@@ -119,8 +119,8 @@ server = function(input, output, session) {
   })
   
   string_results <- reactive({
-    if (file.exists(paste("SavedRuns/", msig_result_rds_name, ".rds", sep = ""))) {
-      string_result_rds_name <- paste(data_basename(), "string", "result", sep = "_")
+    string_result_rds_name <- paste(data_basename(), "string", "result", sep = "_")
+    if (file.exists(paste("SavedRuns/", string_result_rds_name, ".rds", sep = ""))) {
       string_results <- readRDS(paste("SavedRuns/", string_result_rds_name, ".rds", sep = ""))
     } else {
       print("RunMSigDB not yet ran on input...")
@@ -128,8 +128,8 @@ server = function(input, output, session) {
   })
   
   msig_results <- reactive({
+    msig_result_rds_name <- paste(data_basename(), "msig", "result", sep = "_")
     if (file.exists(paste("SavedRuns/", msig_result_rds_name, ".rds", sep = ""))) {
-      msig_result_rds_name <- paste(data_basename(), "msig", "result", sep = "_")
       msig_results <- readRDS(paste("SavedRuns/", msig_result_rds_name, ".rds", sep = ""))
     } else {
       print("RunMSigDB not yet ran on input...")
