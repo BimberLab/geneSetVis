@@ -511,6 +511,16 @@ server = function(input, output, session) {
   })
   
   
+  output$msigdbr_resource_info <- renderText({
+    'The Molecular Signatures Database (MSigDB) is a collection of gene sets
+  originally created for use with the Gene Set Enrichment Analysis (GSEA) software.
+  Gene homologs are provided by HUGO Gene Nomenclature Committee at the European Bioinformatics Institute
+  which integrates the orthology assertions predicted for human genes by
+  eggNOG, Ensembl Compara, HGNC, HomoloGene, Inparanoid, NCBI Gene Orthology, OMA, OrthoDB, OrthoMCL, Panther, PhylomeDB, TreeFam and ZFIN.
+  For each human equivalent within each species, only the ortholog supported by the largest number of databases is used.
+  '
+  })
+  
   output$david_select_cluster_UI <- renderUI({
     if ( is.null(sample_data()$cluster) ) {
       #textOutput(NULL)
@@ -525,10 +535,24 @@ server = function(input, output, session) {
   })
   
   
+  e <- reactive({
+    selectedCluster <- input$msigdbr_select_cluster_input
+    #selectedCluster <- selectedCluster()
+    msig_results <- msig_results()
+    
+    extract <- paste(selectedCluster, "fgsea_results", sep = "_")
+    extract2 <- paste(selectedCluster, "input_genes", sep = "_")
+    
+    e <- as.enrichResult(result = msig_results[[extract]], inputIds = msig_results[[extract2]], geneSet = msig_results[['msig_geneSet_list']])
+    e
+    
+  })
   
   
   
-  makePlotSet(input = input, output = output, session = session, outputKey = "fgsea", enrichTypeResList = msig_result)
+  makePlotSet(output = output, outputKey = "fgsea", enrichTypeResList = e())
+  
+  #makePlotSet(output = output, outputKey = 'fgsea', enrichTypeResList = msig_results, selectedCluster = input$msigdbr_select_cluster_input)
   
   # output_plotset <- reactive({
   #   msig_results <- msig_results()

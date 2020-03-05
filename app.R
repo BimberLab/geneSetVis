@@ -4,6 +4,7 @@ library(flexdashboard)
 
 library(dplyr)
 library(ggplot2)
+library(ggupset)
 library(tidyr)
 library(reshape2)
 library(stringr)

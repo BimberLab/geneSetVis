@@ -173,7 +173,7 @@ runMSigDB <- function(DEtable, species) {
         
         #.......................................
         ##Use the gene sets data frame for fgsea.
-        msg_list = human.msig %>% split(x = .$gene_symbol, f = .$gs_name)
+        msig_geneSet_list = human.msig %>% split(x = .$gene_symbol, f = .$gs_name)
         
         ##name the marker genes with their avgLogFC
         ranks <- clusterTable$avg_logFC
@@ -181,7 +181,7 @@ runMSigDB <- function(DEtable, species) {
         
         set.seed(1234)
         fgsea_results <- fgsea(
-          pathways = msg_list,
+          pathways = msig_geneSet_list,
           stats = ranks,
           minSize = 5,
           maxSize = 600,
@@ -206,7 +206,7 @@ runMSigDB <- function(DEtable, species) {
         
         fgsea_gtable <-
           plotGseaTable(
-            pathways = msg_list[topPathways],
+            pathways = msig_geneSet_list[topPathways],
             stats = ranks,
             fgseaRes = fgsea_results,
             gseaParam = 0.5,
@@ -229,8 +229,10 @@ runMSigDB <- function(DEtable, species) {
         input_genes_name = paste(i, "input_genes", sep = "_")
         return_list[[input_genes_name]] <- clusterTable$gene
         
+        return_list[["msig_geneSet_list"]] <- msig_geneSet_list
+        
         # plot the most significantly enriched pathway
-        #plotEnrichment(msg_list[[head(fgsea_results[order(pval), ], 1)$pathway]], ranks)
+        #plotEnrichment(msig_geneSet_list[[head(fgsea_results[order(pval), ], 1)$pathway]], ranks)
         #+ labs(title=head(fgsea_results[order(pval), ], 1)$pathway)
       }
     })
@@ -241,7 +243,7 @@ runMSigDB <- function(DEtable, species) {
 
 
 
-as.enrichResult_internal <- function(result, inputIds) {
+as.enrichResult_internal <- function(result, inputIds, geneSet) {
   
   gene <- inputIds
   gene.length <- length(gene)
@@ -257,7 +259,7 @@ as.enrichResult_internal <- function(result, inputIds) {
   rownames(result) <- result$Description
   
   #result$qvalue <- result$pvalue
-  geneSetsOI <- msg_list[c(result$Description)]
+  geneSetsOI <- geneSet[c(result$Description)]
   genesInGeneSet <- lapply(geneSetsOI, intersect, y=gene)
   genesInGeneSet.stack <- stack(genesInGeneSet) %>% 
     rename(ind = "Description") %>% group_by(Description) %>% 
@@ -271,7 +273,7 @@ as.enrichResult_internal <- function(result, inputIds) {
       #qvalueCutoff   = 1,
       gene           = as.character(gene),
       #universe       = extID,
-      geneSets       = msg_list,
+      geneSets       = geneSet,
       organism       = "UNKNOWN",
       keytype        = "UNKNOWN",
       ontology       = "UNKNOWN",
@@ -280,36 +282,30 @@ as.enrichResult_internal <- function(result, inputIds) {
   
 }
 
-as.enrichResult <- function(result, inputIds) {
-  e <- as.enrichResult_internal(result = result, inputIds = inputIds)
+as.enrichResult <- function(result, inputIds, geneSet) {
+  e <- as.enrichResult_internal(result = result, inputIds = inputIds, geneSet = geneSet)
   rownames(e@result) <- e@result$Description
   
   return(e)
 }
 
-makePlotSet <- function(input, output, session, outputKey, enrichTypeResList) {
-  #output <- list()
-  reactive({
-  selectedCluster <- input$msigdbr_select_cluster_input
-  selectedCluster <- selectedCluster()
-  enrichTypeResList <- reactive({enrichTypeResList()})
-  extract <- paste(selectedCluster, "fgsea_results", sep = "_")
-  extract2 <- paste(selectedCluster, "input_genes", sep = "_")
-  
-  e <- as.enrichResult(result = enrichTypeResList[[extract]], inputIds = enrichTypeResList[[extract2]])
 
+
+
+makePlotSet <- function(output, outputKey, enrichTypeResList) {
+  #output <- list()
+  
   #output[[paste0(outputKey, '_table')]] <- codeToRenderTable(...)
   
-  output[[paste(outputKey, 'dotplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::dotplot(e))})
+  output[[paste(outputKey, 'dotplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::dotplot(enrichTypeResList))})
   
-  output[[paste(outputKey, 'emapplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::emapplot(e))})
+  output[[paste(outputKey, 'emapplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::emapplot(enrichTypeResList))})
   
-  output[[paste(outputKey, 'cnetplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::cnetplot(e))})
+  output[[paste(outputKey, 'cnetplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::cnetplot(enrichTypeResList))})
   
-  output[[paste(outputKey, 'upsetplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::upsetplot(e))})
+  output[[paste(outputKey, 'upsetplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::upsetplot(enrichTypeResList))})
   
-  output[[paste(outputKey, 'heatplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::heatplot(e))})
-})
+  output[[paste(outputKey, 'heatplot', sep = "_")]] <- renderPlotly({plotly::ggplotly(enrichplot::heatplot(enrichTypeResList))})
 }
 
 
