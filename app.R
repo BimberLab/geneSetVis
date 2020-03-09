@@ -1,5 +1,6 @@
 library(shiny)
 library(shinydashboard)
+library(shinyBS)
 library(flexdashboard)
 
 library(dplyr)
@@ -37,7 +38,7 @@ library(msigdbr)
 
 
 #########################################################################
-wd <- "."
+wd <- '.'
 setwd(wd)
 
 source('fxs.R', local = TRUE)
