@@ -4,6 +4,7 @@ source('info.R', local = TRUE)
 
 server = function(input, output, session) {
   
+  options(shiny.maxRequestSize=50*1024^2) 
   preferences <- reactiveValues(use_webgl = TRUE)
   
   
@@ -122,7 +123,7 @@ server = function(input, output, session) {
     )
   })
   
-  stringRes <- eventReactive(input$runstringdb_button, {
+  observeEvent(input$runstringdb_button, {
     stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
     validate(need(input$stringdb_maxHitsToPlot_input != '', "Please type in maxHitsToPlot..."))
     validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
@@ -133,29 +134,17 @@ server = function(input, output, session) {
                              maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
                              refSpeciesNum = refSpeciesNum, 
                              scoreThreshold = input$stringdb_scoreThreshold_input)
-    saveRDS(stringRes, paste0('SavedRuns/', data_basename(), '_string', '.rds', sep = ''))
+    saveRDS(stringRes, paste0('SavedRuns/', data_basename(), '_string_result', '.rds', sep = ''))
     stringRes
   })
   
   
-  # eventReactive(input$runstringdb_button, {
-  #   stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
-  #   validate(need(input$stringdb_maxHitsToPlot_input != '', "Please type in maxHitsToPlot..."))
-  #   validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
-  #   validate(need(input$stringdb_refSpecies_input != '', "Please type in refSpecies..."))
-  #   refSpeciesNum = stringdbSpecies$species_id[stringdbSpecies$compact_name == input$stringdb_refSpecies_input]
-  #   
-  #   stringRes <- runSTRINGdb(DEtable = sample_data(), 
-  #                            maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
-  #                            refSpeciesNum = refSpeciesNum, 
-  #                            scoreThreshold = input$stringdb_scoreThreshold_input)
-  #   saveRDS(stringRes, paste0('SavedRuns/', data_basename(), '_string', '.rds', sep = ''))
-  # })
+  
   
   output$runmsigdbr_select_parameters <- renderUI({
     msigdbrSpecies <- data.frame(Species = msigdbr::msigdbr_show_species())
     species.msig <- msigdbr::msigdbr(species = 'Homo sapiens')  ##similary category in all species so hardcoded for now
-    req()
+    req(species.msig)
     fluidRow(
       selectInput(
         inputId = 'msigdbr_species_input',
@@ -186,11 +175,11 @@ server = function(input, output, session) {
     })
   })
   
-  eventReactive(input$runmsigdbr_button, {
+  observeEvent(input$runmsigdbr_button, {
     req(input$msigdbr_species_input)
     
     msigdbrRes <- runMSigDB(DEtable = sample_data(), species = input$msigdbr_species_input)
-    saveRDS(msigdbrRes, paste0('SavedRuns/', data_basename(), '_msigdbr', '.rds', sep = ''))
+    saveRDS(msigdbrRes, paste0('SavedRuns/', data_basename(), '_msig_result', '.rds', sep = ''))
   })
   
   
@@ -199,19 +188,25 @@ server = function(input, output, session) {
   ##--------------------##
   ##################################################################################
   output$stringdb_select_run_UI <- renderUI({
-    if ( is.null(sample_data()$cluster) ) {
-      #textOutput(NULL)
-      #textOutput('enriched_pathways_by_sample_table_missing')
-    } else {
-      fileInput('stringdb_select_run', 'Load Run...', multiple = F, accept = c('.rds'))
-    }
+    fileInput(
+      'stringdb_select_run',
+      'Load Run...',
+      multiple = F,
+      accept = c('.rds')
+    )
   })
   
   output$stringdb_select_cluster_UI <- renderUI({
+    if (is.null(sample_data()$cluster)){
+      choices = "NA"
+    } else {
+      choices = levels(sample_data()$cluster)
+    }
     selectInput(
       inputId = 'stringdb_select_cluster_input',
       label = 'Select group (or cluster)',
-      choices = levels(sample_data()$cluster)
+      choices = choices,
+      selected = choices[1]
     )
 })
   
@@ -360,32 +355,30 @@ server = function(input, output, session) {
   
   
   output$msigdbr_select_run_UI <- renderUI({
-    if ( is.null(sample_data()$cluster) ) {
-      #textOutput(NULL)
-      #textOutput('enriched_pathways_by_sample_table_missing')
-    } else {
-      fileInput(inputId = 'msigdbr_select_run', label = 'Load Run...', multiple = F, accept = c('.rds'))
-    }
+    fileInput(
+      inputId = 'msigdbr_select_run',
+      label = 'Load Run...',
+      multiple = F,
+      accept = c('.rds')
+    )
   })
-  
   
   output$msigdbr_select_cluster_UI <- renderUI({
-    if ( is.null(sample_data()$cluster) ) {
-      #textOutput(NULL)
-      #textOutput('enriched_pathways_by_sample_table_missing')
+    if (is.null(sample_data()$cluster)){
+      choices = "NA"
     } else {
-      selectInput(
-        inputId = 'msigdbr_select_cluster_input',
-        label = 'Select group (or cluster)',
-        choices = levels(sample_data()$cluster)
-      )
+      choices = levels(sample_data()$cluster)
     }
+    selectInput(
+      inputId = 'msigdbr_select_cluster_input',
+      label = 'Select group (or cluster)',
+      choices = choices,
+      selected = choices[1]
+    )
   })
-  
   
   
   output$num_of_mapped_enricher <- renderValueBox({
-    #msig_results_enricher <- msig_results_enricher()
     num_genes_mapped <- str_split(noquote(msig_results_enricher()@result$GeneRatio[1]), '/')[[1]][2]
     box(
       title = 'Number of genes mapped',
@@ -414,7 +407,6 @@ server = function(input, output, session) {
   
   
   renderPlotSet(output = output, key = 'fgsea', enrichTypeResult = msig_results_fgsea)
-
   renderPlotSet(output = output, key = 'enricher', enrichTypeResult = msig_results_enricher)
   
   output[["fgsea_table_PPI"]] <- renderPlot({

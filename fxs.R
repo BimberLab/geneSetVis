@@ -14,7 +14,7 @@
 ##change db version
 
 
-runSTRINGdb <- function(DEtable, maxHitsToPlot, refSpeciesNum, scoreThreshold) {
+runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
   string_db <-
     STRINGdb$new(
       version = '10',
@@ -24,19 +24,24 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot, refSpeciesNum, scoreThreshold) {
     )
   
   ##dedup table to remove multiple tests
-  DEtable.dedup <-
-    DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
-  DEtable.dedup <-
-    DEtable.dedup[match(unique(DEtable.dedup$gene), DEtable.dedup$gene), ]
+  if (!is.null(DEtable$p_val_adj)){
+    DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
+    DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
+  } 
   
-  DEtable.split <- split(DEtable.dedup, DEtable.dedup$cluster)
+  
+  if (!is.null(DEtable$cluster)){
+    DEtable <- split(DEtable, DEtable$cluster)
+  } else{
+    DEtable <- list('NA' = DEtable)
+  }
   
   return_list = list()
-  for (i in as.vector(names(DEtable.split))) {
+  for (i in as.vector(names(DEtable))) {
     tryCatch({
-      clusterTable <- DEtable.split[[i]]
+      clusterTable <- DEtable[[i]]
       
-      if (nrow(DEtable.split[[i]]) > 0) {
+      if (nrow(DEtable[[i]]) > 0) {
         cluster.map <-
           string_db$map(clusterTable, 'gene', removeUnmappedRows = FALSE)
         hits <- cluster.map$STRING_id
@@ -97,7 +102,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot, refSpeciesNum, scoreThreshold) {
           string_db$plot_network(networkClustersList[[j]], payload_id = payload_id)
         }
         
-        link <- string_db$get_link()
+        link <- string_db$get_link(hits)
         
         addSubset = paste(i, 'hits', sep = '_')
         return_list[[addSubset]] <- hits
@@ -135,15 +140,22 @@ runMSigDB <- function(DEtable, species) {
   msigTerm = human.msig %>% dplyr::select(gs_name, gene_symbol, gs_cat, gs_subcat) %>% as.data.frame()
   
   ##dedup table to remove multiple tests
-  DEtable.dedup <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)), ]
-  DEtable.dedup <- DEtable.dedup[match(unique(DEtable.dedup$gene), DEtable.dedup$gene),]
+  if (!is.null(DEtable$p_val_adj)){
+    DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
+    DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
+  } 
   
-  DEtable.split <- split(DEtable.dedup, DEtable.dedup$cluster)
+  
+  if (!is.null(DEtable$cluster)){
+    DEtable <- split(DEtable, DEtable$cluster)
+  } else{
+    DEtable <- list('NA' = DEtable)
+  }
   
   return_list = list()
-  for (i in as.vector(names(DEtable.split))) {
+  for (i in as.vector(names(DEtable))) {
     tryCatch({
-      clusterTable <- DEtable.split[[i]]
+      clusterTable <- DEtable[[i]]
       
       if (nrow(clusterTable) > 0) {
         ##Use the gene sets data frame for clusterProfiler (for genes as gene symbols)
