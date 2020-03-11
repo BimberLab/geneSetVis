@@ -1,9 +1,13 @@
 library(shiny)
 library(shinydashboard)
+library(rhandsontable)
+library(shinyMatrix)
+library(shinyBS)
 library(flexdashboard)
 
 library(dplyr)
 library(ggplot2)
+library(ggupset)
 library(tidyr)
 library(reshape2)
 library(stringr)
@@ -36,7 +40,7 @@ library(msigdbr)
 
 
 #########################################################################
-wd <- "."
+wd <- '.'
 setwd(wd)
 
 source('fxs.R', local = TRUE)
