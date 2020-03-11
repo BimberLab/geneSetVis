@@ -97,17 +97,22 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot, refSpeciesNum, scoreThreshold) {
           string_db$plot_network(networkClustersList[[j]], payload_id = payload_id)
         }
         
-        hits_name = paste(i, 'hits', sep = '_')
-        return_list[[hits_name]] <- hits
+        link <- string_db$get_link()
         
-        network_name = paste(i, 'network', sep = '_')
-        return_list[[network_name]] <- network
+        addSubset = paste(i, 'hits', sep = '_')
+        return_list[[addSubset]] <- hits
         
-        go_name = paste(i, 'GO', sep = '_')
-        return_list[[go_name]] <- enrichmentGO
+        addSubset = paste(i, 'network', sep = '_')
+        return_list[[addSubset]] <- network
         
-        kegg_name = paste(i, 'KEGG', sep = '_')
-        return_list[[kegg_name]] <- enrichmentKEGG
+        addSubset = paste(i, 'GO', sep = '_')
+        return_list[[addSubset]] <- enrichmentGO
+        
+        addSubset = paste(i, 'KEGG', sep = '_')
+        return_list[[addSubset]] <- enrichmentKEGG
+        
+        addSubset = paste(i, 'link', sep = '_')
+        return_list[[addSubset]] <- link
         
       }
       
@@ -159,10 +164,6 @@ runMSigDB <- function(DEtable, species) {
         #msig_enricher$geneID <- gsub(x = msig_enricher$geneID, pattern = '/', replacement = ',')
         addSubset = paste(i, 'enricher_result', sep = '_')
         return_list[[addSubset]] <- msig_enricher
-        #return_list[[enricher_name]] <- as.data.frame(msig_enricher)
-        
-        #enricher_plot_name = paste(i, 'enricher_plot', sep = '_')
-        #return_list[[enricher_plot_name]] <- msig_enricher_plot
         
         #.......................................
         ##Use the gene sets data frame for fgsea.
@@ -189,7 +190,6 @@ runMSigDB <- function(DEtable, species) {
           threshold
         ))
         
-        #topPathways <- fgsea_results[head(order(pval), n=15)][order(NES), pathway]
         topPathwaysUp <-
           fgsea_results[ES > 0][head(order(pval), n = 10), pathway]
         topPathwaysDown <-
@@ -222,12 +222,6 @@ runMSigDB <- function(DEtable, species) {
         addSubset = 'msig_geneSet'
         return_list[[addSubset]] <- msig_geneSet
         
-        #msig_geneSet_list, input_genes, num_genes, fgsea_gtable
-        
-        # plot the most significantly enriched pathway
-        #plotEnrichment(msig_geneSet_list[[head(fgsea_results[order(pval), ], 1)$pathway]], ranks)+ 
-          #labs(title=head(fgsea_results[order(pval), ], 1)$pathway)
-        
       }
     })
   }
@@ -238,7 +232,9 @@ runMSigDB <- function(DEtable, species) {
 
 
 as.enrichResult_internal <- function(result, inputIds, geneSet) {
-  
+  if (is.null(inputIds)) {
+    print('null geneIds')
+  }
   gene <- inputIds
   gene.length <- length(gene)
   
@@ -287,9 +283,12 @@ as.enrichResult <- function(result, inputIds, geneSet) {
 
 
 renderPlotSet <- function(output, key, enrichTypeResult) {
+  #print(paste0('called render plot: ', is.null(enrichTypeResult)))
   
+  ##add if is not null exception
   output[[paste(key, 'table', sep = '_')]] <- renderDataTable({
-    table <- enrichTypeResult %>% as.data.frame() %>% dplyr::rename(
+    req(!is.null(enrichTypeResult()))
+    enrichTypeResult() %>% as.data.frame() %>% dplyr::rename(
       'Term Description' = Description,
       'geneID' = geneID,
       'Hits' = Count,
@@ -321,18 +320,32 @@ renderPlotSet <- function(output, key, enrichTypeResult) {
           )
         )
       ) # %>% formatStyle( 0, target= 'row',color = 'black', backgroundColor = NULL, fontWeight = NULL, lineHeight='50%')
-    table
   })
   
-  output[[paste(key, 'dotplot', sep = '_')]] <- renderPlotly({plotly::ggplotly(enrichplot::dotplot(enrichTypeResult))})
+  output[[paste(key, 'dotplot', sep = '_')]] <- renderPlotly({
+    req(!is.null(enrichTypeResult()))
+    enrichplot::dotplot(enrichTypeResult())
+  })
   
-  output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({enrichplot::emapplot(enrichTypeResult)})
+  output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({
+    req(!is.null(enrichTypeResult()))
+    enrichplot::emapplot(enrichTypeResult())
+  })
   
-  output[[paste(key, 'cnetplot', sep = '_')]] <- renderPlot({enrichplot::cnetplot(enrichTypeResult)})
+  output[[paste(key, 'cnetplot', sep = '_')]] <- renderPlot({
+    req(!is.null(enrichTypeResult()))
+    enrichplot::cnetplot(enrichTypeResult())
+  })
   
-  output[[paste(key, 'upsetplot', sep = '_')]] <- renderPlot({enrichplot::upsetplot(enrichTypeResult)})
+  output[[paste(key, 'upsetplot', sep = '_')]] <- renderPlot({
+    req(!is.null(enrichTypeResult()))
+    enrichplot::upsetplot(enrichTypeResult())
+  })
   
-  output[[paste(key, 'heatplot', sep = '_')]] <- renderPlot({enrichplot::heatplot(enrichTypeResult)})
+  output[[paste(key, 'heatplot', sep = '_')]] <- renderPlot({
+    req(!is.null(enrichTypeResult()))
+    enrichplot::heatplot(enrichTypeResult())
+  })
 }
 
 makeTabBox <- function(title, key) {
@@ -351,7 +364,4 @@ makeTabBox <- function(title, key) {
   )
 }
 
-
-#makePlotSet('enrichr', ....)
-#makePlotSet('fgsea', ..)
 

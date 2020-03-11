@@ -1,5 +1,7 @@
 library(shiny)
 library(shinydashboard)
+library(rhandsontable)
+library(shinyMatrix)
 library(shinyBS)
 library(flexdashboard)
 

@@ -1,13 +1,13 @@
 
 source('fxs.R', local = TRUE)
 
+
 ##----------------------------------------------------------------------------##
 ## Tabs -- UI.R
 ## 1 - loadData
 ##----------------------------------------------------------------------------##
 
 tab_load_data <- tabItem(
-  ## more like tabId, attached to menuItem(tabName = ...)
   tabName = 'loadData',
   fluidRow(
     column(12,
@@ -23,31 +23,25 @@ tab_load_data <- tabItem(
            )
     )
   ), 
+  textInput(
+    inputId = 'areaInput_runname',
+    label = 'Run name:',
+    placeholder = 'Run1'
+  ),
   textAreaInput(
-    inputId = 'data_input',
+    inputId = 'areaInput',
     label = 'Enter Gene and/or Average Log Fold Change (avg. LogFC)',
     value = '',
     width = NULL,
     height = NULL,
-    cols = NULL,
+    cols = 3,
     rows = NULL,
-    placeholder = NULL,
+    placeholder = "HMOX 2.00 \nABCA4 -1.50",
     resize = NULL
   ),
   actionButton('submit', 'Submit'), 
-  tags$hr(style='border-color: blue;'), 
-  fluidRow(box(
-    title = 'Run STRINGdb',
-    uiOutput('runstringdb_select_parameters'),
-    actionButton('runstringdb_button', 'Run')
-  )
-  ), 
-  fluidRow(box(
-    title = 'Run MSigDB',
-    uiOutput('runmsigdbr_select_parameters'),
-    uiOutput('runmsigdbr_select_parameters_sub'),
-    uiOutput('runmsigdbr_select_parameters_cont'),
-    actionButton('runmsigdbr_button', 'Run')))
+  tags$hr(style='border-color: blue;'),
+  tableOutput(('inputTable'))
 )
 
 ##----------------------------------------------------------------------------##
@@ -56,6 +50,23 @@ tab_load_data <- tabItem(
 ##----------------------------------------------------------------------------##
 tab_stringdb <- tabItem(
   tabName = 'stringdb',
+  box(
+    title = tagList(p('Run STRINGdb', style = "padding-right: 5px; display: inline"), 
+            actionButton(
+              inputId = "stringdb_resource_info",
+              label = "info",
+              icon = NULL,
+              class = "btn-xs",
+              title = "Show additional information for this panel."
+            )),
+    status = 'primary',
+    solidHeader = TRUE,
+    width = 16,
+    collapsible = TRUE,
+    tagList(
+      uiOutput('runstringdb_select_parameters'),
+      actionButton('runstringdb_button', 'Run')
+    )),
   box(
     title = 'Select input',
     status = 'primary',
@@ -72,16 +83,6 @@ tab_stringdb <- tabItem(
     valueBoxOutput('num_of_total_genes')
   ),
   box(
-    title = 'Network',
-    status = 'primary',
-    solidHeader = TRUE,
-    width = 16,
-    collapsible = TRUE,
-    tagList(
-      plotOutput('stringdb_network')
-    )
-  ),
-  box(
     title = 'Network (PNG)',
     status = 'primary',
     solidHeader = TRUE,
@@ -92,23 +93,11 @@ tab_stringdb <- tabItem(
     )
   ),
   tabBox(
-    title = tagList(p('GO', style = "padding-right: 5px; display: inline"), 
-                    actionButton(
-                      inputId = "stringdb_GO_resource_info",
-                      label = "info",
-                      icon = NULL,
-                      class = "btn-xs",
-                      title = "Show additional information for this panel."
-                    )
-                    ),
+    title = 'GO',
     side = 'right',
     height = NULL,
     selected = 'Table',
     width = 16,
-    
-    tabPanel('Resource',
-             textOutput('stringdb_GO_resource_info'), 
-             style = 'height:500px; overflow-y: scroll;overflow-x: scroll;'),
     tabPanel('Explore', 
              uiOutput('stringdb_select_GO_ann'), 
              textOutput('stringdb_select_GO_ann_output')),
@@ -122,25 +111,40 @@ tab_stringdb <- tabItem(
     height = NULL,
     selected = 'Table',
     width = 16,
-    tabPanel('Resource',
-             textOutput('stringdb_KEGG_resource_info'), 
-             style = 'height:500px; overflow-y: scroll;overflow-x: scroll;'),
     tabPanel('Explore', 
              uiOutput('stringdb_select_KEGG_ann')),
     tabPanel('Table', dataTableOutput('stringdb_KEGG'), 
              #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
-             collapsible = TRUE
-    )
+             collapsible = TRUE)
   )
 )
+
 
 ##----------------------------------------------------------------------------##
 ## Tabs -- UI.R
 ## 3 - MSigDBr
 ##----------------------------------------------------------------------------##
-
 tab_msigdbr <- tabItem(
   tabName = 'msigdbr',
+  box(
+    title = tagList(p('Run MSigDB', style = "padding-right: 5px; display: inline"), 
+                    actionButton(
+                      inputId = "msigdbr_resource_info",
+                      label = "info",
+                      icon = NULL,
+                      class = "btn-xs",
+                      title = "Show additional information for this panel."
+                    )),
+    status = 'primary',
+    solidHeader = TRUE,
+    width = 16,
+    collapsible = TRUE,
+    tagList(
+          uiOutput('runmsigdbr_select_parameters'),
+          uiOutput('runmsigdbr_select_parameters_sub'),
+          actionButton('runmsigdbr_button', 'Run')
+        )
+    ),
   box(
     title = 'Select input',
     status = 'primary',
@@ -152,51 +156,33 @@ tab_msigdbr <- tabItem(
       uiOutput('msigdbr_select_cluster_UI')
     )
   ),
-  tabBox(
-    title = 'clusterProfiler (Enricher)',   
-    side = 'right',
-    height = NULL,
-    selected = 'Table',
-    width = 16,
-    tabPanel('Resource',
-             textOutput('msigdbr_enricher_resource_info'), 
-             style = 'height:500px; overflow-y: scroll;overflow-x: scroll;'),
-    tabPanel('Table', dataTableOutput('msigdbr_select_cluster_enricher_table'), 
-             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;'
-    ),
-    tabPanel('Plot', plotOutput('msigdbr_select_cluster_enricher_plot'), 
-             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
-             collapsible = TRUE),
-    tabPanel('Info', 
-             fluidRow(
-               valueBoxOutput('num_of_mapped_enricher'),
-               valueBoxOutput('num_of_total_genes_enricher')), 
-             uiOutput('msigdbr_enricher_select_PA_ann'), 
-             textOutput('msigdbr_enricher_select_PA_ann_output')
-    ), 
-    tabBox(
-      title = 'FGSEA',   
-      side = 'right',
-      height = NULL,
-      selected = 'Table',
-      width = 16,
-      tabPanel('Resource',
-               textOutput('msigdbr_fgsea_resource_info'), 
-               #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;'
-      ),
-      tabPanel('Table', dataTableOutput('msigdbr_select_cluster_fgsea_table'), 
-               #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
-               collapsible = TRUE
-      ),
-      tabPanel('GTable', plotOutput('msigdbr_select_cluster_fgsea_gtable'))
-    )
-  ),
-  makeTabBox(title = 'Enricher-fx Plots', key = 'enricher'),
-  makeTabBox(title = 'FGSEA-fx Plots', key = 'fgsea')
+  makeTabBox(title = 'Enricher', key = 'enricher'),
+  makeTabBox(title = 'FGSEA', key = 'fgsea')
 )
 
+##----------------------------------------------------------------------------##
+## Tabs -- UI.R
+## 4 - clusterProfiler
+##----------------------------------------------------------------------------##
 tab_clusterprofiler <- tabItem(
   tabName = 'clusterprofiler',
+  box(
+    title = tagList(p('Select Enricher-type', style = "padding-right: 5px; display: inline"), 
+                    actionButton(
+                      inputId = "clusterprofiler_resource_info",
+                      label = "info",
+                      icon = NULL,
+                      class = "btn-xs",
+                      title = "Show additional information for this panel."
+                    )),
+    status = 'primary',
+    solidHeader = TRUE,
+    width = 16,
+    collapsible = TRUE,
+    tagList(
+      
+    )
+  ),
   box(
     title = 'Select Cluster',
     status = 'primary',
@@ -211,8 +197,3 @@ tab_clusterprofiler <- tabItem(
 )
 
 
-# mainPanel(
-#   makeSection('fgsea - Tab1', 'tab1'),
-#   
-#   makeSection('enrichr - Tab2', 'tab2')
-# )
