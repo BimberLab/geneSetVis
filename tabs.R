@@ -30,13 +30,13 @@ tab_load_data <- tabItem(
   ),
   textAreaInput(
     inputId = 'areaInput',
-    label = 'Enter Gene and/or Average Log Fold Change (avg. LogFC)',
-    value = '',
+    label = 'Enter Gene and Average Log Fold Change (avg. LogFC)',
+    value = 'CDKN1A	0.7265868 \nHMOX1	1.0596510 \nENSMMUG00000062894	0.9929236 \nRNF167	0.9790608  \nFTH1.1	0.2733286 \nVIM	0.3409602 \nFN1	0.4090008 \nENSMMUG00000049833	0.9146529 \nFYB1	-0.4637513 \nRPL37A	-0.6478795 \nTXNIP	-0.6576339',
     width = NULL,
-    height = NULL,
-    cols = 3,
+    height = '300px',
+    cols = NULL,
     rows = NULL,
-    placeholder = "HMOX 2.00 \nABCA4 -1.50",
+    placeholder = NULL,
     resize = NULL
   ),
   actionButton('submit', 'Submit'), 

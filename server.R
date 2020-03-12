@@ -99,7 +99,9 @@ server = function(input, output, session) {
   })
   
   
-  #####################################################
+  ##--------------------##
+  ## stringdb
+  ##--------------------##
   stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
   output$runstringdb_select_parameters <- renderUI({
     req(stringdbSpecies)
@@ -123,70 +125,24 @@ server = function(input, output, session) {
     )
   })
   
-  observeEvent(input$runstringdb_button, {
+  string_results <- eventReactive(input$runstringdb_button, {
     stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
     validate(need(input$stringdb_maxHitsToPlot_input != '', "Please type in maxHitsToPlot..."))
     validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
     validate(need(input$stringdb_refSpecies_input != '', "Please type in refSpecies..."))
     refSpeciesNum = stringdbSpecies$species_id[stringdbSpecies$compact_name == input$stringdb_refSpecies_input]
     
+    withProgress(message = 'making STRING query...', {
     stringRes <- runSTRINGdb(DEtable = sample_data(), 
                              maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
                              refSpeciesNum = refSpeciesNum, 
                              scoreThreshold = input$stringdb_scoreThreshold_input)
+    })
     saveRDS(stringRes, paste0('SavedRuns/', data_basename(), '_string_result', '.rds', sep = ''))
+    
     stringRes
   })
   
-  
-  
-  
-  output$runmsigdbr_select_parameters <- renderUI({
-    msigdbrSpecies <- data.frame(Species = msigdbr::msigdbr_show_species())
-    species.msig <- msigdbr::msigdbr(species = 'Homo sapiens')  ##similary category in all species so hardcoded for now
-    req(species.msig)
-    fluidRow(
-      selectInput(
-        inputId = 'msigdbr_species_input',
-        label = 'Reference species',
-        selected = 'Homo sapiens',
-        choices = msigdbrSpecies$Species
-      ),
-      selectInput(
-        inputId = 'msigdbr_category_input',
-        label = 'Select category (optional):',
-        selected = '',
-        choices = c('', unique(species.msig$gs_cat))
-      )
-    )
-  })
-  
-  
-  observeEvent(input$msigdbr_category_input, { 
-    species.msig <- msigdbr::msigdbr(species = 'Homo sapiens')
-    subcat <- filter(species.msig, species.msig$gs_cat == input$msigdbr_category_input)
-    output$runmsigdbr_select_parameters_sub <- renderUI({
-      selectInput(
-        inputId = 'msigdbr_subcategory_input',
-        label = 'Select subcategory (optional):',
-        selected = '',
-        choices = c('', unique(subcat$gs_subcat))
-      )
-    })
-  })
-  
-  observeEvent(input$runmsigdbr_button, {
-    req(input$msigdbr_species_input)
-    
-    msigdbrRes <- runMSigDB(DEtable = sample_data(), species = input$msigdbr_species_input)
-    saveRDS(msigdbrRes, paste0('SavedRuns/', data_basename(), '_msig_result', '.rds', sep = ''))
-  })
-  
-  
-  ##--------------------##
-  ## Tabs - STRINGdb
-  ##--------------------##
-  ##################################################################################
   output$stringdb_select_run_UI <- renderUI({
     fileInput(
       'stringdb_select_run',
@@ -208,7 +164,7 @@ server = function(input, output, session) {
       choices = choices,
       selected = choices[1]
     )
-})
+  })
   
   output$num_of_mapped <- renderValueBox({
     req(string_results())
@@ -232,7 +188,6 @@ server = function(input, output, session) {
     )
   })
   
-  #TODO: pval and pct.1 filter input
   output$stringdb_network <- renderPlot({
     validate(need(!is.null(string_results()), "Please Run STRINGdb on input..."))
     extract <- paste(input$stringdb_select_cluster_input, 'network', sep = '_')
@@ -245,6 +200,7 @@ server = function(input, output, session) {
     list(src = paste('SavedData/', png_file, sep = ''), height='90%', width='90%')
   })
   
+  # TODO: download entire dataset
   output$stringdb_GO <- renderDataTable({
     validate(need(!is.null(string_results()), "Please Run STRINGdb on input..."))
     extract <- paste(input$stringdb_select_cluster_input, 'GO', sep = '_')
@@ -281,40 +237,6 @@ server = function(input, output, session) {
       )
   })
   
-  observeEvent(input[["stringdb_resource_info"]], {
-    showModal(
-      modalDialog(
-        stringdb_resource_info[["text"]],
-        title = stringdb_resource_info[["title"]],
-        easyClose = TRUE,
-        footer = NULL
-      )
-    )
-  })
-  
-  observeEvent(input[["msigdbr_resource_info"]], {
-    showModal(
-      modalDialog(
-        msigdbr_resource_info[["text"]],
-        title = msigdbr_resource_info[["title"]],
-        easyClose = TRUE,
-        footer = NULL
-      )
-    )
-  })
-  
-  observeEvent(input[["clusterprofiler_resource_info"]], {
-    showModal(
-      modalDialog(
-        clusterprofiler_resource_info[["text"]],
-        title = clusterprofiler_resource_info[["title"]],
-        easyClose = TRUE,
-        footer = NULL
-      )
-    )
-  })
-  
-  ##--------------------##
   # TODO: download entire dataset
   output$stringdb_KEGG <- renderDataTable({
     validate(need(!is.null(string_results()), "Please Run STRINGdb on input..."))
@@ -353,6 +275,62 @@ server = function(input, output, session) {
       )
   })
   
+  observeEvent(input[["stringdb_resource_info"]], {
+    showModal(
+      modalDialog(
+        stringdb_resource_info[["text"]],
+        title = stringdb_resource_info[["title"]],
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
+  
+  ##--------------------##
+  ## msigdbr
+  ##--------------------##
+  output$runmsigdbr_select_parameters <- renderUI({
+    msigdbrSpecies <- data.frame(Species = msigdbr::msigdbr_show_species())
+    species.msig <- msigdbr::msigdbr(species = 'Homo sapiens')  ##similary category in all species so hardcoded for now
+    req(species.msig)
+    fluidRow(
+      selectInput(
+        inputId = 'msigdbr_species_input',
+        label = 'Reference species',
+        selected = 'Homo sapiens',
+        choices = msigdbrSpecies$Species
+      ),
+      selectInput(
+        inputId = 'msigdbr_category_input',
+        label = 'Select category (optional):',
+        selected = '',
+        choices = c('', unique(species.msig$gs_cat))
+      )
+    )
+  })
+  
+  observeEvent(input$msigdbr_category_input, { 
+    species.msig <- msigdbr::msigdbr(species = 'Homo sapiens')
+    subcat <- filter(species.msig, species.msig$gs_cat == input$msigdbr_category_input)
+    output$runmsigdbr_select_parameters_sub <- renderUI({
+      selectInput(
+        inputId = 'msigdbr_subcategory_input',
+        label = 'Select subcategory (optional):',
+        selected = '',
+        choices = c('', unique(subcat$gs_subcat))
+      )
+    })
+  })
+  
+  msig_results <- eventReactive(input$runmsigdbr_button, {
+    req(input$msigdbr_species_input)
+    
+    withProgress(message = 'making MSigDB query..', {
+    msigdbrRes <- runMSigDB(DEtable = sample_data(), species = input$msigdbr_species_input)
+    saveRDS(msigdbrRes, paste0('SavedRuns/', data_basename(), '_msig_result', '.rds', sep = ''))
+    })
+    msigdbrRes
+  })
   
   output$msigdbr_select_run_UI <- renderUI({
     fileInput(
@@ -409,6 +387,7 @@ server = function(input, output, session) {
   renderPlotSet(output = output, key = 'fgsea', enrichTypeResult = msig_results_fgsea)
   renderPlotSet(output = output, key = 'enricher', enrichTypeResult = msig_results_enricher)
   
+  
   output[["fgsea_table_PPI"]] <- renderPlot({
     req(input$fgsea_table_cell_clicked)
     info_list <- input$fgsea_table_cell_clicked
@@ -420,7 +399,6 @@ server = function(input, output, session) {
       labs(title=info_list[["value"]])
   })
   
-  
   observeEvent(input$fgsea_table_cell_clicked, {
     showModal(
       modalDialog(
@@ -429,9 +407,21 @@ server = function(input, output, session) {
     )
   })
   
+  observeEvent(input[["msigdbr_resource_info"]], {
+    showModal(
+      modalDialog(
+        msigdbr_resource_info[["text"]],
+        title = msigdbr_resource_info[["title"]],
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
   
-  #################################################################################################################
-  #################################################################################################################
+  
+  ##--------------------##
+  ## clusterprofiler
+  ##--------------------##
   output$clusterprofiler_select_run_UI <- renderUI({
     if ( is.null(sample_data()$cluster) ) {
       #textOutput(NULL)
@@ -455,7 +445,18 @@ server = function(input, output, session) {
     }
   })
   
+  observeEvent(input[["clusterprofiler_resource_info"]], {
+    showModal(
+      modalDialog(
+        clusterprofiler_resource_info[["text"]],
+        title = clusterprofiler_resource_info[["title"]],
+        easyClose = TRUE,
+        footer = NULL
+      )
+    )
+  })
   
-  #******************************************************************************************************************
+  
+  #*********************************************************
 }
 
