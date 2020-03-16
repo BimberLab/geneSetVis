@@ -1,4 +1,5 @@
 # geneSetVis
 
-gene set visualization in Shiny.
+gene set visualization in Shiny:
 
+https://kolabx.shinyapps.io/genesetvis/
