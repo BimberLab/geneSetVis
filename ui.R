@@ -10,37 +10,31 @@ ui = dashboardPage(
   dashboardSidebar(tags$head(tags$style(
     HTML('.content-wrapper {overflow-x: scroll;}')
   )), 
-    sidebarMenu(
-      id = 'sidebar',
-      menuItem(
-        text = 'Load data',
-        tabName = 'loadData',
-        icon = icon(NULL),
-        selected = TRUE
-      ),
-      menuItem(
-        text = 'STRINGdb',
-        tabName = 'stringdb',
-        icon = icon(NULL),
-        selected = FALSE
-      ),
-      menuItem(
-        text = 'MsigDB',
-        tabName = 'msigdbr',
-        icon = icon(NULL)
-      ),
-      menuItem(
-        text = 'clusterProfiler',
-        tabName = 'clusterprofiler',
-        icon = icon(NULL)
-      )
+  sidebarMenu(
+    id = 'sidebar',
+    menuItem(
+      text = 'Load data',
+      tabName = 'loadData',
+      icon = icon(NULL),
+      selected = TRUE
+    ),
+    menuItem(
+      text = 'STRINGdb',
+      tabName = 'stringdb',
+      icon = icon(NULL),
+      selected = FALSE
+    ),
+    menuItem(
+      text = 'MsigDB',
+      tabName = 'msigdbr',
+      icon = icon(NULL)
     )
+  )
   ),
   dashboardBody(
     tags$script(HTML('$("body").addClass("fixed");')),
     tabItems(tab_load_data,
              tab_stringdb,
-             tab_msigdbr,
-             tab_clusterprofiler)
+             tab_msigdbr)
   )
 )
