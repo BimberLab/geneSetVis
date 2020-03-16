@@ -70,9 +70,6 @@ tab_stringdb <- tabItem(
     height = NULL,
     selected = 'Table',
     width = 16,
-    tabPanel('Explore', 
-             uiOutput('stringdb_select_GO_ann'), 
-             textOutput('stringdb_select_GO_ann_output')),
     tabPanel('Table', dataTableOutput('stringdb_GO'), 
              #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
              collapsible = TRUE)
@@ -83,8 +80,6 @@ tab_stringdb <- tabItem(
     height = NULL,
     selected = 'Table',
     width = 16,
-    tabPanel('Explore', 
-             uiOutput('stringdb_select_KEGG_ann')),
     tabPanel('Table', dataTableOutput('stringdb_KEGG'), 
              #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
              collapsible = TRUE)

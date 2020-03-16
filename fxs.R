@@ -77,7 +77,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
       string_db$get_png(max_hits_to_plot, file = paste('network.png', sep = ''))
       
       
-      network <- string_db$plot_network(max_hits_to_plot)
+      #network <- string_db$plot_network(max_hits_to_plot)
       
       #______
       ##payload mechanism for upregulated vs downregulated genes:
@@ -87,23 +87,23 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
       # post payload information to the STRING server
       payload_id <-
         string_db$post_payload(cluster.color$STRING_id, colors = cluster.color$color)
-      string_db$plot_network(hits, payload_id = payload_id)
+      #string_db$plot_network(hits, payload_id = payload_id)
       
       ##clustering/community algorithms: ”fastgreedy”, ”walktrap”, ”spinglass”, ”edge.betweenness”.
-      networkClustersList <-
-        string_db$get_clusters(max_hits_to_plot, algorithm = 'fastgreedy')
-      par(mfrow = c(2, 2))
-      for (j in seq(1:length(networkClustersList))) {
-        string_db$plot_network(networkClustersList[[j]], payload_id = payload_id)
-      }
+      # networkClustersList <-
+      #   string_db$get_clusters(max_hits_to_plot, algorithm = 'fastgreedy')
+      # par(mfrow = c(2, 2))
+      # for (j in seq(1:length(networkClustersList))) {
+      #   string_db$plot_network(networkClustersList[[j]], payload_id = payload_id)
+      # }
       
       link <- string_db$get_link(hits)
       
       addSubset = paste('hits', sep = '')
       return_list[[addSubset]] <- hits
       
-      addSubset = paste('network', sep = '')
-      return_list[[addSubset]] <- network
+      #addSubset = paste('network', sep = '')
+      #return_list[[addSubset]] <- network
       
       addSubset = paste('GO', sep = '')
       return_list[[addSubset]] <- enrichmentGO
@@ -313,15 +313,15 @@ renderPlotSet <- function(output, key, enrichTypeResult) {
       'Hits' = Count,
       'p-Value (adj.)' = pvalue,
       'p-Value' = p.adjust,
-      #'q-Value' = qvalue
+      'Genes in Term' = geneID
     ) %>% 
-      dplyr::select(c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'geneID', dplyr::everything())) 
+      dplyr::select(c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')) 
     
     table$'Term Description' <- hyperlink_text(text = table$'Term Description', url = "https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=")
     
-    table$'geneID' <- gsub('/', ',', x = table$'geneID')
-    table$'geneID' <- multi_hyperlink_text(labels = table$'geneID', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
-    
+    table$'Genes in Term' <- gsub('/', ',', x = table$'Genes in Term')
+    table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+
     DT::datatable(
       table,
       filter = 'bottom',

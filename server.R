@@ -116,18 +116,26 @@ server = function(input, output, session) {
   
   # TODO: download entire dataset
   output$stringdb_GO <- renderDataTable({
-    validate(need(!is.null(envir$string_result), "Please Run STRINGdb on input..."))
+    validate(need(!is.null(envir$string_results), "Please Run STRINGdb on input..."))
     extract <- paste('GO', sep = '')
-    envir$string_results[[extract]] %>% dplyr::rename(
+    table <- envir$string_results[[extract]] %>% dplyr::rename(
       'Term Description' = term_description,
       'Term ID' = term_id,
       'Proteins' = proteins,
       'Hits' = hits,
       'p-Value' = pvalue,
-      'p-Value (adj.)' = pvalue_fdr
+      'p-Value (adj.)' = pvalue_fdr, 
+      'Genes in Term' = hit_term_genes
     ) %>% 
-      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) %>%
+      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) 
+    
+    table$'Term ID' <- hyperlink_text(text = table$'Term ID', url = "https://www.ebi.ac.uk/QuickGO/term/")
+    
+    #table$'geneID' <- gsub('/', ',', x = table$'geneID')
+    table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+    
       DT::datatable(
+        table,
         filter = 'bottom',
         selection = 'multiple',
         escape = FALSE,
@@ -153,19 +161,26 @@ server = function(input, output, session) {
   
   # TODO: download entire dataset
   output$stringdb_KEGG <- renderDataTable({
-    validate(need(!is.null(envir$string_result), "Please Run STRINGdb on input..."))
+    validate(need(!is.null(envir$string_results), "Please Run STRINGdb on input..."))
     extract <- paste('KEGG', sep = '')
-    envir$string_results[[extract]] %>% dplyr::rename(
+    table <- envir$string_results[[extract]] %>% dplyr::rename(
       'Term Description' = term_description,
       'Term ID' = term_id,
       'Proteins' = proteins,
       'Hits' = hits,
       'p-Value' = pvalue,
-      'p-Value (adj.)' = pvalue_fdr
+      'p-Value (adj.)' = pvalue_fdr,
+      'Genes in Term' = hit_term_genes
     ) %>% 
-      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) %>%
+      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) 
+    
+    table$'Term ID' <- hyperlink_text(text = table$'Term ID', url = "https://www.genome.jp/dbget-bin/www_bget?map")
+    
+    #table$'geneID' <- gsub('/', ',', x = table$'geneID')
+    table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+    
       DT::datatable(
-        #table,
+        table,
         filter = 'bottom',
         selection = 'multiple',
         escape = FALSE,
