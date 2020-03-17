@@ -1,4 +1,3 @@
-
 source('fxs.R', local = TRUE)
 source('info.R', local = TRUE)
 
@@ -7,98 +6,35 @@ server = function(input, output, session) {
   options(shiny.maxRequestSize=50*1024^2) 
   preferences <- reactiveValues(use_webgl = TRUE)
   
-  
+  envir <- reactiveValues(sample_data = NULL)
   ##-------------------##
   ## Sample data
   ##-------------------##
-  areaTable <- NULL
-  areaTable <- eventReactive(input$submit, {
-    validate(need(input$areaInput_runname != '', "Please type in a run name..."))
-    areaTable <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
-        header = FALSE,
-        col.names = c("gene", "avg_logFC"),
-        quote = "",
-        allowEscapes = T)
-    saveRDS(areaTable, file = paste0('SavedData/', input$areaInput_runname, '.rds', sep = ''))
+  #sample_data <- NULL
+  observeEvent(input$submit, {
+    sample_data <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
+                            header = FALSE,
+                            col.names = c("gene", "avg_logFC"),
+                            quote = "",
+                            allowEscapes = T)
+    saveRDS(sample_data, file = paste0('SavedData/', 'running', '.rds', sep = ''))
+    string_result <- NULL
+    msig_result <- NULL
+    if (file.exists('SavedRuns/running_string_result.rds')) 
+      file.remove('SavedRuns/running_string_result.rds')
+    if (file.exists('SavedRuns/running_msig_result.rds')) 
+      file.remove('SavedRuns/running_msig_result.rds')
     #updateTextAreaInput(session, "areaInput", value = paste("HMOX 2.00 \nABCA4 -1.50", x))
-    areaTable
+    envir$sample_data <- sample_data
+    sample_data
   })
-  
+  #*
   output$inputTable <- renderTable({
     req(input$submit)
-    areaTable()
+    envir$sample_data
   })
   
-  observeEvent(input$input_file, {
-    output$inputTable <- renderTable({
-      req(input$input_file)
-      data.table::data.table(readRDS(input$input_file$datapath))
-    })
-  })
-  
-  sample_data_path <- reactive({
-    areaTableFile <- paste0('SavedData/', input$areaInput_runname, '.rds')
-    if ( !file.exists(areaTableFile) ) {
-      if ( is.null(input$input_file) || is.na(input$input_file) ) {
-        sample_data_path <- 'testdata/cbndObj02_x7.res02.markers.rds'
-      } else {
-        req(input$input_file)
-        sample_data_path <- input$input_file$datapath
-      }
-    } else {
-      sample_data_path <- areaTableFile
-    }
-    sample_data_path
-  })
-  
-  sample_data <- reactive({readRDS(sample_data_path())})
-  
-  data_basename <- reactive({
-    data_basename <- basename(sample_data_path()) %>% tools::file_path_sans_ext()
-  })
-  
-  ##load results if ran previously
-  string_results <- reactive({
-    string_result_rds_name <- paste(data_basename(), 'string', 'result', sep = '_')
-    string_result_rds_path <- paste('SavedRuns/', string_result_rds_name, '.rds', sep = '')
-    if (file.exists(string_result_rds_path)) {
-      string_results <- readRDS(string_result_rds_path)
-    } else {
-      string_results <- NULL
-      print('RunSTRINGdb not yet run on input...')
-    }
-    string_results
-  })
-  
-  msig_results <- reactive({
-    msig_result_rds_name <- paste(data_basename(), 'msig', 'result', sep = '_')
-    msig_result_rds_path <- paste('SavedRuns/', msig_result_rds_name, '.rds', sep = '')
-    if (file.exists(msig_result_rds_path)) {
-      msig_results <- readRDS(msig_result_rds_path)
-      print("loading msig_result")
-    } else {
-      msig_results <- NULL
-      print('RunMSigDB not yet ran on input...')
-    }
-    msig_results
-  })
-  
-  msig_results_enricher <- reactive({
-    toSubset <- paste(input$msigdbr_select_cluster_input, 'enricher_result', sep = '_')
-    msig_results()[[toSubset]]
-  })
-  
-  msig_results_fgsea <- reactive({
-    toSubset <- paste(input$msigdbr_select_cluster_input, 'fgsea_results', sep = '_')
-    msig_results_fgsea <- msig_results()[[toSubset]]
-    
-    req(!is.null(msig_results_enricher()))
-    as.enrichResult(result = msig_results_fgsea,
-                    inputIds = msig_results_enricher()@gene,
-                    geneSet = msig_results_enricher()@geneSets)
-  })
-  
-  
+ 
   ##--------------------##
   ## stringdb
   ##--------------------##
@@ -125,7 +61,9 @@ server = function(input, output, session) {
     )
   })
   
-  string_results <- eventReactive(input$runstringdb_button, {
+  observeEvent(c(input$runstringdb_button), {
+    #if (input$submit == 0)    return(NULL)
+    
     stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
     validate(need(input$stringdb_maxHitsToPlot_input != '', "Please type in maxHitsToPlot..."))
     validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
@@ -133,87 +71,71 @@ server = function(input, output, session) {
     refSpeciesNum = stringdbSpecies$species_id[stringdbSpecies$compact_name == input$stringdb_refSpecies_input]
     
     withProgress(message = 'making STRING query...', {
-    stringRes <- runSTRINGdb(DEtable = sample_data(), 
-                             maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
-                             refSpeciesNum = refSpeciesNum, 
-                             scoreThreshold = input$stringdb_scoreThreshold_input)
+      stringRes <- runSTRINGdb(DEtable = envir$sample_data, 
+                               maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
+                               refSpeciesNum = refSpeciesNum, 
+                               scoreThreshold = input$stringdb_scoreThreshold_input)
     })
-    saveRDS(stringRes, paste0('SavedRuns/', data_basename(), '_string_result', '.rds', sep = ''))
-    
-    stringRes
-  })
-  
-  output$stringdb_select_run_UI <- renderUI({
-    fileInput(
-      'stringdb_select_run',
-      'Load Run...',
-      multiple = F,
-      accept = c('.rds')
-    )
-  })
-  
-  output$stringdb_select_cluster_UI <- renderUI({
-    if (is.null(sample_data()$cluster)){
-      choices = "NA"
-    } else {
-      choices = levels(sample_data()$cluster)
-    }
-    selectInput(
-      inputId = 'stringdb_select_cluster_input',
-      label = 'Select group (or cluster)',
-      choices = choices,
-      selected = choices[1]
-    )
+    saveRDS(stringRes, paste0('SavedRuns/', 'running', '_string_result', '.rds', sep = ''))
+    envir$string_results <- stringRes
   })
   
   output$num_of_mapped <- renderValueBox({
-    req(string_results())
-    extract <- paste(input$stringdb_select_cluster_input, 'hits', sep = '_')
-    box(
+    req(envir$string_results)
+    extract <- paste('hits', sep = '')
+    shinydashboard::box(
       title = 'Number of genes mapped',
       width = 6,
       background = 'light-blue',
-      sum(!is.na(string_results()[[extract]]))
+      sum(!is.na(envir$string_results[[extract]]))
     )
   })
   
   output$num_of_total_genes <- renderValueBox({
-    req(string_results())
-    extract <- paste(input$stringdb_select_cluster_input, 'hits', sep = '_')
-    box(
+    req(envir$string_results)
+    extract <- paste('hits', sep = '')
+    shinydashboard::box(
       title = 'Number of genes total',
       width = 6,
       background = 'light-blue',
-      length(string_results()[[extract]])
+      length(envir$string_results[[extract]])
     )
   })
   
   output$stringdb_network <- renderPlot({
-    validate(need(!is.null(string_results()), "Please Run STRINGdb on input..."))
-    extract <- paste(input$stringdb_select_cluster_input, 'network', sep = '_')
-    string_results()[[extract]]
+    validate(need(!is.null(envir$string_results), "Please Run STRINGdb on input..."))
+    extract <- paste('network', sep = '')
+    envir$string_results[[extract]]
   })
   
   output$stringdb_network_png <- renderImage(deleteFile = F, {
-    validate(need(!is.null(string_results()), "Please Run STRINGdb on input..."))
-    png_file <- paste(input$stringdb_select_cluster_input, '_network', '.png', sep = '')
-    list(src = paste('SavedData/', png_file, sep = ''), height='90%', width='90%')
+    validate(need(!is.null(envir$string_results), "Please Run STRINGdb on input..."))
+    png_file <- paste('network', '.png', sep = '')
+    list(src = paste('', png_file, sep = ''), height='90%', width='90%')
   })
   
   # TODO: download entire dataset
   output$stringdb_GO <- renderDataTable({
-    validate(need(!is.null(string_results()), "Please Run STRINGdb on input..."))
-    extract <- paste(input$stringdb_select_cluster_input, 'GO', sep = '_')
-    string_results()[[extract]] %>% dplyr::rename(
+    validate(need(!is.null(envir$string_results), "Please Run STRINGdb on input..."))
+    extract <- paste('GO', sep = '')
+    table <- envir$string_results[[extract]] %>% dplyr::rename(
       'Term Description' = term_description,
       'Term ID' = term_id,
       'Proteins' = proteins,
       'Hits' = hits,
       'p-Value' = pvalue,
-      'p-Value (adj.)' = pvalue_fdr
+      'p-Value (adj.)' = pvalue_fdr, 
+      'Genes in Term' = hit_term_genes
     ) %>% 
-      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) %>%
+      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) 
+    
+    table$'Term ID' <- hyperlink_text(text = table$'Term ID', url = "https://www.ebi.ac.uk/QuickGO/term/")
+    
+    #table$'geneID' <- gsub('/', ',', x = table$'geneID')
+    table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+    
       DT::datatable(
+        table,
         filter = 'bottom',
         selection = 'multiple',
         escape = FALSE,
@@ -239,19 +161,26 @@ server = function(input, output, session) {
   
   # TODO: download entire dataset
   output$stringdb_KEGG <- renderDataTable({
-    validate(need(!is.null(string_results()), "Please Run STRINGdb on input..."))
-    extract <- paste(input$stringdb_select_cluster_input, 'KEGG', sep = '_')
-    string_results()[[extract]] %>% dplyr::rename(
+    validate(need(!is.null(envir$string_results), "Please Run STRINGdb on input..."))
+    extract <- paste('KEGG', sep = '')
+    table <- envir$string_results[[extract]] %>% dplyr::rename(
       'Term Description' = term_description,
       'Term ID' = term_id,
       'Proteins' = proteins,
       'Hits' = hits,
       'p-Value' = pvalue,
-      'p-Value (adj.)' = pvalue_fdr
+      'p-Value (adj.)' = pvalue_fdr,
+      'Genes in Term' = hit_term_genes
     ) %>% 
-      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) %>%
+      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) 
+    
+    table$'Term ID' <- hyperlink_text(text = table$'Term ID', url = "https://www.genome.jp/dbget-bin/www_bget?map")
+    
+    #table$'geneID' <- gsub('/', ',', x = table$'geneID')
+    table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+    
       DT::datatable(
-        #table,
+        table,
         filter = 'bottom',
         selection = 'multiple',
         escape = FALSE,
@@ -322,43 +251,49 @@ server = function(input, output, session) {
     })
   })
   
-  msig_results <- eventReactive(input$runmsigdbr_button, {
+  observeEvent(c(input$runmsigdbr_button), {
+    #if (is.null(msig_result)) {}
+    # if (input$submit == 0)    return(NULL)
+    # msig_result <- NULL
     req(input$msigdbr_species_input)
     
     withProgress(message = 'making MSigDB query..', {
-    msigdbrRes <- runMSigDB(DEtable = sample_data(), species = input$msigdbr_species_input)
-    saveRDS(msigdbrRes, paste0('SavedRuns/', data_basename(), '_msig_result', '.rds', sep = ''))
+      msigdbrRes <- runMSigDB(DEtable = envir$sample_data, species = input$msigdbr_species_input)
+      #saveRDS(msigdbrRes, paste0('SavedRuns/', 'running', '_msig_result', '.rds', sep = ''))
     })
-    msigdbrRes
+    envir$msig_result <- msigdbrRes
+    
+    
+    envir$msig_result_enricher <- msigdbrRes[['enricher_result']]
+    
+    
+    envir$msig_result_fgsea <- as.enrichResult(result = msigdbrRes[['fgsea_result']],
+                                                inputIds = msigdbrRes[['enricher_result']]@gene,
+                                                geneSet = msigdbrRes[['enricher_result']]@geneSets)
+    
+    
+    renderPlotSet(output = output,
+                key = 'fgsea',
+                enrichTypeResult = envir$msig_result_fgsea)
+    
+    renderPlotSet(output = output,
+                key = 'enricher',
+                enrichTypeResult = envir$msig_result_enricher)
+  
+    
+    
+
+    ##update msig_result()
   })
   
-  output$msigdbr_select_run_UI <- renderUI({
-    fileInput(
-      inputId = 'msigdbr_select_run',
-      label = 'Load Run...',
-      multiple = F,
-      accept = c('.rds')
-    )
-  })
-  
-  output$msigdbr_select_cluster_UI <- renderUI({
-    if (is.null(sample_data()$cluster)){
-      choices = "NA"
-    } else {
-      choices = levels(sample_data()$cluster)
-    }
-    selectInput(
-      inputId = 'msigdbr_select_cluster_input',
-      label = 'Select group (or cluster)',
-      choices = choices,
-      selected = choices[1]
-    )
-  })
-  
+  # print(paste0('envir$msig_result: \n', head(envir$msig_result)))
+  # print(paste0('envir$msig_result_enricher: \n', head(envir$msig_result_enricher)))
+  # print(paste0('envir$msig_result_fgsea: \n', head(envir$msig_result_fgsea)))
+ 
   
   output$num_of_mapped_enricher <- renderValueBox({
-    num_genes_mapped <- str_split(noquote(msig_results_enricher()@result$GeneRatio[1]), '/')[[1]][2]
-    box(
+    num_genes_mapped <- str_split(noquote(envir$msig_result_enricher@result$GeneRatio[1]), '/')[[1]][2]
+    shinydashboard::box(
       title = 'Number of genes mapped',
       width = 6,
       background = 'light-blue',
@@ -367,8 +302,8 @@ server = function(input, output, session) {
   })
   
   output$num_of_total_genes_enricher <- renderValueBox({
-    num_genes_total <- length(msig_results_enricher()@gene)
-    box(
+    num_genes_total <- length(envir$msig_result_enricher@gene)
+    shinydashboard::box(
       title = 'Number of genes total',
       width = 6,
       background = 'light-blue',
@@ -377,15 +312,8 @@ server = function(input, output, session) {
   })
   
   
-  output$msigdbr_select_cluster_fgsea_gtable <- renderPlot({
-    toSubset <- paste(input$msigdbr_select_cluster_input, 'fgsea_gtable', sep = '_')
-    msig_results <- msig_results()
-    plot(msig_results[[toSubset]])
-  })
   
   
-  renderPlotSet(output = output, key = 'fgsea', enrichTypeResult = msig_results_fgsea)
-  renderPlotSet(output = output, key = 'enricher', enrichTypeResult = msig_results_enricher)
   
   
   output[["fgsea_table_PPI"]] <- renderPlot({
@@ -393,9 +321,7 @@ server = function(input, output, session) {
     info_list <- input$fgsea_table_cell_clicked
     print(info_list[["value"]])
     
-    toSubset <- paste(input$msigdbr_select_cluster_input, 'fgsea_ranks', sep = '_')
-    
-    plotEnrichment(msig_results()[['msig_geneSet']][[info_list[["value"]]]], msig_results()[[toSubset]]) + 
+    plotEnrichment(msig_result()[['msig_geneSet']][[info_list[["value"]]]], envir$msig_result[['fgsea_ranks']]) + 
       labs(title=info_list[["value"]])
   })
   
@@ -417,46 +343,4 @@ server = function(input, output, session) {
       )
     )
   })
-  
-  
-  ##--------------------##
-  ## clusterprofiler
-  ##--------------------##
-  output$clusterprofiler_select_run_UI <- renderUI({
-    if ( is.null(sample_data()$cluster) ) {
-      #textOutput(NULL)
-      #textOutput('enriched_pathways_by_sample_table_missing')
-    } else {
-      fileInput(inputId = 'clusterprofiler_select_run', label = 'Load Run...', multiple = F, accept = c('.rds'))
-    }
-  })
-  
-  
-  output$clusterprofiler_select_cluster_UI <- renderUI({
-    if ( is.null(sample_data()$cluster) ) {
-      #textOutput(NULL)
-      #textOutput('enriched_pathways_by_sample_table_missing')
-    } else {
-      selectInput(
-        inputId = 'clusterprofiler_select_cluster_input',
-        label = 'Select group (or cluster)',
-        choices = levels(sample_data()$cluster)
-      )
-    }
-  })
-  
-  observeEvent(input[["clusterprofiler_resource_info"]], {
-    showModal(
-      modalDialog(
-        clusterprofiler_resource_info[["text"]],
-        title = clusterprofiler_resource_info[["title"]],
-        easyClose = TRUE,
-        footer = NULL
-      )
-    )
-  })
-  
-  
-  #*********************************************************
 }
-
