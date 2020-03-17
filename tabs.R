@@ -7,7 +7,7 @@ source('fxs.R', local = TRUE)
 ## 1 - loadData
 ##----------------------------------------------------------------------------##
 
-tab_load_data <- tabItem(
+tab_load_data <- shinydashboard::tabItem(
   tabName = 'loadData',
   fluidRow(
   textAreaInput(
@@ -31,9 +31,9 @@ tab_load_data <- tabItem(
 ## Tabs -- UI.R
 ## 2 - STRINGdb
 ##----------------------------------------------------------------------------##
-tab_stringdb <- tabItem(
+tab_stringdb <- shinydashboard::tabItem(
   tabName = 'stringdb',
-  box(
+  shinydashboard::box(
     title = tagList(p('Run STRINGdb', style = "padding-right: 5px; display: inline"), 
                     actionButton(
                       inputId = "stringdb_resource_info",
@@ -54,7 +54,7 @@ tab_stringdb <- tabItem(
     valueBoxOutput('num_of_mapped'),
     valueBoxOutput('num_of_total_genes')
   ),
-  box(
+  shinydashboard::box(
     title = 'Network (PNG)',
     status = 'primary',
     solidHeader = TRUE,
@@ -91,9 +91,9 @@ tab_stringdb <- tabItem(
 ## Tabs -- UI.R
 ## 3 - MSigDBr
 ##----------------------------------------------------------------------------##
-tab_msigdbr <- tabItem(
+tab_msigdbr <- shinydashboard::tabItem(
   tabName = 'msigdbr',
-  box(
+  shinydashboard::box(
     title = tagList(p('Run MSigDB', style = "padding-right: 5px; display: inline"), 
                     actionButton(
                       inputId = "msigdbr_resource_info",

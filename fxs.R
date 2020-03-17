@@ -307,6 +307,7 @@ renderPlotSet <- function(output, key, enrichTypeResult) {
   ##add if is not null exception
   output[[paste(key, 'table', sep = '_')]] <- renderDataTable({
     validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     table <- enrichTypeResult %>% as.data.frame() %>% dplyr::rename(
       'Term Description' = Description,
       'geneID' = geneID,
@@ -349,26 +350,31 @@ renderPlotSet <- function(output, key, enrichTypeResult) {
   
   output[[paste(key, 'dotplot', sep = '_')]] <- renderPlotly({
     validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     enrichplot::dotplot(enrichTypeResult)
   })
   
   output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({
     validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     enrichplot::emapplot(enrichTypeResult)
   })
   
   output[[paste(key, 'cnetplot', sep = '_')]] <- renderPlot({
     validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     enrichplot::cnetplot(enrichTypeResult)
   })
   
   output[[paste(key, 'upsetplot', sep = '_')]] <- renderPlot({
     validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     enrichplot::upsetplot(enrichTypeResult)
   })
   
   output[[paste(key, 'heatplot', sep = '_')]] <- renderPlot({
     validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     enrichplot::heatplot(enrichTypeResult)
   })
 }

@@ -83,7 +83,7 @@ server = function(input, output, session) {
   output$num_of_mapped <- renderValueBox({
     req(envir$string_results)
     extract <- paste('hits', sep = '')
-    box(
+    shinydashboard::box(
       title = 'Number of genes mapped',
       width = 6,
       background = 'light-blue',
@@ -94,7 +94,7 @@ server = function(input, output, session) {
   output$num_of_total_genes <- renderValueBox({
     req(envir$string_results)
     extract <- paste('hits', sep = '')
-    box(
+    shinydashboard::box(
       title = 'Number of genes total',
       width = 6,
       background = 'light-blue',
@@ -293,7 +293,7 @@ server = function(input, output, session) {
   
   output$num_of_mapped_enricher <- renderValueBox({
     num_genes_mapped <- str_split(noquote(envir$msig_result_enricher@result$GeneRatio[1]), '/')[[1]][2]
-    box(
+    shinydashboard::box(
       title = 'Number of genes mapped',
       width = 6,
       background = 'light-blue',
@@ -303,7 +303,7 @@ server = function(input, output, session) {
   
   output$num_of_total_genes_enricher <- renderValueBox({
     num_genes_total <- length(envir$msig_result_enricher@gene)
-    box(
+    shinydashboard::box(
       title = 'Number of genes total',
       width = 6,
       background = 'light-blue',

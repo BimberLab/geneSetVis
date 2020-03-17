@@ -4,6 +4,7 @@ library(rhandsontable)
 library(shinyMatrix)
 library(shinyBS)
 library(flexdashboard)
+library(rsconnect)
 
 library(dplyr)
 library(ggplot2)
@@ -24,12 +25,12 @@ library(Matrix)
 
 library(testthat)
 
-library(Seurat)
-library(OOSAP)
+#library(Seurat)
+#library(OOSAP)
 
 library(org.Hs.eg.db)
-library(AnnotationHub)
-library(ReactomePA)
+#library(AnnotationHub)
+#library(ReactomePA)
 library(clusterProfiler)
 library(fgsea) 
 
@@ -38,6 +39,8 @@ library(STRINGdb)
 #library(RDAVIDWebService) 
 library(msigdbr)
 
+
+options(repos = BiocManager::repositories())
 
 #########################################################################
 wd <- '.'
