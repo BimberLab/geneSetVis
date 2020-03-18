@@ -61,7 +61,7 @@ server = function(input, output, session) {
     )
   })
   
-  observeEvent(c(input$runstringdb_button), {
+  observeEvent(c(input$runstringdb_button, input$sample_data), {
     #if (input$submit == 0)    return(NULL)
     
     stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
@@ -80,14 +80,18 @@ server = function(input, output, session) {
     envir$string_results <- stringRes
   })
   
+  output$string_map_stats <- renderText({
+    req(envir$string_results)
+    paste0(sum(!is.na(envir$string_results[['hits']])), ' out of ', length(envir$string_results[['hits']]), 'genes were mapped.')
+  })
+  
   output$num_of_mapped <- renderValueBox({
     req(envir$string_results)
-    extract <- paste('hits', sep = '')
     shinydashboard::box(
       title = 'Number of genes mapped',
       width = 6,
       background = 'light-blue',
-      sum(!is.na(envir$string_results[[extract]]))
+      sum(!is.na(envir$string_results[['hits']]))
     )
   })
   
@@ -251,7 +255,7 @@ server = function(input, output, session) {
     })
   })
   
-  observeEvent(c(input$runmsigdbr_button), {
+  observeEvent(c(input$runmsigdbr_button, input$submit), {
     #if (is.null(msig_result)) {}
     # if (input$submit == 0)    return(NULL)
     # msig_result <- NULL
@@ -271,17 +275,38 @@ server = function(input, output, session) {
                                                 inputIds = msigdbrRes[['enricher_result']]@gene,
                                                 geneSet = msigdbrRes[['enricher_result']]@geneSets)
     
+    renderPlotSet(output = output,
+                  key = 'fgsea',
+                  enrichTypeResult = envir$msig_result_fgsea)
     
     renderPlotSet(output = output,
-                key = 'fgsea',
-                enrichTypeResult = envir$msig_result_fgsea)
+                  key = 'enricher',
+                  enrichTypeResult = envir$msig_result_enricher)
+    #}
     
-    renderPlotSet(output = output,
-                key = 'enricher',
-                enrichTypeResult = envir$msig_result_enricher)
-  
+    # observe({
+    #   #if (req(input$submit) == 0) {
+    #     #updateSelectInput(...)
+    #     renderPlotSet(output = output,
+    #                   key = 'fgsea',
+    #                   enrichTypeResult = envir$msig_result_fgsea)
+    #     
+    #     renderPlotSet(output = output,
+    #                   key = 'enricher',
+    #                   enrichTypeResult = envir$msig_result_enricher)
+    #   #}
+    # })
+
+    # renderPlotSet(output = output,
+    #               key = 'fgsea',
+    #               enrichTypeResult = envir$msig_result_fgsea)
+    # 
+    # renderPlotSet(output = output,
+    #               key = 'enricher',
+    #               enrichTypeResult = envir$msig_result_enricher)
+    # 
     
-    
+
 
     ##update msig_result()
   })
@@ -321,8 +346,8 @@ server = function(input, output, session) {
     info_list <- input$fgsea_table_cell_clicked
     print(info_list[["value"]])
     
-    plotEnrichment(msig_result()[['msig_geneSet']][[info_list[["value"]]]], envir$msig_result[['fgsea_ranks']]) + 
-      labs(title=info_list[["value"]])
+    fgsea::plotEnrichment(msig_result()[['msig_geneSet']][[info_list[["value"]]]], envir$msig_result[['fgsea_ranks']]) + 
+      ggplot2::labs(title=info_list[["value"]])
   })
   
   observeEvent(input$fgsea_table_cell_clicked, {
