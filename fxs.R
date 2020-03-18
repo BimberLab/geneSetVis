@@ -27,7 +27,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
   if (!is.null(DEtable$p_val_adj)){
     DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
     DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
-  } 
+  }
 
   
   return_list = list()
@@ -229,9 +229,7 @@ runMSigDB <- function(DEtable, species) {
 
 
 as.enrichResult_internal <- function(result, inputIds, geneSet) {
-  if (is.null(inputIds)) {
-    print('null geneIds')
-  }
+
   gene <- inputIds
   gene.length <- length(gene)
   
@@ -272,8 +270,13 @@ as.enrichResult_internal <- function(result, inputIds, geneSet) {
 }
 
 as.enrichResult <- function(result, inputIds, geneSet) {
-  e <- as.enrichResult_internal(result = result, inputIds = inputIds, geneSet = geneSet)
-  rownames(e@result) <- e@result$Description
+  if (nrow(result) != 0) {
+    e <- as.enrichResult_internal(result = result, inputIds = inputIds, geneSet = geneSet)
+    rownames(e@result) <- e@result$Description
+  
+  } else {
+    stop('No terms in input.')
+  }
   
   return(e)
 }
@@ -299,6 +302,7 @@ multi_hyperlink_text <- function(labels, links){
   out <- sapply(out, paste, collapse=",")
   return(as.list(out))
 }
+
 
 
 renderPlotSet <- function(output, key, enrichTypeResult) {
@@ -380,7 +384,7 @@ renderPlotSet <- function(output, key, enrichTypeResult) {
 }
 
 makeTabBox <- function(title, key) {
-  tabBox(
+  shinydashboard::tabBox(
     title = title,   
     side = 'right',
     height = NULL,

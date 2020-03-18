@@ -51,8 +51,9 @@ tab_stringdb <- shinydashboard::tabItem(
       actionButton('runstringdb_button', 'Run')
     )),
   fluidRow(
-    valueBoxOutput('num_of_mapped'),
-    valueBoxOutput('num_of_total_genes')
+    #textOutput('string_map_stats')
+    flexdashboard::valueBoxOutput('num_of_mapped'),
+    flexdashboard::valueBoxOutput('num_of_total_genes')
   ),
   shinydashboard::box(
     title = 'Network (PNG)',
@@ -64,7 +65,7 @@ tab_stringdb <- shinydashboard::tabItem(
       imageOutput('stringdb_network_png')
     )
   ),
-  tabBox(
+  shinydashboard::tabBox(
     title = 'GO',
     side = 'right',
     height = NULL,
@@ -74,7 +75,7 @@ tab_stringdb <- shinydashboard::tabItem(
              #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
              collapsible = TRUE)
   ),
-  tabBox(
+  shinydashboard::tabBox(
     title = 'KEGG',   
     side = 'right',
     height = NULL,
