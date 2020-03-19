@@ -342,12 +342,16 @@ server = function(input, output, session) {
   
   
   output[["fgsea_table_PPI"]] <- renderPlot({
-    req(input$fgsea_table_cell_clicked)
+    req(length(input$fgsea_table_cell_clicked) > 0)
     info_list <- input$fgsea_table_cell_clicked
-    print(info_list[["value"]])
     
-    fgsea::plotEnrichment(msig_result()[['msig_geneSet']][[info_list[["value"]]]], envir$msig_result[['fgsea_ranks']]) + 
-      ggplot2::labs(title=info_list[["value"]])
+    cellVal <- strsplit(info_list[["value"]], perl = T, split = 'target=\"_blank\">')
+    cellVal <- strsplit(cellVal[[1]][2], perl = T, split = "</a>")
+    cellVal <- cellVal[[1]]
+    print(cellVal)
+    
+    fgsea::plotEnrichment(envir$msig_result[['msig_geneSet']][[cellVal]], envir$msig_result[['fgsea_ranks']]) + 
+      ggplot2::labs(title = cellVal)
   })
   
   observeEvent(input$fgsea_table_cell_clicked, {
