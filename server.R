@@ -20,10 +20,10 @@ server = function(input, output, session) {
     saveRDS(sample_data, file = paste0('SavedData/', 'running', '.rds', sep = ''))
     string_result <- NULL
     msig_result <- NULL
-    if (file.exists('SavedRuns/running_string_result.rds')) 
-      file.remove('SavedRuns/running_string_result.rds')
-    if (file.exists('SavedRuns/running_msig_result.rds')) 
-      file.remove('SavedRuns/running_msig_result.rds')
+    # if (file.exists('SavedRuns/running_string_result.rds')) 
+    #   file.remove('SavedRuns/running_string_result.rds')
+    # if (file.exists('SavedRuns/running_msig_result.rds')) 
+    #   file.remove('SavedRuns/running_msig_result.rds')
     #updateTextAreaInput(session, "areaInput", value = paste("HMOX 2.00 \nABCA4 -1.50", x))
     envir$sample_data <- sample_data
     sample_data
@@ -85,7 +85,7 @@ server = function(input, output, session) {
     paste0(sum(!is.na(envir$string_results[['hits']])), ' out of ', length(envir$string_results[['hits']]), 'genes were mapped.')
   })
   
-  output$num_of_mapped <- renderValueBox({
+  output$num_of_mapped <- flexdashboard::renderValueBox({
     req(envir$string_results)
     shinydashboard::box(
       title = 'Number of genes mapped',
@@ -95,7 +95,7 @@ server = function(input, output, session) {
     )
   })
   
-  output$num_of_total_genes <- renderValueBox({
+  output$num_of_total_genes <- flexdashboard::renderValueBox({
     req(envir$string_results)
     extract <- paste('hits', sep = '')
     shinydashboard::box(
@@ -316,7 +316,7 @@ server = function(input, output, session) {
   # print(paste0('envir$msig_result_fgsea: \n', head(envir$msig_result_fgsea)))
  
   
-  output$num_of_mapped_enricher <- renderValueBox({
+  output$num_of_mapped_enricher <- flexdashboard::renderValueBox({
     num_genes_mapped <- str_split(noquote(envir$msig_result_enricher@result$GeneRatio[1]), '/')[[1]][2]
     shinydashboard::box(
       title = 'Number of genes mapped',
@@ -326,7 +326,7 @@ server = function(input, output, session) {
     )
   })
   
-  output$num_of_total_genes_enricher <- renderValueBox({
+  output$num_of_total_genes_enricher <- flexdashboard::renderValueBox({
     num_genes_total <- length(envir$msig_result_enricher@gene)
     shinydashboard::box(
       title = 'Number of genes total',
