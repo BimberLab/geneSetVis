@@ -1,0 +1,12 @@
+name: geneSetVis
+title: geneSetVis
+username:
+account: kolabx
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1955232
+bundleId: 2898835
+url: https://kolabx.shinyapps.io/genesetvis/
+when: 1584639694.78988
+asMultiple: FALSE
+asStatic: FALSE

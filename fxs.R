@@ -16,7 +16,7 @@
 
 runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
   string_db <-
-    STRINGdb$new(
+    STRINGdb::STRINGdb$new(
       version = '10',
       species = refSpeciesNum,
       score_threshold = scoreThreshold,
@@ -128,7 +128,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 
 runMSigDB <- function(DEtable, species) {
   ##get species datdset
-  human.msig = msigdbr(species = species)
+  human.msig = msigdbr::msigdbr(species = species)
   
   ##subset columms of interest: gene-set name (gs_name) and gene symbols or enterez id
   msigTerm = human.msig %>% dplyr::select(gs_name, gene_symbol, gs_cat, gs_subcat) %>% as.data.frame()
@@ -146,7 +146,7 @@ runMSigDB <- function(DEtable, species) {
     if (nrow(clusterTable) > 0) {
       ##Use the gene sets data frame for clusterProfiler (for genes as gene symbols)
       msig_enricher <-
-        enricher(gene = clusterTable$gene, TERM2GENE = msigTerm)
+        clusterProfiler::enricher(gene = clusterTable$gene, TERM2GENE = msigTerm)
       #msig_enricher_plot <- dotplot(msig_enricher)
       
       #clusterProfiler::geneInCategory()
@@ -195,7 +195,7 @@ runMSigDB <- function(DEtable, species) {
       
       
       fgsea_gtable <-
-        plotGseaTable(
+        fgsea::plotGseaTable(
           pathways = msig_geneSet[topPathways],
           stats = ranks,
           fgseaRes = fgsea_results,
@@ -391,7 +391,7 @@ makeTabBox <- function(title, key) {
     selected = 'Dot Plot',
     width = 16,
     tabPanel('Table', dataTableOutput(paste(key, 'table', sep = '_'))),
-    tabPanel('Dot Plot', plotlyOutput(paste(key, 'dotplot', sep = '_'))),
+    tabPanel('Dot Plot', plotly::plotlyOutput(paste(key, 'dotplot', sep = '_'))),
     tabPanel('Emap Plot', plotOutput(paste(key, 'emapplot', sep = '_'))),
     tabPanel('Cnet Plot', plotOutput(paste(key, 'cnetplot', sep = '_'))),
     tabPanel('Upset Plot', plotOutput(paste(key, 'upsetplot', sep = '_'))),
