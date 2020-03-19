@@ -61,7 +61,7 @@ server = function(input, output, session) {
     )
   })
   
-  observeEvent(c(input$runstringdb_button, input$sample_data), {
+  observeEvent(c(input$runstringdb_button, input$submit), {
     #if (input$submit == 0)    return(NULL)
     
     stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
