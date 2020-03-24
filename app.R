@@ -34,11 +34,13 @@ library(org.Hs.eg.db)
 library(AnnotationHub)
 library(ReactomePA)
 library(clusterProfiler)
+library(DOSE)
+library(enrichplot)
 library(fgsea) 
 
 library(biomaRt)
 library(STRINGdb) 
-library(RDAVIDWebService)
+#library(RDAVIDWebService)
 library(msigdbr)
 
 

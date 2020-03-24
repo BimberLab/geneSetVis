@@ -1,6 +1,6 @@
 #' @title plot STRINGdb networks
 #'
-#' @description Takes Differential Expression table and plots STRINGdb networks 
+#' @Description Takes Differential Expression table and plots STRINGdb networks 
 #' @param DEtable A DE table
 #' @param numHits The num of mapped hits to plot
 #' @param refSpeciesNum The dataset (see STRINGdb docs) to use as a reference; 9606=Human, ?=Rhesus Macaque
@@ -250,7 +250,7 @@ as.enrichResult_internal <- function(result, inputIds, geneSet) {
   gene.length <- length(gene)
   
   result <- result %>% 
-    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, Description = 'pathway') 
+    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, 'Description' = pathway) 
   # %>% dplyr::arrange(dplyr::desc(p.adjust))
   
   result <- result[order(pvalue),]
@@ -265,9 +265,10 @@ as.enrichResult_internal <- function(result, inputIds, geneSet) {
   geneSetsOI <- geneSet[c(result$Description)]
   genesInGeneSet <- lapply(geneSetsOI, intersect, y=gene)
   genesInGeneSet.stack <- stack(genesInGeneSet) %>% 
-    rename(ind = 'Description') %>% group_by(Description) %>% 
+    rename(ind = 'Descriptions') %>% group_by(Descriptions) %>% 
+    #group_by(ind) %>% 
     summarise(geneID = paste(values, collapse = '/'))
-  result <- merge(result, genesInGeneSet.stack, by = 'Description')
+  result <- merge(result, genesInGeneSet.stack, by = 'Descriptions')
   
   new('enrichResult',
       result         = result, 
@@ -288,7 +289,7 @@ as.enrichResult_internal <- function(result, inputIds, geneSet) {
 as.enrichResult <- function(result, inputIds, geneSet) {
   if (nrow(result) != 0) {
     e <- as.enrichResult_internal(result = result, inputIds = inputIds, geneSet = geneSet)
-    rownames(e@result) <- e@result$Description
+    #rownames(e@result) <- e@result$Description
   
   } else {
     stop('No terms in input.')
@@ -326,8 +327,10 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL) {
   #if (input$submit == 0)    return()
   ##add if is not null exception
   output[[paste(key, 'table', sep = '_')]] <- renderDataTable({
-    validate(need(!is.null(enrichTypeResult), 'Input should be of enrichResult type...'))
+    validate(need(!is.null(enrichTypeResult), 'Please Run process on input...'))
+    validate(need(class(enrichTypeResult) == 'enrichResult', 'Input should be of enrichResult type...'))
     validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
+    req(class(enrichTypeResult))
     table <- enrichTypeResult %>% as.data.frame() %>% dplyr::rename(
       'Term Description' = Description,
       'Term ID' = ID,
@@ -373,31 +376,37 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL) {
   })
   
   output[[paste(key, 'dotplot', sep = '_')]] <- renderPlotly({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(!is.null(enrichTypeResult), 'Please Run process on input...'))
+    #validate(need(class(enrichTypeResult) == 'enrichResult', 'Input should be of enrichResult type...'))
     validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
+    req(class(enrichTypeResult))
     enrichplot::dotplot(enrichTypeResult)
   })
   
   output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(!is.null(enrichTypeResult), 'Please Run process on input...'))
+    validate(need(class(enrichTypeResult) == 'enrichResult', 'Input should be of enrichResult type...'))
     validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     enrichplot::emapplot(enrichTypeResult)
   })
   
   output[[paste(key, 'cnetplot', sep = '_')]] <- renderPlot({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(!is.null(enrichTypeResult), 'Please Run process on input...'))
+    validate(need(class(enrichTypeResult) == 'enrichResult', 'Input should be of enrichResult type...'))
     validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     enrichplot::cnetplot(enrichTypeResult)
   })
   
   output[[paste(key, 'upsetplot', sep = '_')]] <- renderPlot({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(!is.null(enrichTypeResult), 'Please Run process on input...'))
+    validate(need(class(enrichTypeResult) == 'enrichResult', 'Input should be of enrichResult type...'))
     validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     enrichplot::upsetplot(enrichTypeResult)
   })
   
   output[[paste(key, 'heatplot', sep = '_')]] <- renderPlot({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(!is.null(enrichTypeResult), 'Please Run process on input...'))
+    validate(need(class(enrichTypeResult) == 'enrichResult', 'Input should be of enrichResult type...'))
     validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     enrichplot::heatplot(enrichTypeResult)
   })

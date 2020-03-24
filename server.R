@@ -292,6 +292,8 @@ server = function(input, output, session) {
                                                 inputIds = msigdbrRes[['enricher_result']]@gene,
                                                 geneSet = msigdbrRes[['enricher_result']]@geneSets)
     
+    #envir$msig_result_fgsea <- msigdbrRes[['fgsea_result']]
+    
     renderPlotSet(output = output,
                   key = 'fgsea',
                   enrichTypeResult = envir$msig_result_fgsea,
