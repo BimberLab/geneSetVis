@@ -118,3 +118,30 @@ tab_msigdbr <- shinydashboard::tabItem(
   makeTabBox(title = 'FGSEA', key = 'fgsea')
 )
 
+
+tab_reactome <- shinydashboard::tabItem(
+  tabName = 'reactome',
+  shinydashboard::box(
+    title = tagList(p('Run Reactome', style = "padding-right: 5px; display: inline"), 
+                    actionButton(
+                      inputId = "reactome_resource_info",
+                      label = "info",
+                      icon = NULL,
+                      class = "btn-xs",
+                      title = "Show additional information for this panel."
+                    )),
+    status = 'primary',
+    solidHeader = TRUE,
+    width = 16,
+    collapsible = TRUE,
+    tagList(
+      uiOutput('runreactome_select_parameters'),
+      actionButton('runreactome_button', 'Run')
+    )
+  ),
+  
+  makeTabBox(title = 'Reactome', key = 'reactome')
+)
+
+
+

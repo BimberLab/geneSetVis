@@ -24,7 +24,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
     )
   
   ##dedup table to remove multiple tests
-  if (!is.null(DEtable$p_val_adj)){
+  if (!is.null(DEtable$test)){
     DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
     DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
   }
@@ -134,7 +134,7 @@ runMSigDB <- function(DEtable, species) {
   msigTerm = human.msig %>% dplyr::select(gs_name, gene_symbol, gs_cat, gs_subcat) %>% as.data.frame()
   
   ##dedup table to remove multiple tests
-  if (!is.null(DEtable$p_val_adj)){
+  if (!is.null(DEtable$test)){
     DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
     DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
   } 
@@ -225,7 +225,23 @@ runMSigDB <- function(DEtable, species) {
   return(return_list)
 }
 
-
+##useful?? in-app run instead + cache??
+runReactomePA <- function(DEtable, species) {
+  ##dedup table to remove multiple tests
+  if (!is.null(DEtable$test)){
+    DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
+    DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
+  } 
+  
+  return_list = list()
+  tryCatch({
+    entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable$gene), 'ENTREZID', 'SYMBOL')
+    
+    go <- enrichGO(entrezIDs, OrgDb = human, pvalueCutoff = 1, qvalueCutoff = 1)
+    pa <- ReactomePA::enrichPathway(entrezIDs)
+    
+  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+}
 
 
 as.enrichResult_internal <- function(result, inputIds, geneSet) {
@@ -281,9 +297,9 @@ as.enrichResult <- function(result, inputIds, geneSet) {
   return(e)
 }
 
-hyperlink_text <- function(url, text) {
+hyperlink_text <- function(url, text, hide=text) {
   for (t in text) {
-   s <-  paste0('<a href="',url,text,'" target="_blank">',text,'</a>')
+   s <-  paste0('<a href="',url,hide,'" target="_blank">',text,'</a>')
    return(s)
     }
 }
@@ -305,30 +321,34 @@ multi_hyperlink_text <- function(labels, links){
 
 
 
-renderPlotSet <- function(output, key, enrichTypeResult) {
+renderPlotSet <- function(output, key, enrichTypeResult, termURL) {
   #print(paste0('called render plot: ', is.null(enrichTypeResult)))
   #if (input$submit == 0)    return()
   ##add if is not null exception
   output[[paste(key, 'table', sep = '_')]] <- renderDataTable({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
+    validate(need(!is.null(enrichTypeResult), 'Input should be of enrichResult type...'))
     validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
     table <- enrichTypeResult %>% as.data.frame() %>% dplyr::rename(
       'Term Description' = Description,
+      'Term ID' = ID,
       'geneID' = geneID,
       'Hits' = Count,
       'p-Value (adj.)' = pvalue,
       'p-Value' = p.adjust,
       'Genes in Term' = geneID
-    ) %>% 
-      dplyr::select(c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')) 
+    )  
     
-    table$'Term Description' <- hyperlink_text(text = table$'Term Description', url = "https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=")
+    table$'Term Description' <- hyperlink_text(url = termURL, text = table$'Term Description', hide = table$'Term ID')
     
     table$'Genes in Term' <- gsub('/', ',', x = table$'Genes in Term')
     table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+    
+    table <- table %>% 
+      dplyr::select(c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term'))
 
     DT::datatable(
       table,
+      #caption = 'Click on Term Description cell to view Protein-protein interaction plot.',
       filter = 'bottom',
       selection = 'single',
       escape = FALSE,
