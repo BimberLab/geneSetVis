@@ -26,8 +26,21 @@ msigdbr_resource_info <- list(
   For each human equivalent within each species, only the ortholog supported by the largest number of databases is used.
   <p>
   <li><a href=https://www.gsea-msigdb.org/gsea/msigdb/index.jsp 
-  title="Official MSigDB website" 
+  title="link to Official MSigDB" 
   target="_blank"><b>Official MSigDB website</b></a></li>
+  '
+  )
+)
+
+reactome_resource_info <- list(
+  title = "Reactome Resource info", 
+  text = HTML(
+    '<b>Reactome Pathway Browser</b><br>
+    ...
+  <p>
+  <li><a href=https://reactome.org/PathwayBrowser/
+  title="Reactome Pathway Browser website" 
+  target="_blank"><b>Reactome Pathway Browser website</b></a></li>
   '
   )
 )

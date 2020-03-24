@@ -28,6 +28,11 @@ ui = shinydashboard::dashboardPage(
       text = 'MsigDB',
       tabName = 'msigdbr',
       icon = icon(NULL)
+    ),
+    shinydashboard::menuItem(
+      text = 'Reactome',
+      tabName = 'reactome',
+      icon = icon(NULL)
     )
   )
   ),
@@ -35,6 +40,7 @@ ui = shinydashboard::dashboardPage(
     tags$script(HTML('$("body").addClass("fixed");')),
     shinydashboard::tabItems(tab_load_data,
              tab_stringdb,
-             tab_msigdbr)
+             tab_msigdbr,
+             tab_reactome)
   )
 )

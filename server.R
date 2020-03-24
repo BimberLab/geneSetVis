@@ -69,16 +69,24 @@ server = function(input, output, session) {
     validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
     validate(need(input$stringdb_refSpecies_input != '', "Please type in refSpecies..."))
     refSpeciesNum = stringdbSpecies$species_id[stringdbSpecies$compact_name == input$stringdb_refSpecies_input]
+  
     
-    withProgress(message = 'making STRING query...', {
-      stringRes <- runSTRINGdb(DEtable = envir$sample_data, 
-                               maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
-                               refSpeciesNum = refSpeciesNum, 
-                               scoreThreshold = input$stringdb_scoreThreshold_input)
+    withProgress(message = 'making STRING query..', {
+      saveFile <- paste0('SavedRuns/', 'running', '_string_result', '.rds', sep = '')
+      if (file.exists(saveFile)) {
+        stringRes <- readRDS(saveFile)
+      } else {
+        stringRes <- runSTRINGdb(DEtable = envir$sample_data, 
+                                 maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
+                                 refSpeciesNum = refSpeciesNum, 
+                                 scoreThreshold = input$stringdb_scoreThreshold_input)
+        saveRDS(stringRes, file = saveFile)
+      }
+      envir$string_results <- stringRes
     })
-    saveRDS(stringRes, paste0('SavedRuns/', 'running', '_string_result', '.rds', sep = ''))
-    envir$string_results <- stringRes
   })
+  
+    
   
   output$string_map_stats <- renderText({
     req(envir$string_results)
@@ -130,13 +138,15 @@ server = function(input, output, session) {
       'p-Value' = pvalue,
       'p-Value (adj.)' = pvalue_fdr, 
       'Genes in Term' = hit_term_genes
-    ) %>% 
-      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) 
+    ) 
     
-    table$'Term ID' <- hyperlink_text(text = table$'Term ID', url = "https://www.ebi.ac.uk/QuickGO/term/")
+    table$'Term Description' <- hyperlink_text(text = table$'Term Description', url = "https://www.ebi.ac.uk/QuickGO/term/", hide = table$'Term ID')
     
-    #table$'geneID' <- gsub('/', ',', x = table$'geneID')
     table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+    
+    table <- table %>% 
+      dplyr::select(c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value')) 
+    #table$'geneID' <- gsub('/', ',', x = table$'geneID')
     
       DT::datatable(
         table,
@@ -175,13 +185,15 @@ server = function(input, output, session) {
       'p-Value' = pvalue,
       'p-Value (adj.)' = pvalue_fdr,
       'Genes in Term' = hit_term_genes
-    ) %>% 
-      dplyr::select(c('Term Description', 'Term ID', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', dplyr::everything())) 
+    ) 
     
-    table$'Term ID' <- hyperlink_text(text = table$'Term ID', url = "https://www.genome.jp/dbget-bin/www_bget?map")
-    
-    #table$'geneID' <- gsub('/', ',', x = table$'geneID')
+    table$'Term Description' <- hyperlink_text(text = table$'Term Description', url = "https://www.genome.jp/dbget-bin/www_bget?map", hide = table$'Term ID')
+   
     table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+    
+    table <- table %>% 
+      dplyr::select(c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value')) 
+    #table$'geneID' <- gsub('/', ',', x = table$'geneID')
     
       DT::datatable(
         table,
@@ -262,8 +274,13 @@ server = function(input, output, session) {
     req(input$msigdbr_species_input)
     
     withProgress(message = 'making MSigDB query..', {
-      msigdbrRes <- runMSigDB(DEtable = envir$sample_data, species = input$msigdbr_species_input)
-      #saveRDS(msigdbrRes, paste0('SavedRuns/', 'running', '_msig_result', '.rds', sep = ''))
+      saveFile <- paste0('SavedRuns/', 'running', '_msig_result', '.rds', sep = '')
+      if (file.exists(saveFile)) {
+        msigdbrRes <- readRDS(saveFile)
+      } else {
+        msigdbrRes <- runMSigDB(DEtable = envir$sample_data, species = input$msigdbr_species_input)
+        saveRDS(msigdbrRes, file = saveFile)
+      }
     })
     envir$msig_result <- msigdbrRes
     
@@ -277,11 +294,13 @@ server = function(input, output, session) {
     
     renderPlotSet(output = output,
                   key = 'fgsea',
-                  enrichTypeResult = envir$msig_result_fgsea)
+                  enrichTypeResult = envir$msig_result_fgsea,
+                  termURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=')
     
     renderPlotSet(output = output,
                   key = 'enricher',
-                  enrichTypeResult = envir$msig_result_enricher)
+                  enrichTypeResult = envir$msig_result_enricher, 
+                  termURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=')
     #}
     
     # observe({
@@ -372,4 +391,46 @@ server = function(input, output, session) {
       )
     )
   })
+  
+  
+  output$runreactome_select_parameters <- renderUI({
+    #req()
+    fluidRow(
+      selectInput(
+        inputId = 'reactome_OrgDB_input',
+        label = 'OrgDB:',
+        selected = 'org.Hs.eg.db',
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
+      )
+    )
+  })
+  
+  observeEvent(c(input$runreactome_button, input$submit), {
+    #if (input$submit == 0)    return(NULL)
+    
+    validate(need(input$reactome_OrgDB_input != '', "Please select OrgDB..."))
+    
+    withProgress(message = 'making reactomePA query...', {
+      saveFile <- paste0('SavedRuns/', 'running', '_reactomePA_result', '.rds', sep = '')
+      if (file.exists(saveFile)) {
+        reactomePAres <- readRDS(saveFile)
+      } else {
+        entrezIDs <- bitr(geneID = envir$sample_data$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
+        reactomePAres <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
+        
+        saveRDS(reactomePAres, file = saveFile)
+      }
+      
+    })
+    
+    envir$reactomePAres <- reactomePAres
+    
+    renderPlotSet(output = output,
+                  key = 'reactome',
+                  enrichTypeResult = envir$reactomePAres, 
+                  termURL = "https://reactome.org/PathwayBrowser/#/")
+  })
+  
 }
+
+
