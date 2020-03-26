@@ -93,8 +93,18 @@ runMSigDB <- function(DEtable, species) {
 
 msigdbModule <- function(session, input, output, envir) {
 	msigdbResults <- reactiveValues(
-		results = NULL
+		results = NULL,
+		enricher_result = NULL,
+		fgsea_result = NULL
 	)
+
+	#NOTE: this should reset our tab whenever the input genes change
+	observeEvent(envir$gene_list, {
+		print('resetting msigdb')
+		msigdbResults$results <- NULL
+		msigdbResults$enricher_result <- NULL
+		msigdbResults$fgsea_result <- NULL
+	})
 
 	observeEvent(input$msigdbr_category_input, {
 		req(input$msigdbr_category_input)

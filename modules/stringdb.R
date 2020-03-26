@@ -124,7 +124,13 @@ stringDbModule <- function(session, input, output, envir) {
 	stringResults <- reactiveValues(
 		results = NULL
 	)
-	
+
+	#NOTE: this should reset our tab whenever the input genes change
+	observeEvent(envir$gene_list, {
+		print('resetting stringdb')
+		stringResults$results <- NULL
+	})
+
 	stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
 	observeEvent(input$runstringdb_button, {
 		validate(need(input$stringdb_maxHitsToPlot_input != '', "Please type in maxHitsToPlot..."))

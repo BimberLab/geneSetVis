@@ -40,6 +40,7 @@ library(biomaRt)
 library(STRINGdb) 
 library(RDAVIDWebService)
 library(msigdbr)
+library(stats)
 
 
 options(repos = BiocManager::repositories())

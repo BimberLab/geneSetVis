@@ -5,6 +5,12 @@ reactomeModule <- function(session, input, output, envir) {
 		results = NULL
 	)
 
+	#NOTE: this should reset our tab whenever the input genes change
+	observeEvent(envir$gene_list, {
+		print('resetting reactome')
+		reactomeResults$results <- NULL
+	})
+
 	runReactomePA <- function(DEtable, species) {
 		##dedup table to remove multiple tests
 		if (!is.null(DEtable$test)){
