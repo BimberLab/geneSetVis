@@ -7,7 +7,7 @@ as.enrichResult <- function(result, inputIds, geneSet) {
   gene.length <- length(gene)
   
   result <- result %>% 
-    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, Description = 'pathway') %>% dplyr::arrange(dplyr::desc(p.adjust))
+    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, Description = 'pathway') %>% dplyr::arrange(p.adjust)
 
   result$GeneRatio <- paste(result$Count, '/', gene.length, sep = '')
   result$size <- result$Count
@@ -77,7 +77,7 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = 
     table$'Genes in Term' <- gsub('/', ',', x = table$'Genes in Term')
     table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
     
-    table <- table %>% dplyr::select(c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')) %>% dplyr::arrange(dplyr::desc(`p-Value (adj.)`))
+    table <- table %>% dplyr::select(c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')) %>% dplyr::arrange(`p-Value (adj.)`)
 
     DT::datatable(
       table,
