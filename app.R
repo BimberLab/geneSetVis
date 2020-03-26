@@ -42,6 +42,7 @@ library(biomaRt)
 library(STRINGdb) 
 #library(RDAVIDWebService)
 library(msigdbr)
+library(stats)
 
 
 options(repos = BiocManager::repositories())
@@ -53,6 +54,8 @@ setwd(wd)
 source('fxs.R', local = TRUE)
 source('ui.R')
 source('server.R')
+
+shinyOptions(cache = diskCache("./cache"))
 
 #########################################################################
 shinyApp(ui = ui, server = server)
