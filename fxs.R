@@ -1,274 +1,27 @@
-#' @title plot STRINGdb networks
-#'
-#' @description Takes Differential Expression table and plots STRINGdb networks 
-#' @param DEtable A DE table
-#' @param numHits The num of mapped hits to plot
-#' @param refSpeciesNum The dataset (see STRINGdb docs) to use as a reference; 9606=Human, ?=Rhesus Macaque
-#' @return The PNGs of network plots
-#' @keywords STRINGdb
-#' @import STRINGdb
-#' @export
-#' @importFrom
-
-##TODO: save pngs
-##change db version
-
-
-runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
-  string_db <-
-    STRINGdb::STRINGdb$new(
-      version = '10',
-      species = refSpeciesNum,
-      score_threshold = scoreThreshold,
-      input_directory = ''
-    )
-  
-  ##dedup table to remove multiple tests
-  if (!is.null(DEtable$test)){
-    DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
-    DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
+as.enrichResult <- function(result, inputIds, geneSet) {
+  if (nrow(result) == 0) {
+    stop('No terms in input.')
   }
-
-  
-  return_list = list()
-  tryCatch({
-    clusterTable <- DEtable
-    
-    if (nrow(DEtable) > 0) {
-      cluster.map <-
-        string_db$map(clusterTable, 'gene', removeUnmappedRows = FALSE)
-      hits <- cluster.map$STRING_id
-      
-      max_hits_to_plot <- cluster.map$STRING_id[1:maxHitsToPlot]
-      
-      enrichmentGO <-
-        string_db$get_enrichment(hits,
-                                 category = 'Process',
-                                 methodMT = 'fdr',
-                                 iea = TRUE)
-      
-      enrichmentKEGG <-
-        string_db$get_enrichment(hits,
-                                 category = 'KEGG',
-                                 methodMT = 'fdr',
-                                 iea = TRUE)
-      
-      
-      hit_term_proteins <-
-        string_db$get_term_proteins(enrichmentGO$term_id, hits)
-      hit_term_genes <- hit_term_proteins %>%
-        dplyr::select(term_id, preferred_name) %>%
-        dplyr::group_by(term_id) %>%
-        dplyr::summarize('hit_term_genes' = paste0(preferred_name, collapse = ','))
-      
-      enrichmentGO <- merge(hit_term_genes, enrichmentGO)
-      
-      
-      hit_term_proteins <-
-        string_db$get_term_proteins(enrichmentKEGG$term_id, hits)
-      hit_term_genes <- hit_term_proteins %>%
-        dplyr::select(term_id, preferred_name) %>%
-        dplyr::group_by(term_id) %>%
-        dplyr::summarize('hit_term_genes' = paste0(preferred_name, collapse = ','))
-      
-      enrichmentKEGG <- merge(hit_term_genes, enrichmentKEGG)
-      
-      
-      string_db$get_png(max_hits_to_plot, file = paste('network.png', sep = ''))
-      
-      
-      #network <- string_db$plot_network(max_hits_to_plot)
-      
-      #______
-      ##payload mechanism for upregulated vs downregulated genes:
-      ##adds a color column for up vs downregulated genes
-      cluster.color <-
-        string_db$add_diff_exp_color(cluster.map, logFcColStr = 'avg_logFC')
-      # post payload information to the STRING server
-      payload_id <-
-        string_db$post_payload(cluster.color$STRING_id, colors = cluster.color$color)
-      #string_db$plot_network(hits, payload_id = payload_id)
-      
-      ##clustering/community algorithms: ”fastgreedy”, ”walktrap”, ”spinglass”, ”edge.betweenness”.
-      # networkClustersList <-
-      #   string_db$get_clusters(max_hits_to_plot, algorithm = 'fastgreedy')
-      # par(mfrow = c(2, 2))
-      # for (j in seq(1:length(networkClustersList))) {
-      #   string_db$plot_network(networkClustersList[[j]], payload_id = payload_id)
-      # }
-      
-      link <- string_db$get_link(hits)
-      
-      addSubset = paste('hits', sep = '')
-      return_list[[addSubset]] <- hits
-      
-      #addSubset = paste('network', sep = '')
-      #return_list[[addSubset]] <- network
-      
-      addSubset = paste('GO', sep = '')
-      return_list[[addSubset]] <- enrichmentGO
-      
-      addSubset = paste('KEGG', sep = '')
-      return_list[[addSubset]] <- enrichmentKEGG
-      
-      addSubset = paste('link', sep = '')
-      return_list[[addSubset]] <- link
-      
-    }
-    
-  }, error = function(e) {
-    cat('\nERROR :', conditionMessage(e), '\n')
-  })
-  
-  return(return_list)
-}
-
-
-
-
-runMSigDB <- function(DEtable, species) {
-  ##get species datdset
-  human.msig = msigdbr::msigdbr(species = species)
-  
-  ##subset columms of interest: gene-set name (gs_name) and gene symbols or enterez id
-  msigTerm = human.msig %>% dplyr::select(gs_name, gene_symbol, gs_cat, gs_subcat) %>% as.data.frame()
-  
-  ##dedup table to remove multiple tests
-  if (!is.null(DEtable$test)){
-    DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
-    DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
-  } 
-  
-  return_list = list()
-  tryCatch({
-    clusterTable <- DEtable
-    
-    if (nrow(clusterTable) > 0) {
-      ##Use the gene sets data frame for clusterProfiler (for genes as gene symbols)
-      msig_enricher <-
-        clusterProfiler::enricher(gene = clusterTable$gene, TERM2GENE = msigTerm)
-      #msig_enricher_plot <- dotplot(msig_enricher)
-      
-      #clusterProfiler::geneInCategory()
-      #geneInCategory(msig_enricher)[as.data.frame(msig_enricher)$ID == 'WINTER_HYPOXIA_METAGENE'][1]
-      
-      # enricher_KEGG <- enrichKEGG(
-      #   clusterTable$gene,
-      #   organism = 'hsa',
-      #   keyType = 'kegg',
-      #   pAdjustMethod = 'BH'
-      # )
-      
-      #msig_enricher <- as.data.frame(msig_enricher)
-      #msig_enricher$geneID <- gsub(x = msig_enricher$geneID, pattern = '/', replacement = ',')
-      addSubset = paste('enricher_result', sep = '')
-      return_list[[addSubset]] <- msig_enricher
-      
-      #.......................................
-      ##Use the gene sets data frame for fgsea.
-      msig_geneSet = human.msig %>% split(x = .$gene_symbol, f = .$gs_name)
-      
-      ##name the marker genes with their avgLogFC
-      ranks <- clusterTable$avg_logFC
-      ranks <- setNames(ranks, clusterTable$gene)
-      
-      set.seed(1234)
-      fgsea_results <- fgsea(
-        pathways = msig_geneSet,
-        stats = ranks,
-        minSize = 5,
-        maxSize = 600,
-        nperm = 10000
-      )
-      
-      threshold <- 0.001
-      sigPathways.sum <- sum(fgsea_results[, padj < threshold])
-      print(paste0(sigPathways.sum,
-                   ' significant pathways. pval < ',
-                   threshold))
-      
-      topPathwaysUp <-
-        fgsea_results[ES > 0][head(order(pval), n = 10), pathway]
-      topPathwaysDown <-
-        fgsea_results[ES < 0][head(order(pval), n = 10), pathway]
-      topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
-      
-      
-      fgsea_gtable <-
-        fgsea::plotGseaTable(
-          pathways = msig_geneSet[topPathways],
-          stats = ranks,
-          fgseaRes = fgsea_results,
-          gseaParam = 0.5,
-          render = F,
-          colwidths = c(5, 3, 0.8, 1.2, 1.2)
-        )
-      
-      
-      plot(fgsea_gtable)
-      
-      addSubset = paste('fgsea_result', sep = '')
-      return_list[[addSubset]] <- fgsea_results
-      
-      addSubset = paste('fgsea_gtable', sep = '')
-      return_list[[addSubset]] <- fgsea_gtable
-      
-      addSubset = paste('fgsea_ranks', sep = '')
-      return_list[[addSubset]] <- ranks
-      
-      addSubset = 'msig_geneSet'
-      return_list[[addSubset]] <- msig_geneSet
-      
-    }
-  })
-  
-  return(return_list)
-}
-
-##useful?? in-app run instead + cache??
-runReactomePA <- function(DEtable, species) {
-  ##dedup table to remove multiple tests
-  if (!is.null(DEtable$test)){
-    DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
-    DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
-  } 
-  
-  return_list = list()
-  tryCatch({
-    entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable$gene), 'ENTREZID', 'SYMBOL')
-    
-    go <- enrichGO(entrezIDs, OrgDb = human, pvalueCutoff = 1, qvalueCutoff = 1)
-    pa <- ReactomePA::enrichPathway(entrezIDs)
-    
-  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
-}
-
-
-as.enrichResult_internal <- function(result, inputIds, geneSet) {
 
   gene <- inputIds
   gene.length <- length(gene)
   
   result <- result %>% 
-    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, Description = 'pathway') 
-  # %>% dplyr::arrange(dplyr::desc(p.adjust))
-  
-  result <- result[order(pvalue),]
-  
+    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, Description = 'pathway') %>% dplyr::arrange(dplyr::desc(p.adjust))
+
   result$GeneRatio <- paste(result$Count, '/', gene.length, sep = '')
   result$size <- result$Count
   result$ID <- result$Description
   
   rownames(result) <- result$Description
-  
-  #result$qvalue <- result$pvalue
+
   geneSetsOI <- geneSet[c(result$Description)]
   genesInGeneSet <- lapply(geneSetsOI, intersect, y=gene)
   genesInGeneSet.stack <- stack(genesInGeneSet) %>% 
     rename(ind = 'Description') %>% group_by(Description) %>% 
     summarise(geneID = paste(values, collapse = '/'))
   result <- merge(result, genesInGeneSet.stack, by = 'Description')
-  
+
   new('enrichResult',
       result         = result, 
       pvalueCutoff   = 0.05,
@@ -282,19 +35,6 @@ as.enrichResult_internal <- function(result, inputIds, geneSet) {
       ontology       = 'UNKNOWN',
       readable       = T
   )
-  
-}
-
-as.enrichResult <- function(result, inputIds, geneSet) {
-  if (nrow(result) != 0) {
-    e <- as.enrichResult_internal(result = result, inputIds = inputIds, geneSet = geneSet)
-    rownames(e@result) <- e@result$Description
-  
-  } else {
-    stop('No terms in input.')
-  }
-  
-  return(e)
 }
 
 hyperlink_text <- function(url, text, hide=text) {
@@ -305,7 +45,6 @@ hyperlink_text <- function(url, text, hide=text) {
 }
 
 multi_hyperlink_text <- function(labels, links){
-
   out <- mapply(
     function(text, url){
       dat <- hyperlink_text(text, url = url)
@@ -319,16 +58,12 @@ multi_hyperlink_text <- function(labels, links){
   return(as.list(out))
 }
 
-
-
-renderPlotSet <- function(output, key, enrichTypeResult, termURL) {
-  #print(paste0('called render plot: ', is.null(enrichTypeResult)))
-  #if (input$submit == 0)    return()
-  ##add if is not null exception
+renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = NULL) {
   output[[paste(key, 'table', sep = '_')]] <- renderDataTable({
-    validate(need(!is.null(enrichTypeResult), 'Input should be of enrichResult type...'))
-    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
-    table <- enrichTypeResult %>% as.data.frame() %>% dplyr::rename(
+    er <- enrichTypeResult()
+    validate(need(!is.null(er), 'Input should be of enrichResult type...'))
+    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    table <- er %>% as.data.frame() %>% dplyr::rename(
       'Term Description' = Description,
       'Term ID' = ID,
       'geneID' = geneID,
@@ -339,12 +74,10 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL) {
     )  
     
     table$'Term Description' <- hyperlink_text(url = termURL, text = table$'Term Description', hide = table$'Term ID')
-    
     table$'Genes in Term' <- gsub('/', ',', x = table$'Genes in Term')
     table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
     
-    table <- table %>% 
-      dplyr::select(c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term'))
+    table <- table %>% dplyr::select(c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')) %>% dplyr::arrange(dplyr::desc(`p-Value (adj.)`))
 
     DT::datatable(
       table,
@@ -373,33 +106,38 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL) {
   })
   
   output[[paste(key, 'dotplot', sep = '_')]] <- renderPlotly({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
-    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
-    enrichplot::dotplot(enrichTypeResult)
+    er <- enrichTypeResult()
+    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    enrichplot::dotplot(er)
   })
   
   output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
-    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
-    enrichplot::emapplot(enrichTypeResult)
+    er <- enrichTypeResult()
+    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    enrichplot::emapplot(er)
   })
   
   output[[paste(key, 'cnetplot', sep = '_')]] <- renderPlot({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
-    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
-    enrichplot::cnetplot(enrichTypeResult)
+    er <- enrichTypeResult()
+    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    enrichplot::cnetplot(er)
   })
   
   output[[paste(key, 'upsetplot', sep = '_')]] <- renderPlot({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
-    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
-    enrichplot::upsetplot(enrichTypeResult)
+    er <- enrichTypeResult()
+    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    enrichplot::upsetplot(er)
   })
   
   output[[paste(key, 'heatplot', sep = '_')]] <- renderPlot({
-    validate(need(!is.null(enrichTypeResult), 'Please Run MSigDB on input...'))
-    validate(need(nrow(enrichTypeResult) != 0, 'No enriched terms found.'))
-    enrichplot::heatplot(enrichTypeResult)
+    er <- enrichTypeResult()
+    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    enrichplot::heatplot(er)
   })
 }
 

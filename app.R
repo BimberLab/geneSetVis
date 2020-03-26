@@ -52,6 +52,8 @@ source('fxs.R', local = TRUE)
 source('ui.R')
 source('server.R')
 
+shinyOptions(cache = diskCache("./cache"))
+
 #########################################################################
 shinyApp(ui = ui, server = server)
 
