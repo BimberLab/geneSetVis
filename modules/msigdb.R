@@ -1,12 +1,10 @@
-source('fxs.R', local = TRUE)
 
-
-runMSigDB <- function(DEtable, species) {
+runMSigDB <- function(DEtable, species, category = NULL, subcategory = NULL) {
 	##get species datdset
-	human.msig = msigdbr::msigdbr(species = species)
+  species.msig = msigdbr::msigdbr(species = species, category = category, subcategory = subcategory)
 
 	##subset columms of interest: gene-set name (gs_name) and gene symbols or enterez id
-	msigTerm = human.msig %>% dplyr::select(gs_name, gene_symbol, gs_cat, gs_subcat) %>% as.data.frame()
+  msigTerm = species.msig %>% dplyr::select(gs_name, gene_symbol, gs_cat, gs_subcat) %>% as.data.frame()
 
 	##dedup table to remove multiple tests
 	if (!is.null(DEtable$test)){
@@ -41,7 +39,7 @@ runMSigDB <- function(DEtable, species) {
 
 			#.......................................
 			##Use the gene sets data frame for fgsea.
-			msig_geneSet = human.msig %>% split(x = .$gene_symbol, f = .$gs_name)
+			msig_geneSet = species.msig %>% split(x = .$gene_symbol, f = .$gs_name)
 
 			##name the marker genes with their avgLogFC
 			ranks <- clusterTable$avg_logFC
@@ -91,7 +89,7 @@ runMSigDB <- function(DEtable, species) {
 	return(return_list)
 }
 
-msigdbModule <- function(session, input, output, envir) {
+msigdbModule <- function(session, input, output, envir, sessionCache) {
 	msigdbResults <- reactiveValues(
 		results = NULL,
 		enricher_result = NULL,
@@ -127,12 +125,37 @@ msigdbModule <- function(session, input, output, envir) {
 		#NOTE: the only purpose of this save is for rapid debugging.
 		#Should ultimately review Shiny's existing caching mechanism and use this
 		withProgress(message = 'making MSigDB query..', {
-			saveFile <- paste0('SavedRuns/', 'running', '_msig_result', '.rds', sep = '')
-			if (file.exists(saveFile)) {
-				msigdbrRes <- readRDS(saveFile)
+			# saveFile <- paste0('SavedRuns/', 'running', '_msig_result', '.rds', sep = '')
+			# if (file.exists(saveFile)) {
+			# 	msigdbrRes <- readRDS(saveFile)
+		  category <- input$msigdbr_category_input
+		  subcategory <- input$msigdbr_subcategory_input
+		  
+		  if (category == '') {category <- NULL}     
+		  if (subcategory == '') {subcategory <- NULL} 
+		  
+		  cacheKey <- paste(
+		    digest::digest(envir$gene_list),
+		    digest::digest(input$msigdbr_species_input),
+		    digest::digest(category),
+		    digest::digest(subcategory),
+		    sep = '-'
+		  )
+		  cacheVal <- sessionCache$get(cacheKey)
+		  if (class(cacheVal) == 'key_missing') {
+		    print('missing cache key...')
+		    msigdbrRes <- runMSigDB(
+		      DEtable = envir$gene_list,
+		      species = input$msigdbr_species_input,
+		      category = category,
+		      subcategory = subcategory
+		    )
+		    sessionCache$set(key = cacheKey, value = msigdbrRes)
 			} else {
-				msigdbrRes <- runMSigDB(DEtable = envir$gene_list, species = input$msigdbr_species_input)
-				saveRDS(msigdbrRes, file = saveFile)
+				# msigdbrRes <- runMSigDB(DEtable = envir$gene_list, species = input$msigdbr_species_input)
+				# saveRDS(msigdbrRes, file = saveFile)
+			  print('loading from cache...')
+			  msigdbrRes <- cacheVal
 			}
 		})
 		msigdbResults$result <- msigdbrRes
@@ -144,40 +167,34 @@ msigdbModule <- function(session, input, output, envir) {
 			geneSet = msigdbrRes[['enricher_result']]@geneSets
 		)
 	})
-
-	renderPlotSet(output = output,
-		key = 'fgsea',
-		enrichTypeResult = reactive(msigdbResults$fgsea_result),
-		termURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
-		datasetName = 'MSigDB'
+	
+	renderPlotSet(
+	  output = output,
+	  key = 'enricher',
+	  enrichTypeResult = reactive(msigdbResults$enricher_result),
+	  termURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
+	  datasetName = 'MSigDB'
 	)
-
-	renderPlotSet(output = output,
-		key = 'enricher',
-		enrichTypeResult = reactive(msigdbResults$enricher_result),
-		termURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
-		datasetName = 'MSigDB'
+	
+	renderPlotSet(
+	  output = output,
+	  key = 'fgsea',
+	  enrichTypeResult = reactive(msigdbResults$fgsea_result),
+	  termURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
+	  datasetName = 'MSigDB',
+	  caption = 'Click on Term Description cell to view enrichment plot.'
 	)
-
-	output$num_of_mapped_enricher <- flexdashboard::renderValueBox({
-		num_genes_mapped <- str_split(noquote(msigdbResults$enricher_result@result$GeneRatio[1]), '/')[[1]][2]
-		shinydashboard::box(
-		title = 'Number of genes mapped',
-		width = 6,
-		background = 'light-blue',
-		num_genes_mapped
-		)
+	
+	
+	output$msig_map_stats <- renderText({
+	  validate(need(!is.null(msigdbResults$enricher_result), "No mapped genes."))
+	  num_genes_mapped <- str_split(noquote(msigdbResults$enricher_result@result$GeneRatio[1]), '/')[[1]][2]
+	  HTML(
+	    '<b>Mapped genes</b><br>',
+	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')
+	  )
 	})
 
-	output$num_of_total_genes_enricher <- flexdashboard::renderValueBox({
-		num_genes_total <- length(msigdbResults$enricher_result@gene)
-		shinydashboard::box(
-		title = 'Number of genes total',
-		width = 6,
-		background = 'light-blue',
-		num_genes_total
-		)
-	})
 
 	output[["fgsea_table_PPI"]] <- renderPlot({
 		req(length(input$fgsea_table_cell_clicked) > 0)

@@ -32,6 +32,7 @@ msigdbr_resource_info <- list(
   )
 )
 
+
 reactome_resource_info <- list(
   title = "Reactome Resource info", 
   text = HTML(

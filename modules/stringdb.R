@@ -1,16 +1,3 @@
-source('fxs.R', local = TRUE)
-
-#' @title plot STRINGdb networks
-#'
-#' @description Takes Differential Expression table and plots STRINGdb networks
-#' @param DEtable A DE table
-#' @param numHits The num of mapped hits to plot
-#' @param refSpeciesNum The dataset (see STRINGdb docs) to use as a reference; 9606=Human, ?=Rhesus Macaque
-#' @return The PNGs of network plots
-#' @keywords STRINGdb
-#' @import STRINGdb
-#' @export
-#' @importFrom
 runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
 	string_db <-
 	STRINGdb::STRINGdb$new(
@@ -35,6 +22,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 			cluster.map <-
 			string_db$map(clusterTable, 'gene', removeUnmappedRows = FALSE)
 			hits <- cluster.map$STRING_id
+			if ( sum(!is.na(hits)) == 0 ) {stop('No mapped genes.')}
 
 			max_hits_to_plot <- cluster.map$STRING_id[1:maxHitsToPlot]
 
@@ -94,7 +82,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 			#   string_db$plot_network(networkClustersList[[j]], payload_id = payload_id)
 			# }
 
-			link <- string_db$get_link(hits)
+			link <- string_db$get_link(hits[!is.na(hits)])
 
 			addSubset = paste('hits', sep = '')
 			return_list[[addSubset]] <- hits
@@ -120,7 +108,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 	return(return_list)
 }
 
-stringDbModule <- function(session, input, output, envir) {
+stringDbModule <- function(session, input, output, envir, sessionCache) {
 	stringResults <- reactiveValues(
 		results = NULL
 	)
@@ -140,146 +128,113 @@ stringDbModule <- function(session, input, output, envir) {
 
 		print('making StringDB query')
 		withProgress(message = 'making STRING query..', {
-			saveFile <- paste0('SavedRuns/', 'running', '_string_result', '.rds', sep = '')
-			if (file.exists(saveFile)) {
-				stringRes <- readRDS(saveFile)
+			# saveFile <- paste0('SavedRuns/', 'running', '_string_result', '.rds', sep = '')
+			# if (file.exists(saveFile)) {
+			# 	stringRes <- readRDS(saveFile)
+		  
+		  cacheKey <- paste(
+		    digest::digest(envir$gene_list), 
+		    digest::digest(input$stringdb_maxHitsToPlot_input), 
+		    digest::digest(refSpeciesNum), 
+		    digest::digest(input$stringdb_scoreThreshold_input), 
+		    sep = '-')
+		  cacheVal <- sessionCache$get(cacheKey)
+		  if (class(cacheVal) == 'key_missing') {
+		    print('missing cache key...')
+		    
+		    stringRes <- runSTRINGdb(
+		      DEtable = envir$gene_list, 
+		      maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
+		      refSpeciesNum = refSpeciesNum, 
+		      scoreThreshold = input$stringdb_scoreThreshold_input
+		    )
+		    
+		    sessionCache$set(key = cacheKey, value = stringRes)
+		  
 			} else {
-				stringRes <- runSTRINGdb(DEtable = envir$gene_list,
-				maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
-				refSpeciesNum = refSpeciesNum,
-				scoreThreshold = input$stringdb_scoreThreshold_input)
-				saveRDS(stringRes, file = saveFile)
+				# stringRes <- runSTRINGdb(DEtable = envir$gene_list,
+				# maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
+				# refSpeciesNum = refSpeciesNum,
+				# scoreThreshold = input$stringdb_scoreThreshold_input)
+				# saveRDS(stringRes, file = saveFile)
+			  print('loading from cache...')
+			  stringRes <- cacheVal
 			}
 			stringResults$results <- stringRes
 		})
 	})
-
+	
 	output$string_map_stats <- renderText({
-		req(stringResults$results)
-		paste0(sum(!is.na(stringResults$results[['hits']])), ' out of ', length(stringResults$results[['hits']]), 'genes were mapped.')
-	})
-
-	output$num_of_mapped <- flexdashboard::renderValueBox({
-		req(stringResults$results)
-		shinydashboard::box(
-		title = 'Number of genes mapped',
-		width = 6,
-		background = 'light-blue',
-		sum(!is.na(stringResults$results[['hits']]))
-		)
-	})
-
-	output$num_of_total_genes <- flexdashboard::renderValueBox({
-		req(stringResults$results)
-		extract <- paste('hits', sep = '')
-		shinydashboard::box(
-		title = 'Number of genes total',
-		width = 6,
-		background = 'light-blue',
-		length(stringResults$results[[extract]])
-		)
+	  validate(need(!is.null(stringResults$results), "No mapped genes."))
+	  num_genes_mapped <- sum(!is.na(stringResults$results[['hits']]))
+	  HTML(
+	    '<b>Mapped genes</b><br>',
+	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.'),
+	    '<p>',
+	    hyperlink_text(url = stringResults$results[['link']], text = 'View mapped genes on string-db website', hide = NULL)
+	  )
 	})
 
 	output$stringdb_network <- renderPlot({
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
-		extract <- paste('network', sep = '')
-		stringResults$results[[extract]]
+	  toSubset <- paste('network', sep = '')
+	  stringResults$results[[toSubset]]
 	})
 
-	output$stringdb_network_png <- renderImage(deleteFile = F, {
+	output$stringdb_network_png <- renderImage(deleteFile = T, {
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
 		png_file <- paste('network', '.png', sep = '')
-		list(src = paste('', png_file, sep = ''), height='90%', width='90%')
+		list(src = paste('', png_file, sep = ''), height='100%', width='100%')
 	})
 
 	# TODO: download entire dataset
 	output$stringdb_GO <- renderDataTable({
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
-		extract <- paste('GO', sep = '')
-		table <- stringResults$results[[extract]] %>% dplyr::rename(
-		'Term Description' = term_description,
-		'Term ID' = term_id,
-		'Proteins' = proteins,
-		'Hits' = hits,
-		'p-Value' = pvalue,
-		'p-Value (adj.)' = pvalue_fdr,
-		'Genes in Term' = hit_term_genes
-		)
+	  validate(need(!is.null(stringResults$results), "No mapped genes."))
+	  toSubset <- paste('GO', sep = '')
+	  table <- stringResults$results[[toSubset]] %>% 
+	    dplyr::rename(
+	      'Term Description' = term_description,
+	      'Term ID' = term_id,
+	      'Proteins' = proteins,
+	      'Hits' = hits,
+	      'p-Value' = pvalue,
+	      'p-Value (adj.)' = pvalue_fdr,
+	      'Genes in Term' = hit_term_genes
+	    )
 
-		table$'Term Description' <- hyperlink_text(text = table$'Term Description', url = "https://www.ebi.ac.uk/QuickGO/term/", hide = table$'Term ID')
-		table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
-		table <- table %>% dplyr::select(c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value'))
-
-		DT::datatable(
-		table,
-		filter = 'bottom',
-		selection = 'multiple',
-		escape = FALSE,
-		autoHideNavigation = TRUE,
-		rownames = FALSE,
-		extensions = c('Buttons'),
-		class = 'cell-border stripe',
-		options = list(
-		dom = 'Bfrtip',
-		lengthMenu = c(15, 30, 50, 100),
-		pageLength = 10,
-		buttons = list(
-		'colvis',
-		list(
-		extend = 'collection',
-		text = 'Download/Copy',
-		buttons = c('copy', 'csv', 'excel')
-		)
-		)
-		)
-		)
+	  makeTermsTable(
+	    table = table,
+	    genesDelim = ',',
+	    termURL = "https://www.ebi.ac.uk/QuickGO/term/",
+	    caption = NULL,
+	    includeColumns = c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
+	  )
+	  
 	})
 
 	# TODO: download entire dataset
 	output$stringdb_KEGG <- renderDataTable({
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
-		extract <- paste('KEGG', sep = '')
-		table <- stringResults$results[[extract]] %>% dplyr::rename(
-		'Term Description' = term_description,
-		'Term ID' = term_id,
-		'Proteins' = proteins,
-		'Hits' = hits,
-		'p-Value' = pvalue,
-		'p-Value (adj.)' = pvalue_fdr,
-		'Genes in Term' = hit_term_genes
-		)
+	  toSubset <- paste('KEGG', sep = '')
+	  table <- stringResults$results[[toSubset]] %>% 
+	    dplyr::rename(
+	      'Term Description' = term_description,
+	      'Term ID' = term_id,
+	      'Proteins' = proteins,
+	      'Hits' = hits,
+	      'p-Value' = pvalue,
+	      'p-Value (adj.)' = pvalue_fdr,
+	      'Genes in Term' = hit_term_genes
+	    ) 
 
-		table$'Term Description' <- hyperlink_text(text = table$'Term Description', url = "https://www.genome.jp/dbget-bin/www_bget?map", hide = table$'Term ID')
-
-		table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
-
-		table <- table %>%
-		dplyr::select(c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value'))
-		#table$'geneID' <- gsub('/', ',', x = table$'geneID')
-
-		DT::datatable(
-		table,
-		filter = 'bottom',
-		selection = 'multiple',
-		escape = FALSE,
-		autoHideNavigation = TRUE,
-		rownames = FALSE,
-		extensions = c('Buttons'),
-		class = 'cell-border stripe',
-		options = list(
-		dom = 'Bfrtip',
-		lengthMenu = c(15, 30, 50, 100),
-		pageLength = 10,
-		buttons = list(
-		'colvis',
-		list(
-		extend = 'collection',
-		text = 'Download/Copy',
-		buttons = c('copy', 'csv', 'excel')
-		)
-		)
-		)
-		)
+	  makeTermsTable(
+	    table = table,
+	    genesDelim = ',',
+	    termURL = "https://www.genome.jp/dbget-bin/www_bget?map",
+	    caption = NULL,
+	    includeColumns = c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
+	  )
 	})
 
 	observeEvent(input$stringdb_resource_info, {

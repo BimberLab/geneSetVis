@@ -13,30 +13,31 @@ as.enrichResult <- function(result, inputIds, geneSet) {
   result$size <- result$Count
   result$ID <- result$Description
   
-  rownames(result) <- result$Description
-
   geneSetsOI <- geneSet[c(result$Description)]
   genesInGeneSet <- lapply(geneSetsOI, intersect, y=gene)
   genesInGeneSet.stack <- stack(genesInGeneSet) %>% 
-    rename(ind = 'Descriptions') %>% group_by(Descriptions) %>% 
-    #group_by(ind) %>% 
+    rename(ind = 'Description') %>% group_by(Description) %>%
     summarise(geneID = paste(values, collapse = '/'))
+  
   result <- merge(result, genesInGeneSet.stack, by = 'Description')
+  rownames(result) <- result$Description
 
-  new('enrichResult',
-      result         = result, 
-      pvalueCutoff   = 0.05,
-      pAdjustMethod  = 'UNKNOWN',
-      #qvalueCutoff   = 1,
-      gene           = as.character(gene),
-      #universe       = extID,
-      geneSets       = geneSet,
-      organism       = 'UNKNOWN',
-      keytype        = 'UNKNOWN',
-      ontology       = 'UNKNOWN',
-      readable       = T
+  new(
+    'enrichResult',
+    result         = result,
+    pvalueCutoff   = 0.05,
+    pAdjustMethod  = 'UNKNOWN',
+    #qvalueCutoff   = 1,
+    gene           = as.character(gene),
+    #universe       = extID,
+    geneSets       = geneSet,
+    organism       = 'UNKNOWN',
+    keytype        = 'UNKNOWN',
+    ontology       = 'UNKNOWN',
+    readable       = T
   )
 }
+
 
 hyperlink_text <- function(url, text, hide=text) {
   for (t in text) {
@@ -44,6 +45,7 @@ hyperlink_text <- function(url, text, hide=text) {
    return(s)
     }
 }
+
 
 multi_hyperlink_text <- function(labels, links){
   out <- mapply(
@@ -59,30 +61,40 @@ multi_hyperlink_text <- function(labels, links){
   return(as.list(out))
 }
 
-renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = NULL) {
-  output[[paste(key, 'table', sep = '_')]] <- renderDataTable({
-    er <- enrichTypeResult()
-    validate(need(!is.null(er), 'Input should be of enrichResult type...'))
-    validate(need(nrow(er) != 0, 'No enriched terms found.'))
-    table <- er %>% as.data.frame() %>% dplyr::rename(
-      'Term Description' = Description,
-      'Term ID' = ID,
-      'geneID' = geneID,
-      'Hits' = Count,
-      'p-Value (adj.)' = pvalue,
-      'p-Value' = p.adjust,
-      'Genes in Term' = geneID
-    )  
-    
-    table$'Term Description' <- hyperlink_text(url = termURL, text = table$'Term Description', hide = table$'Term ID')
-    table$'Genes in Term' <- gsub('/', ',', x = table$'Genes in Term')
-    table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
-    
-    table <- table %>% dplyr::select(c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')) %>% dplyr::arrange(`p-Value (adj.)`)
 
+appCache <- function() {
+  e <- new.env(parent = emptyenv())
+  
+  list(
+    get = function(key) {
+      if (exists(key, envir = e, inherits = FALSE)) {
+        return(e[[key]])
+      } else {
+        return(shiny::key_missing())
+        #return('missing_key')
+      }
+    },
+    set = function(key, value) {
+      e[[key]] <- value
+    }
+  )
+}
+
+
+makeTermsTable <- function(table, genesDelim,
+                           termURL, 
+                           caption = NULL, 
+                           includeColumns = c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')) {
+  
+  table$'Genes in Term' <- gsub(pattern = genesDelim, replacement = ',', x = table$'Genes in Term')
+  
+  table$'Term Description' <- hyperlink_text(url = termURL, text = table$'Term Description', hide = table$'Term ID')
+  table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+  
+  table <- table %>% 
+    dplyr::select(tidyselect::all_of(includeColumns)) %>% 
     DT::datatable(
-      table,
-      #caption = 'Click on Term Description cell to view Protein-protein interaction plot.',
+      caption = caption,
       filter = 'bottom',
       selection = 'single',
       escape = FALSE,
@@ -104,7 +116,30 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = 
         )
       )
     ) # %>% formatStyle( 0, target= 'row',color = 'black', backgroundColor = NULL, fontWeight = NULL, lineHeight='50%')
-  })
+}
+
+
+renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = NULL, caption = NULL) {
+  output[[paste(key, 'table', sep = '_')]] <- renderDataTable({
+    er <- enrichTypeResult()
+    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(class(er) == 'enrichResult', 'Input should be of enrichResult type...'))
+    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    table <- er %>% as.data.frame() %>% 
+      dplyr::rename(
+      'Term Description' = Description,
+      'Term ID' = ID,
+      'geneID' = geneID,
+      'Hits' = Count,
+      'p-Value (adj.)' = pvalue,
+      'p-Value' = p.adjust,
+      'Genes in Term' = geneID
+    )  
+    
+    makeTermsTable(table = table, genesDelim = '/',
+                   termURL = termURL, 
+                   caption = caption,
+                   includeColumns = c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term'))  })
   
   output[[paste(key, 'dotplot', sep = '_')]] <- renderPlotly({
     er <- enrichTypeResult()

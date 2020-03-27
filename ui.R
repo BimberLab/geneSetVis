@@ -1,10 +1,7 @@
-source('fxs.R', local = TRUE)
-source('tabs.R', local = TRUE)
+
 
 ui = shinydashboard::dashboardPage(
-  shinydashboard::dashboardHeader(
-    title = 'geneSetVis'
-  ),
+  shinydashboard::dashboardHeader(title = 'geneSetVis'),
   shinydashboard::dashboardSidebar(
     shinydashboard::sidebarMenu(
       id = 'sidebar',
@@ -34,9 +31,8 @@ ui = shinydashboard::dashboardPage(
   ),
   shinydashboard::dashboardBody(
     shinydashboard::tabItems(tab_load_data,
-             tab_stringdb,
-             tab_msigdbr,
-             tab_reactome
-    )
+                             tab_stringdb,
+                             tab_msigdbr,
+                             tab_reactome)
   )
 )

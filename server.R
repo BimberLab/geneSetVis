@@ -1,23 +1,19 @@
-source('fxs.R', local = TRUE)
-source('info.R', local = TRUE)
-
-source('modules/stringdb.R')
-source('modules/msigdb.R')
-source('modules/reactome.R')
 
 server = function(input, output, session) {
   
   options(shiny.maxRequestSize=50*1024^2) 
-  preferences <- reactiveValues(use_webgl = TRUE)
+  
+  
+  shinyOptions(cache = appCache())
+  sessionCache <- appCache()
+  
   
   envir <- reactiveValues(
     gene_list = NULL
   )
 
-  ##-------------------##
-  ## Sample data
-  ##-------------------##
 
+  #---------------------------
   observeEvent(input$submit, {
     gene_list <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
                             header = FALSE,
@@ -35,9 +31,9 @@ server = function(input, output, session) {
     envir$gene_list
   })
 
-  stringDbModule(session, input, output, envir)
-  msigdbModule(session, input, output, envir)
-  reactomeModule(session, input, output, envir)
+  stringDbModule(session, input, output, envir, sessionCache)
+  msigdbModule(session, input, output, envir, sessionCache)
+  reactomeModule(session, input, output, envir, sessionCache)
 }
 
 

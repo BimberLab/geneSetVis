@@ -1,10 +1,3 @@
-source('fxs.R', local = TRUE)
-
-
-##----------------------------------------------------------------------------##
-## Tabs -- UI.R
-## 1 - loadData
-##----------------------------------------------------------------------------##
 
 tab_load_data <- shinydashboard::tabItem(
   tabName = 'loadData',
@@ -37,10 +30,7 @@ tab_load_data <- shinydashboard::tabItem(
   )
 )
 
-##----------------------------------------------------------------------------##
-## Tabs -- UI.R
-## 2 - STRINGdb
-##----------------------------------------------------------------------------##
+ 
 tab_stringdb <- shinydashboard::tabItem(
   tabName = 'stringdb',
   shinydashboard::box(
@@ -56,61 +46,64 @@ tab_stringdb <- shinydashboard::tabItem(
     solidHeader = TRUE,
     width = 16,
     collapsible = TRUE,
-    selectInput(
-      inputId = 'stringdb_refSpecies_input',
-      label = 'Reference species:',
-      selected = 'Homo sapiens',
-      choices = STRINGdb::get_STRING_species(version = '10')$compact_name
-    ),
-    numericInput(
+    flowLayout(
+      selectInput(
+        inputId = 'stringdb_refSpecies_input',
+        label = 'Reference species:',
+        selected = 'Homo sapiens',
+        choices = STRINGdb::get_STRING_species(version = '10')$compact_name
+      ),
+      numericInput(
         inputId = 'stringdb_maxHitsToPlot_input',
         label = 'Max. number of hits to plot:',
         value = 200
-    ),
-    numericInput(
+      ),
+      numericInput(
         inputId = 'stringdb_scoreThreshold_input',
         label = 'Score threshold:',
         value = 0
-    ),
+      )
+    ), 
     actionButton('runstringdb_button', 'Run')
   ),
-  fluidRow(
-    flexdashboard::valueBoxOutput('num_of_mapped'),
-    flexdashboard::valueBoxOutput('num_of_total_genes')
-  ),
-  shinydashboard::box(
-    title = 'Network (PNG)',
-    status = 'primary',
-    solidHeader = TRUE,
+  #browser(),
+  shinydashboard::tabBox(
+    title = NULL,
+    side = 'right',
+    height = NULL,
+    selected = 'Mapped',
     width = 16,
-    collapsible = TRUE,
-    tagList(
-      imageOutput('stringdb_network_png')
+    tabPanel('Mapped', uiOutput('string_map_stats'))
+  ),
+  shinydashboard::tabBox(
+    title = NULL,
+    side = 'right',
+    height = NULL,
+    selected = 'Network (PNG)',
+    width = 16,
+    tabPanel(
+      'Network (PNG)',
+      imageOutput('stringdb_network_png'),
+      #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;',
+      collapsible = TRUE
     )
-  ),
+  ), 
   shinydashboard::tabBox(
-    title = 'GO',
+    title = NULL,   
     side = 'right',
     height = NULL,
-    selected = 'Table',
+    selected = 'GO',
     width = 16,
-    tabPanel('Table', dataTableOutput('stringdb_GO'), collapsible = TRUE)
-  ),
-  shinydashboard::tabBox(
-    title = 'KEGG',   
-    side = 'right',
-    height = NULL,
-    selected = 'Table',
-    width = 16,
-    tabPanel('Table', dataTableOutput('stringdb_KEGG'), collapsible = TRUE)
+    tabPanel('GO', dataTableOutput('stringdb_GO'), 
+             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
+             collapsible = TRUE),
+    tabPanel('KEGG', dataTableOutput('stringdb_KEGG'), 
+             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
+             collapsible = TRUE)
   )
 )
 
 
-##----------------------------------------------------------------------------##
-## Tabs -- UI.R
-## 3 - MSigDBr
-##----------------------------------------------------------------------------##
 tab_msigdbr <- shinydashboard::tabItem(
   tabName = 'msigdbr',
   shinydashboard::box(
@@ -126,7 +119,7 @@ tab_msigdbr <- shinydashboard::tabItem(
     solidHeader = TRUE,
     width = 16,
     collapsible = TRUE,
-    tagList(
+    flowLayout(
       selectInput(
         inputId = 'msigdbr_species_input',
         label = 'Reference species',
@@ -144,13 +137,22 @@ tab_msigdbr <- shinydashboard::tabItem(
         label = 'Select subcategory (optional):',
         selected = '',
         choices = NULL
-      ),
+      )
+    ), 
       actionButton('runmsigdbr_button', 'Run')
-    )
+    ),
+  shinydashboard::tabBox(
+    title = NULL,
+    side = 'right',
+    height = NULL,
+    selected = 'Mapped',
+    width = 16,
+    tabPanel('Mapped', uiOutput('msig_map_stats'))
   ),
   makeTabBox(title = 'Enricher', key = 'enricher'),
   makeTabBox(title = 'FGSEA', key = 'fgsea')
 )
+
 
 tab_reactome <- shinydashboard::tabItem(
   tabName = 'reactome',
@@ -167,18 +169,26 @@ tab_reactome <- shinydashboard::tabItem(
     solidHeader = TRUE,
     width = 16,
     collapsible = TRUE,
-    tagList(
+    flowLayout(
       selectInput(
         inputId = 'reactome_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-      ),
+        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
+        choices = c('org.Hs.eg.db')
+      )
+    ),
       actionButton('runreactome_button', 'Run')
-    )
+    ),
+  shinydashboard::tabBox(
+    title = NULL,
+    side = 'right',
+    height = NULL,
+    selected = 'Mapped',
+    width = 16,
+    tabPanel('Mapped', uiOutput('reactome_map_stats'))
   ),
   makeTabBox(title = 'Reactome', key = 'reactome')
 )
-
 
 
