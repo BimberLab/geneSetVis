@@ -30,7 +30,7 @@ tab_load_data <- shinydashboard::tabItem(
   )
 )
 
- 
+
 tab_stringdb <- shinydashboard::tabItem(
   tabName = 'stringdb',
   shinydashboard::box(
@@ -63,7 +63,7 @@ tab_stringdb <- shinydashboard::tabItem(
         label = 'Score threshold:',
         value = 0
       )
-    ), 
+    ),
     actionButton('runstringdb_button', 'Run')
   ),
   #browser(),
@@ -87,22 +87,29 @@ tab_stringdb <- shinydashboard::tabItem(
       #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;',
       collapsible = TRUE
     )
-  ), 
+  ),
   shinydashboard::tabBox(
-    title = NULL,   
+    title = NULL,
     side = 'right',
     height = NULL,
     selected = 'GO',
     width = 16,
-    tabPanel('GO', dataTableOutput('stringdb_GO'), 
-             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
+    tabPanel('GO', dataTableOutput('stringdb_GO'),
+             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;',
              collapsible = TRUE),
-    tabPanel('KEGG', dataTableOutput('stringdb_KEGG'), 
-             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
+    tabPanel('KEGG', dataTableOutput('stringdb_KEGG'),
+             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;',
              collapsible = TRUE)
   )
 )
 
+
+msigCategories <- read.table(file = './data/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+msigCategories <- unique(msigCategories[c('Category', 'CategoryLabel')])
+msigCategories$CategoryLabel <- paste0(msigCategories$Category, ': ', msigCategories$CategoryLabel)
+msigdb_categories <- msigCategories$Category
+names(msigdb_categories) <- msigCategories$CategoryLabel
+rm(msigCategories)
 
 tab_msigdbr <- shinydashboard::tabItem(
   tabName = 'msigdbr',
@@ -119,18 +126,19 @@ tab_msigdbr <- shinydashboard::tabItem(
     solidHeader = TRUE,
     width = 16,
     collapsible = TRUE,
-    flowLayout(
+    HTML('<a href="https://www.gsea-msigdb.org/gsea/msigdb/index.jsp" target="_blank" style="font-weight: bold;">Click here for more information on available MSigDB collections</a><br><br>'),
+  	flowLayout(
       selectInput(
         inputId = 'msigdbr_species_input',
         label = 'Reference species',
         selected = 'Homo sapiens',
-        choices = msigdbr::msigdbr_show_species()
+        choices = sort(msigdbr::msigdbr_show_species())
       ),
       selectInput(
         inputId = 'msigdbr_category_input',
         label = 'Select category (optional):',
         selected = '',
-        choices = c('', unique(msigdbr::msigdbr(species = 'Homo sapiens')$gs_cat))
+        choices = c('', msigdb_categories)
       ),
       selectInput(
         inputId = 'msigdbr_subcategory_input',
@@ -138,9 +146,9 @@ tab_msigdbr <- shinydashboard::tabItem(
         selected = '',
         choices = NULL
       )
-    ), 
-      actionButton('runmsigdbr_button', 'Run')
     ),
+    actionButton('runmsigdbr_button', 'Run')
+  ),
   shinydashboard::tabBox(
     title = NULL,
     side = 'right',

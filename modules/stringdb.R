@@ -131,26 +131,26 @@ stringDbModule <- function(session, input, output, envir, sessionCache) {
 			# saveFile <- paste0('SavedRuns/', 'running', '_string_result', '.rds', sep = '')
 			# if (file.exists(saveFile)) {
 			# 	stringRes <- readRDS(saveFile)
-		  
+
 		  cacheKey <- paste(
-		    digest::digest(envir$gene_list), 
-		    digest::digest(input$stringdb_maxHitsToPlot_input), 
-		    digest::digest(refSpeciesNum), 
-		    digest::digest(input$stringdb_scoreThreshold_input), 
+		    digest::digest(envir$gene_list),
+		    digest::digest(input$stringdb_maxHitsToPlot_input),
+		    digest::digest(refSpeciesNum),
+		    digest::digest(input$stringdb_scoreThreshold_input),
 		    sep = '-')
 		  cacheVal <- sessionCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')
-		    
+
 		    stringRes <- runSTRINGdb(
-		      DEtable = envir$gene_list, 
-		      maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
-		      refSpeciesNum = refSpeciesNum, 
+		      DEtable = envir$gene_list,
+		      maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
+		      refSpeciesNum = refSpeciesNum,
 		      scoreThreshold = input$stringdb_scoreThreshold_input
 		    )
-		    
+
 		    sessionCache$set(key = cacheKey, value = stringRes)
-		  
+
 			} else {
 				# stringRes <- runSTRINGdb(DEtable = envir$gene_list,
 				# maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
@@ -163,7 +163,7 @@ stringDbModule <- function(session, input, output, envir, sessionCache) {
 			stringResults$results <- stringRes
 		})
 	})
-	
+
 	output$string_map_stats <- renderText({
 	  validate(need(!is.null(stringResults$results), "No mapped genes."))
 	  num_genes_mapped <- sum(!is.na(stringResults$results[['hits']]))
@@ -192,7 +192,7 @@ stringDbModule <- function(session, input, output, envir, sessionCache) {
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
 	  validate(need(!is.null(stringResults$results), "No mapped genes."))
 	  toSubset <- paste('GO', sep = '')
-	  table <- stringResults$results[[toSubset]] %>% 
+	  table <- stringResults$results[[toSubset]] %>%
 	    dplyr::rename(
 	      'Term Description' = term_description,
 	      'Term ID' = term_id,
@@ -210,14 +210,14 @@ stringDbModule <- function(session, input, output, envir, sessionCache) {
 	    caption = NULL,
 	    includeColumns = c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
 	  )
-	  
+
 	})
 
 	# TODO: download entire dataset
 	output$stringdb_KEGG <- renderDataTable({
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
 	  toSubset <- paste('KEGG', sep = '')
-	  table <- stringResults$results[[toSubset]] %>% 
+	  table <- stringResults$results[[toSubset]] %>%
 	    dplyr::rename(
 	      'Term Description' = term_description,
 	      'Term ID' = term_id,
@@ -226,7 +226,7 @@ stringDbModule <- function(session, input, output, envir, sessionCache) {
 	      'p-Value' = pvalue,
 	      'p-Value (adj.)' = pvalue_fdr,
 	      'Genes in Term' = hit_term_genes
-	    ) 
+	    )
 
 	  makeTermsTable(
 	    table = table,
@@ -238,13 +238,24 @@ stringDbModule <- function(session, input, output, envir, sessionCache) {
 	})
 
 	observeEvent(input$stringdb_resource_info, {
-		showModal(
-		modalDialog(
-		stringdb_resource_info[["text"]],
-		title = stringdb_resource_info[["title"]],
-		easyClose = TRUE,
-		footer = NULL
+		stringdb_resource_info <- list(
+			title = "STRING Resource info",
+			text = HTML(
+				'<b>STRING</b><br>
+					STRING is a database of known and predicted protein-protein interactions. \n
+					The interactions include direct (physical) and indirect (functional) associations; they stem from computational prediction, \n
+					from knowledge transfer between organisms, and from interactions aggregated from other (primary) databases.
+					<p>
+				<li><a href=https://string-db.org/ title="Official string-db website" target="_blank"><b>Official string-db website</b></a></li>
+				'
+			)
 		)
-		)
+
+		showModal(modalDialog(
+			stringdb_resource_info[["text"]],
+			title = stringdb_resource_info[["title"]],
+			easyClose = TRUE,
+			footer = NULL
+		))
 	})
 }

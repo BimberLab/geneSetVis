@@ -1,0 +1,19 @@
+Category	CategoryLabel	Subcategory	SubcategoryLabel	Total
+H	Hallmark Gene Sets			50
+C1	Positional Gene Sets			299
+C2	Curated Gene Sets			5501
+C2	Curated Gene Sets	CGP	Chemical and Genetic Perturbations	3302
+C2	Curated Gene Sets	CP	Canonical Pathways	2199
+C2	Curated Gene Sets	CP:BIOCARTA	BioCarta Gene Sets	289
+C2	Curated Gene Sets	CP:KEGG	KEGG Gene Sets	186
+C2	Curated Gene Sets	CP:PID	PID Gene Sets	196
+C2	Curated Gene Sets	CP:REACTOME	Reactome Gene Sets	1499
+C3	Motif Gene Sets	MIR	microRNA Targets	221
+C3	Motif Gene Sets	TFT	Transcription Factor Targets	610
+C4	Computational Gene Sets	CGN	Cancer Gene Neighborhoods	427
+C4	Computational Gene Sets	CM	Cancer Modules	431
+C5	GO Gene Sets	BP	GO biological process	7350
+C5	GO Gene Sets	CC	GO cellular component	1001
+C5	GO Gene Sets	MF	GO molecular function	1645
+C6	Oncogenic Signatures			189
+C7	Immunologic Signatures			4872
