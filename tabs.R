@@ -7,7 +7,7 @@ tab_load_data <- shinydashboard::tabItem(
       title = 'Input Gene List',
       status = 'primary',
       solidHeader = TRUE,
-      #height = '500px',
+      height = '700px',
       textAreaInput(
         inputId = 'areaInput',
         label = 'Enter Gene and Average Log Fold Change (avg. LogFC)',
@@ -32,7 +32,7 @@ tab_load_data <- shinydashboard::tabItem(
       title = 'Parsed Genes',
       status = 'primary',
       solidHeader = TRUE,
-      height = '550px',
+      height = '700px',
       div(DT::dataTableOutput('inputTable'))
     )
   )

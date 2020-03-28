@@ -110,7 +110,6 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		species.msig <- msigdbr::msigdbr(species = input$msigdbr_species_input)
 		subcat <- unique(filter(species.msig, species.msig$gs_cat == input$msigdbr_category_input)$gs_subcat)
 
-		#See: https://shiny.rstudio.com/reference/shiny/1.2.0/updateSelectInput.html
 		updateSelectInput(session, "msigdbr_subcategory_input",
 			choices = c('', subcat),
 			selected = ''
@@ -122,12 +121,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 
 		req(input$msigdbr_species_input)
 
-		#NOTE: the only purpose of this save is for rapid debugging.
-		#Should ultimately review Shiny's existing caching mechanism and use this
 		withProgress(message = 'making MSigDB query..', {
-			# saveFile <- paste0('SavedRuns/', 'running', '_msig_result', '.rds', sep = '')
-			# if (file.exists(saveFile)) {
-			# 	msigdbrRes <- readRDS(saveFile)
 		  category <- input$msigdbr_category_input
 		  subcategory <- input$msigdbr_subcategory_input
 		  
@@ -146,8 +140,6 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		    )
 		    appDiskCache$set(key = cacheKey, value = msigdbrRes)
 			} else {
-				# msigdbrRes <- runMSigDB(DEtable = envir$gene_list, species = input$msigdbr_species_input)
-				# saveRDS(msigdbrRes, file = saveFile)
 			  print('loading from cache...')
 			  msigdbrRes <- cacheVal
 			}

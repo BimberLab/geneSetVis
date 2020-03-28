@@ -130,10 +130,6 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 		print('making StringDB query')
 		withProgress(message = 'making STRING query..', {
-			# saveFile <- paste0('SavedRuns/', 'running', '_string_result', '.rds', sep = '')
-			# if (file.exists(saveFile)) {
-			# 	stringRes <- readRDS(saveFile)
-		  
 		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$stringdb_maxHitsToPlot_input, refSpeciesNum, input$stringdb_scoreThreshold_input))
 		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
@@ -149,11 +145,6 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 		    appDiskCache$set(key = cacheKey, value = stringRes)
 		  
 			} else {
-				# stringRes <- runSTRINGdb(DEtable = envir$gene_list,
-				# maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
-				# refSpeciesNum = refSpeciesNum,
-				# scoreThreshold = input$stringdb_scoreThreshold_input)
-				# saveRDS(stringRes, file = saveFile)
 			  print('loading from cache...')
 			  stringRes <- cacheVal
 			}
@@ -186,7 +177,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 	# TODO: download entire dataset
 	output$stringdb_GO <- renderDataTable({
-		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
+		validate(need(!is.null(stringResults$results), ""))
 	  validate(need(!is.null(stringResults$results), "No mapped genes."))
 	  toSubset <- paste('GO', sep = '')
 	  table <- stringResults$results[[toSubset]] %>% 
@@ -212,7 +203,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 	# TODO: download entire dataset
 	output$stringdb_KEGG <- renderDataTable({
-		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
+		validate(need(!is.null(stringResults$results), ""))
 	  toSubset <- paste('KEGG', sep = '')
 	  table <- stringResults$results[[toSubset]] %>% 
 	    dplyr::rename(

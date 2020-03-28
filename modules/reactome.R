@@ -32,10 +32,6 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 
 		print('making Reactome query')
 		withProgress(message = 'making reactomePA query...', {
-			# saveFile <- paste0('SavedRuns/', 'running', '_reactomePA_result', '.rds', sep = '')
-			# if (file.exists(saveFile)) {
-			# 	reactomeResults$results <- readRDS(saveFile)
-			# } else {
 		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$reactome_OrgDB_input))
 		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
@@ -43,8 +39,6 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 		    
 				entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
 				reactomePAres <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
-				#saveRDS(reactomePAres, file = saveFile)
-				#reactomeResults$results <- reactomePAres
 				appDiskCache$set(key = cacheKey, value = reactomePAres)
 		  } else {
 		    print('loading from cache...')

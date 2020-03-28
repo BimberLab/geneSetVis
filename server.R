@@ -4,8 +4,8 @@ server = function(input, output, session) {
   options(shiny.maxRequestSize=50*1024^2) 
   
   
-  shinyOptions(cache = diskCache("./cache"))
-  appDiskCache <- diskCache()
+  #shinyOptions(cache = diskCache("./cache"))
+  appDiskCache <- diskCache("./cache")
   
   
   envir <- reactiveValues(
@@ -38,7 +38,7 @@ server = function(input, output, session) {
   })
 
   output$inputTable <- DT::renderDataTable({
-    validate(need(envir$gene_list, "Please enter the gene list above and hit submit"))
+    validate(need(envir$gene_list, "Please enter the gene list and hit submit"))
 
     req(input$submit)
     envir$gene_list %>% 
@@ -49,6 +49,7 @@ server = function(input, output, session) {
         dom = 'Bfrtip',
         lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
         pageLength = 10,
+        scrollX = TRUE,
         buttons = list(
           list(extend = "collection", text = 'Show All', action = DT::JS("function ( e, dt, node, config ) { dt.page.len(-1); dt.ajax.reload(); }")),
           list(extend = 'collection', text = 'Download/Copy', buttons = c('copy', 'csv', 'excel') )

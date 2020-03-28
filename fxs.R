@@ -93,15 +93,13 @@ makeTermsTable <- function(table, genesDelim,
       escape = FALSE,
       autoHideNavigation = TRUE,
       rownames = FALSE,
-      scrollY = 500,
-      scroller = TRUE,
-      scrollX = TRUE,
       extensions = c('Buttons'),
       class = 'cell-border stripe',
       options = list(
         dom = 'Bfrtip',
         lengthMenu = c(15, 30, 50, 100),
         pageLength = 10,
+        scrollX = TRUE,
         buttons = list(
           'colvis',
           list(
@@ -118,7 +116,7 @@ makeTermsTable <- function(table, genesDelim,
 renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = NULL, caption = NULL) {
   output[[paste(key, 'table', sep = '_')]] <- renderDataTable({
     er <- enrichTypeResult()
-    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(!is.null(er), paste0('')))
     validate(need(class(er) == 'enrichResult', 'Input should be of enrichResult type...'))
     validate(need(nrow(er) != 0, 'No enriched terms found.'))
     table <- er %>% as.data.frame() %>% 
@@ -179,9 +177,9 @@ makeTabBox <- function(title, key) {
     title = title,   
     side = 'right',
     height = NULL,
-    selected = 'Dot Plot',
+    selected = 'Table',
     width = 16,
-    tabPanel('Table', dataTableOutput(paste(key, 'Table', sep = '_'))),
+    tabPanel('Table', dataTableOutput(paste(key, 'table', sep = '_'))),
     tabPanel('Dot Plot', plotly::plotlyOutput(paste(key, 'dotplot', sep = '_'))),
     tabPanel('Emap Plot', plotOutput(paste(key, 'emapplot', sep = '_'))),
     tabPanel('Cnet Plot', plotOutput(paste(key, 'cnetplot', sep = '_'))),
