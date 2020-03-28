@@ -89,7 +89,7 @@ runMSigDB <- function(DEtable, species, category = NULL, subcategory = NULL) {
 	return(return_list)
 }
 
-msigdbModule <- function(session, input, output, envir, sessionCache) {
+msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	msigdbResults <- reactiveValues(
 		results = NULL,
 		enricher_result = NULL,
@@ -134,14 +134,8 @@ msigdbModule <- function(session, input, output, envir, sessionCache) {
 		  if (category == '') {category <- NULL}     
 		  if (subcategory == '') {subcategory <- NULL} 
 		  
-		  cacheKey <- paste(
-		    digest::digest(envir$gene_list),
-		    digest::digest(input$msigdbr_species_input),
-		    digest::digest(category),
-		    digest::digest(subcategory),
-		    sep = '-'
-		  )
-		  cacheVal <- sessionCache$get(cacheKey)
+		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$msigdbr_species_input, category, subcategory))
+		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')
 		    msigdbrRes <- runMSigDB(
@@ -150,7 +144,7 @@ msigdbModule <- function(session, input, output, envir, sessionCache) {
 		      category = category,
 		      subcategory = subcategory
 		    )
-		    sessionCache$set(key = cacheKey, value = msigdbrRes)
+		    appDiskCache$set(key = cacheKey, value = msigdbrRes)
 			} else {
 				# msigdbrRes <- runMSigDB(DEtable = envir$gene_list, species = input$msigdbr_species_input)
 				# saveRDS(msigdbrRes, file = saveFile)

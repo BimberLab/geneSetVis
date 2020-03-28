@@ -1,5 +1,4 @@
 
-
 ui = shinydashboard::dashboardPage(
   shinydashboard::dashboardHeader(title = 'geneSetVis'),
   shinydashboard::dashboardSidebar(

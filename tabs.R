@@ -2,10 +2,12 @@
 tab_load_data <- shinydashboard::tabItem(
   tabName = 'loadData',
   fluidRow(
+    #column = 6,  
     shinydashboard::box(
       title = 'Input Gene List',
       status = 'primary',
       solidHeader = TRUE,
+      #height = '500px',
       textAreaInput(
         inputId = 'areaInput',
         label = 'Enter Gene and Average Log Fold Change (avg. LogFC)',
@@ -17,15 +19,21 @@ tab_load_data <- shinydashboard::tabItem(
         placeholder = NULL,
         resize = NULL
       ),
-      actionButton('submit', 'Submit')
-    )
-  ),
-  fluidRow(
+      actionButton('submit', 'Submit'),
+      checkboxGroupInput(
+        "select_gene_conversion",
+        label = 'Gene ID conversion:',
+        choiceNames = c('Ensembl', 'STRING', 'DAVID'),
+        choiceValues = c('useEnsembl', 'useSTRINGdb', 'useDAVID')
+      )
+    ),
+    #column = 10,
     shinydashboard::box(
       title = 'Parsed Genes',
       status = 'primary',
       solidHeader = TRUE,
-      tableOutput('inputTable')
+      height = '550px',
+      div(DT::dataTableOutput('inputTable'))
     )
   )
 )
@@ -81,12 +89,7 @@ tab_stringdb <- shinydashboard::tabItem(
     height = NULL,
     selected = 'Network (PNG)',
     width = 16,
-    tabPanel(
-      'Network (PNG)',
-      imageOutput('stringdb_network_png'),
-      #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;',
-      collapsible = TRUE
-    )
+    tabPanel( 'Network (PNG)', imageOutput('stringdb_network_png'))
   ), 
   shinydashboard::tabBox(
     title = NULL,   
@@ -94,12 +97,8 @@ tab_stringdb <- shinydashboard::tabItem(
     height = NULL,
     selected = 'GO',
     width = 16,
-    tabPanel('GO', dataTableOutput('stringdb_GO'), 
-             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
-             collapsible = TRUE),
-    tabPanel('KEGG', dataTableOutput('stringdb_KEGG'), 
-             #style = 'height:500px; overflow-y: scroll;overflow-x: scroll;', 
-             collapsible = TRUE)
+    tabPanel('GO', dataTableOutput('stringdb_GO')),
+    tabPanel('KEGG', dataTableOutput('stringdb_KEGG'))
   )
 )
 

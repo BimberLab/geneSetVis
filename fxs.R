@@ -1,13 +1,13 @@
+
 as.enrichResult <- function(result, inputIds, geneSet) {
-  if (nrow(result) == 0) {
-    stop('No terms in input.')
-  }
+  if (nrow(result) == 0) {stop('No terms in input.')}
 
   gene <- inputIds
   gene.length <- length(gene)
   
   result <- result %>% 
-    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, Description = 'pathway') %>% dplyr::arrange(p.adjust)
+    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, Description = 'pathway') %>% 
+    dplyr::arrange(p.adjust)
 
   result$GeneRatio <- paste(result$Count, '/', gene.length, sep = '')
   result$size <- result$Count
@@ -62,22 +62,14 @@ multi_hyperlink_text <- function(labels, links){
 }
 
 
-appCache <- function() {
-  e <- new.env(parent = emptyenv())
-  
-  list(
-    get = function(key) {
-      if (exists(key, envir = e, inherits = FALSE)) {
-        return(e[[key]])
-      } else {
-        return(shiny::key_missing())
-        #return('missing_key')
-      }
-    },
-    set = function(key, value) {
-      e[[key]] <- value
-    }
-  )
+makeDiskCacheKey <- function(parameters) {
+  hashConcat <- ''
+  for (param in parameters) {
+   hashSub <-  substr(digest::digest(param), 1, 10)
+      
+   hashConcat <- paste0(hashConcat, hashSub)
+  }
+  return(hashConcat)
 }
 
 
@@ -91,8 +83,9 @@ makeTermsTable <- function(table, genesDelim,
   table$'Term Description' <- hyperlink_text(url = termURL, text = table$'Term Description', hide = table$'Term ID')
   table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
   
-  table <- table %>% 
-    dplyr::select(tidyselect::all_of(includeColumns)) %>% 
+  table <- table %>%
+    dplyr::select(tidyselect::all_of(includeColumns)) %>%
+    dplyr::arrange(`p-Value (adj.)`) %>%
     DT::datatable(
       caption = caption,
       filter = 'bottom',
@@ -100,6 +93,9 @@ makeTermsTable <- function(table, genesDelim,
       escape = FALSE,
       autoHideNavigation = TRUE,
       rownames = FALSE,
+      scrollY = 500,
+      scroller = TRUE,
+      scrollX = TRUE,
       extensions = c('Buttons'),
       class = 'cell-border stripe',
       options = list(
@@ -177,6 +173,7 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = 
   })
 }
 
+
 makeTabBox <- function(title, key) {
   shinydashboard::tabBox(
     title = title,   
@@ -184,7 +181,7 @@ makeTabBox <- function(title, key) {
     height = NULL,
     selected = 'Dot Plot',
     width = 16,
-    tabPanel('Table', dataTableOutput(paste(key, 'table', sep = '_'))),
+    tabPanel('Table', dataTableOutput(paste(key, 'Table', sep = '_'))),
     tabPanel('Dot Plot', plotly::plotlyOutput(paste(key, 'dotplot', sep = '_'))),
     tabPanel('Emap Plot', plotOutput(paste(key, 'emapplot', sep = '_'))),
     tabPanel('Cnet Plot', plotOutput(paste(key, 'cnetplot', sep = '_'))),
