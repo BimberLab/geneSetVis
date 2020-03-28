@@ -15,7 +15,7 @@ runReactomePA <- function(DEtable, species) {
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
 
-reactomeModule <- function(session, input, output, envir, sessionCache) {
+reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	reactomeResults <- reactiveValues(
 		results = NULL
 	)
@@ -36,12 +36,8 @@ reactomeModule <- function(session, input, output, envir, sessionCache) {
 			# if (file.exists(saveFile)) {
 			# 	reactomeResults$results <- readRDS(saveFile)
 			# } else {
-		  cacheKey <- paste(
-		    digest::digest(envir$gene_list),
-		    digest::digest(input$reactome_OrgDB_input),
-		    sep = '-'
-		  )
-		  cacheVal <- sessionCache$get(cacheKey)
+		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$reactome_OrgDB_input))
+		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')
 
@@ -49,7 +45,7 @@ reactomeModule <- function(session, input, output, envir, sessionCache) {
 				reactomePAres <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
 				#saveRDS(reactomePAres, file = saveFile)
 				#reactomeResults$results <- reactomePAres
-				sessionCache$set(key = cacheKey, value = reactomePAres)
+				appDiskCache$set(key = cacheKey, value = reactomePAres)
 		  } else {
 		    print('loading from cache...')
 		    reactomePAres <- cacheVal

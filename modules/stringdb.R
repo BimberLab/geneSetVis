@@ -83,6 +83,8 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 			# }
 
 			link <- string_db$get_link(hits[!is.na(hits)])
+			
+			graph <- string_db$get_graph()
 
 			addSubset = paste('hits', sep = '')
 			return_list[[addSubset]] <- hits
@@ -108,7 +110,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 	return(return_list)
 }
 
-stringDbModule <- function(session, input, output, envir, sessionCache) {
+stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	stringResults <- reactiveValues(
 		results = NULL
 	)
@@ -131,14 +133,9 @@ stringDbModule <- function(session, input, output, envir, sessionCache) {
 			# saveFile <- paste0('SavedRuns/', 'running', '_string_result', '.rds', sep = '')
 			# if (file.exists(saveFile)) {
 			# 	stringRes <- readRDS(saveFile)
-
-		  cacheKey <- paste(
-		    digest::digest(envir$gene_list),
-		    digest::digest(input$stringdb_maxHitsToPlot_input),
-		    digest::digest(refSpeciesNum),
-		    digest::digest(input$stringdb_scoreThreshold_input),
-		    sep = '-')
-		  cacheVal <- sessionCache$get(cacheKey)
+		  
+		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$stringdb_maxHitsToPlot_input, refSpeciesNum, input$stringdb_scoreThreshold_input))
+		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')
 
@@ -148,9 +145,9 @@ stringDbModule <- function(session, input, output, envir, sessionCache) {
 		      refSpeciesNum = refSpeciesNum,
 		      scoreThreshold = input$stringdb_scoreThreshold_input
 		    )
-
-		    sessionCache$set(key = cacheKey, value = stringRes)
-
+		    
+		    appDiskCache$set(key = cacheKey, value = stringRes)
+		  
 			} else {
 				# stringRes <- runSTRINGdb(DEtable = envir$gene_list,
 				# maxHitsToPlot = input$stringdb_maxHitsToPlot_input,

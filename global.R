@@ -26,7 +26,6 @@ library(rhandsontable)
 library(stats)
 
 library(testthat)
-library(uuid)
 
 #library(Seurat)
 #library(OOSAP)
@@ -53,6 +52,7 @@ setwd(wd)
 
 
 source('fxs.R', local = TRUE)
+source('GeneAliasing.R')
 source('modules/stringdb.R')
 source('modules/msigdb.R')
 source('modules/reactome.R')
