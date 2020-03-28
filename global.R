@@ -23,6 +23,7 @@ library(gridExtra)
 library(grid)
 library(Matrix)
 library(rhandsontable)
+library(stats)
 
 library(testthat)
 
@@ -56,7 +57,6 @@ source('modules/stringdb.R')
 source('modules/msigdb.R')
 source('modules/reactome.R')
 source('tabs.R')
-source('info.R')
 source('ui.R')
 source('server.R')
 

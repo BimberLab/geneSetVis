@@ -104,14 +104,24 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		msigdbResults$fgsea_result <- NULL
 	})
 
+	msigSubcategories <- read.table(file = './data/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+	msigSubcategories <- msigSubcategories[!is.na(msigSubcategories$Subcategory) & msigSubcategories$Subcategory != '',]
+	msigSubcategories$SubcategoryLabel <- paste0(msigSubcategories$Subcategory, ': ', msigSubcategories$SubcategoryLabel)
+
 	observeEvent(input$msigdbr_category_input, {
 		req(input$msigdbr_category_input)
 
-		species.msig <- msigdbr::msigdbr(species = input$msigdbr_species_input)
-		subcat <- unique(filter(species.msig, species.msig$gs_cat == input$msigdbr_category_input)$gs_subcat)
+		#NOTE: these do not appear to be specieis-specific, at least on the website.  This call introduces a lot of lag time
+		#species.msig <- msigdbr::msigdbr(species = input$msigdbr_species_input)
+
+		subcat <- msigSubcategories[msigSubcategories$Category == input$msigdbr_category_input,]
+		subcat <- subcat[c('Subcategory', 'SubcategoryLabel')]
+		subcatValues <- subcat$Subcategory
+		names(subcatValues) <- subcat$SubcategoryLabel
+		subcatValues <- sort(subcatValues)
 
 		updateSelectInput(session, "msigdbr_subcategory_input",
-			choices = c('', subcat),
+			choices = c('', subcatValues),
 			selected = ''
 		)
 	})
@@ -201,6 +211,24 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	})
 
 	observeEvent(input$msigdbr_resource_info, {
+		msigdbr_resource_info <- list(
+			title = "MSigDB Resource info",
+			text = HTML(
+			'<b>MSigDB</b><br>
+				The Molecular Signatures Database (MSigDB) is a collection of gene sets
+				originally created for use with the Gene Set Enrichment Analysis (GSEA) software.
+				Gene homologs are provided by HUGO Gene Nomenclature Committee at the European Bioinformatics Institute
+				which integrates the orthology assertions predicted for human genes by
+				eggNOG, Ensembl Compara, HGNC, HomoloGene, Inparanoid, NCBI Gene Orthology, OMA, OrthoDB, OrthoMCL, Panther, PhylomeDB, TreeFam and ZFIN.
+				For each human equivalent within each species, only the ortholog supported by the largest number of databases is used.
+				<p>
+				<li><a href="https://www.gsea-msigdb.org/gsea/msigdb/index.jsp"
+				title="link to Official MSigDB"
+				target="_blank"><b>Official MSigDB website</b></a></li>
+				'
+			)
+		)
+
 		showModal(modalDialog(
 			msigdbr_resource_info[["text"]],
 			title = msigdbr_resource_info[["title"]],

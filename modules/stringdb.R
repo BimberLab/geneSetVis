@@ -134,11 +134,11 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')
-		    
+
 		    stringRes <- runSTRINGdb(
-		      DEtable = envir$gene_list, 
-		      maxHitsToPlot = input$stringdb_maxHitsToPlot_input, 
-		      refSpeciesNum = refSpeciesNum, 
+		      DEtable = envir$gene_list,
+		      maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
+		      refSpeciesNum = refSpeciesNum,
 		      scoreThreshold = input$stringdb_scoreThreshold_input
 		    )
 		    
@@ -151,7 +151,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 			stringResults$results <- stringRes
 		})
 	})
-	
+
 	output$string_map_stats <- renderText({
 	  validate(need(!is.null(stringResults$results), "No mapped genes."))
 	  num_genes_mapped <- sum(!is.na(stringResults$results[['hits']]))
@@ -180,7 +180,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 		validate(need(!is.null(stringResults$results), ""))
 	  validate(need(!is.null(stringResults$results), "No mapped genes."))
 	  toSubset <- paste('GO', sep = '')
-	  table <- stringResults$results[[toSubset]] %>% 
+	  table <- stringResults$results[[toSubset]] %>%
 	    dplyr::rename(
 	      'Term Description' = term_description,
 	      'Term ID' = term_id,
@@ -198,14 +198,14 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	    caption = NULL,
 	    includeColumns = c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
 	  )
-	  
+
 	})
 
 	# TODO: download entire dataset
 	output$stringdb_KEGG <- renderDataTable({
 		validate(need(!is.null(stringResults$results), ""))
 	  toSubset <- paste('KEGG', sep = '')
-	  table <- stringResults$results[[toSubset]] %>% 
+	  table <- stringResults$results[[toSubset]] %>%
 	    dplyr::rename(
 	      'Term Description' = term_description,
 	      'Term ID' = term_id,
@@ -214,7 +214,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	      'p-Value' = pvalue,
 	      'p-Value (adj.)' = pvalue_fdr,
 	      'Genes in Term' = hit_term_genes
-	    ) 
+	    )
 
 	  makeTermsTable(
 	    table = table,
@@ -226,13 +226,24 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	})
 
 	observeEvent(input$stringdb_resource_info, {
-		showModal(
-		modalDialog(
-		stringdb_resource_info[["text"]],
-		title = stringdb_resource_info[["title"]],
-		easyClose = TRUE,
-		footer = NULL
+		stringdb_resource_info <- list(
+			title = "STRING Resource info",
+			text = HTML(
+				'<b>STRING</b><br>
+					STRING is a database of known and predicted protein-protein interactions. \n
+					The interactions include direct (physical) and indirect (functional) associations; they stem from computational prediction, \n
+					from knowledge transfer between organisms, and from interactions aggregated from other (primary) databases.
+					<p>
+				<li><a href=https://string-db.org/ title="Official string-db website" target="_blank"><b>Official string-db website</b></a></li>
+				'
+			)
 		)
-		)
+
+		showModal(modalDialog(
+			stringdb_resource_info[["text"]],
+			title = stringdb_resource_info[["title"]],
+			easyClose = TRUE,
+			footer = NULL
+		))
 	})
 }
