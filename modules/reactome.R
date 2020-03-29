@@ -9,7 +9,6 @@ runReactomePA <- function(DEtable, species) {
   tryCatch({
     entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable$gene), 'ENTREZID', 'SYMBOL')
 
-    go <- enrichGO(entrezIDs, OrgDb = human, pvalueCutoff = 1, qvalueCutoff = 1)
     pa <- ReactomePA::enrichPathway(entrezIDs)
 
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
@@ -48,7 +47,8 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 		})
 	})
 
-	renderPlotSet(output = output,
+	renderPlotSet(
+	  output = output,
 		key = 'reactome',
 		enrichTypeResult = reactive(reactomeResults$results),
 		termURL = "https://reactome.org/PathwayBrowser/#/",
