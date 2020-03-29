@@ -6,7 +6,7 @@ as.enrichResult <- function(result, inputIds, geneSet) {
   gene.length <- length(gene)
   
   result <- result %>% 
-    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, Description = 'pathway') %>% 
+    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, 'Description' = pathway) %>% 
     dplyr::arrange(p.adjust)
 
   result$GeneRatio <- paste(result$Count, '/', gene.length, sep = '')

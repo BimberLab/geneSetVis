@@ -190,6 +190,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')
 	  )
 	})
+	
 
 
 	output[["fgsea_table_PPI"]] <- renderPlot({

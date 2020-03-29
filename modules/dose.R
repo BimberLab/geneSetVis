@@ -58,7 +58,11 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
   
   output$dose_map_stats <- renderText({
     validate(need(!is.null(doseResults$results), "No mapped genes."))
-    num_genes_mapped <- str_split(noquote(doseResults$results@result$GeneRatio[1]), '/')[[1]][2]
+    if (nrow(doseResults$results@result) > 0) {
+      num_genes_mapped <- str_split(noquote(doseResults$results@result$GeneRatio[1]), '/')[[1]][2]
+    } else {
+      num_genes_mapped <- 0
+    }
     HTML(
       '<b>Mapped genes</b><br>',
       paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')

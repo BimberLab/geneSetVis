@@ -162,6 +162,8 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	    hyperlink_text(url = stringResults$results[['link']], text = 'View mapped genes on string-db website', hide = NULL)
 	  )
 	})
+	
+	
 
 	output$stringdb_network <- renderPlot({
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))

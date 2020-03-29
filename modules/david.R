@@ -37,7 +37,7 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
         print('missing cache key...')
         
         entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$david_OrgDB_input)
-        davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = 'oosap@ohsu.edu', readable = T)
+        davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = 'oosap@ohsu.edu')
         appDiskCache$set(key = cacheKey, value = davidRes)
       } else {
         print('loading from cache...')
@@ -57,7 +57,11 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
   
   output$david_map_stats <- renderText({
     validate(need(!is.null(davidResults$results), "No mapped genes."))
-    num_genes_mapped <- str_split(noquote(davidResults$results@result$GeneRatio[1]), '/')[[1]][2]
+    if (nrow(davidResults$results@result) > 0) {
+      num_genes_mapped <- str_split(noquote(davidResults$results@result$GeneRatio[1]), '/')[[1]][2]
+    } else {
+      num_genes_mapped <- 0
+    }
     HTML(
       '<b>Mapped genes</b><br>',
       paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')

@@ -40,7 +40,7 @@ library(fgsea)
 
 library(biomaRt)
 library(STRINGdb) 
-#library(RDAVIDWebService)
+library(RDAVIDWebService)
 library(msigdbr)
 
 

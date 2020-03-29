@@ -57,7 +57,11 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 
 	output$reactome_map_stats <- renderText({
 	  validate(need(!is.null(reactomeResults$results), "No mapped genes."))
-	  num_genes_mapped <- str_split(noquote(reactomeResults$results@result$GeneRatio[1]), '/')[[1]][2]
+	  if (nrow(reactomeResults$results@result) > 0) {
+	    num_genes_mapped <- str_split(noquote(reactomeResults$results@result$GeneRatio[1]), '/')[[1]][2]
+	  } else {
+	    num_genes_mapped <- 0
+	  }
 	  HTML(
 	    '<b>Mapped genes</b><br>',
 	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')
