@@ -8,7 +8,6 @@ runReactomePA <- function(DEtable, species) {
   return_list = list()
   tryCatch({
     entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable$gene), 'ENTREZID', 'SYMBOL')
-
     pa <- ReactomePA::enrichPathway(entrezIDs)
 
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
