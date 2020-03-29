@@ -37,7 +37,7 @@ server = function(input, output, session) {
     envir$gene_list <- gene_list
   })
 
-  output$inputTable <- DT::renderDataTable({
+  output$inputTable <- DT::renderDataTable(server = FALSE, {
     validate(need(envir$gene_list, "Please enter the gene list and hit submit"))
 
     req(input$submit)
@@ -46,12 +46,12 @@ server = function(input, output, session) {
       extensions = c('Buttons'),
       options = list(
         #autoWidth = TRUE, autoHeight = TRUE, scrollX = TRUE, scrollY = TRUE,
-        dom = 'Bfrtip',
-        lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
+        dom = 'lBfrtip',
+        lengthMenu = list(c(15, 30, 50, -1), c('15', '30', '50', 'All')),
         pageLength = 10,
         scrollX = TRUE,
         buttons = list(
-          list(extend = "collection", text = 'Show All', action = DT::JS("function ( e, dt, node, config ) { dt.page.len(-1); dt.ajax.reload(); }")),
+          #list(extend = "collection", text = 'Show All', action = DT::JS("function ( e, dt, node, config ) { dt.page.len(-1); dt.ajax.reload(); }")),
           list(extend = 'collection', text = 'Download/Copy', buttons = c('copy', 'csv', 'excel') )
         )
       )
@@ -61,6 +61,10 @@ server = function(input, output, session) {
   stringDbModule(session, input, output, envir, appDiskCache)
   msigdbModule(session, input, output, envir, appDiskCache)
   reactomeModule(session, input, output, envir, appDiskCache)
+  davidModule(session, input, output, envir, appDiskCache)
+  doseModule(session, input, output, envir, appDiskCache)
+  ncgModule(session, input, output, envir, appDiskCache)
+  dgnModule(session, input, output, envir, appDiskCache)
 }
 
 

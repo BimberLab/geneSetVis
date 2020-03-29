@@ -47,11 +47,11 @@ runMSigDB <- function(DEtable, species, category = NULL, subcategory = NULL) {
 
 			set.seed(1234)
 			fgsea_results <- fgsea(
-			pathways = msig_geneSet,
-			stats = ranks,
-			minSize = 5,
-			maxSize = 600,
-			nperm = 10000
+			  pathways = msig_geneSet,
+			  stats = ranks,
+			  minSize = 5,
+			  maxSize = 600,
+			  nperm = 10000
 			)
 
 			threshold <- 0.001
@@ -138,7 +138,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		  if (category == '') {category <- NULL}     
 		  if (subcategory == '') {subcategory <- NULL} 
 		  
-		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$msigdbr_species_input, category, subcategory))
+		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$msigdbr_species_input, category, subcategory, 'msigdb'))
 		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')
@@ -193,7 +193,6 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 
 
 	output[["fgsea_table_PPI"]] <- renderPlot({
-		req(length(input$fgsea_table_cell_clicked) > 0)
 		info_list <- input$fgsea_table_cell_clicked
 
 		cellVal <- strsplit(info_list[["value"]], perl = T, split = 'target=\"_blank\">')
@@ -205,6 +204,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	})
 
 	observeEvent(input$fgsea_table_cell_clicked, {
+	  req(length(input$fgsea_table_cell_clicked) > 0)
 		showModal(modalDialog(
 			plotOutput("fgsea_table_PPI")
 		))

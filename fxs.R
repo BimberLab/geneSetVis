@@ -96,8 +96,8 @@ makeTermsTable <- function(table, genesDelim,
       extensions = c('Buttons'),
       class = 'cell-border stripe',
       options = list(
-        dom = 'Bfrtip',
-        lengthMenu = c(15, 30, 50, 100),
+        dom = 'lBfrtip',
+        lengthMenu = list(c(15, 30, 50, 100, -1), c('15', '30', '50', '100', 'All')),
         pageLength = 10,
         scrollX = TRUE,
         buttons = list(
@@ -114,7 +114,7 @@ makeTermsTable <- function(table, genesDelim,
 
 
 renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = NULL, caption = NULL) {
-  output[[paste(key, 'table', sep = '_')]] <- renderDataTable({
+  output[[paste(key, 'table', sep = '_')]] <- renderDataTable(server = FALSE, {
     er <- enrichTypeResult()
     validate(need(!is.null(er), paste0('')))
     validate(need(class(er) == 'enrichResult', 'Input should be of enrichResult type...'))

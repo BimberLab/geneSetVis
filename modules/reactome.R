@@ -8,6 +8,7 @@ runReactomePA <- function(DEtable, species) {
   return_list = list()
   tryCatch({
     entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable$gene), 'ENTREZID', 'SYMBOL')
+    
     pa <- ReactomePA::enrichPathway(entrezIDs)
 
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
@@ -30,7 +31,7 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 
 		print('making Reactome query')
 		withProgress(message = 'making reactomePA query...', {
-		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$reactome_OrgDB_input))
+		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$reactome_OrgDB_input, 'reactome'))
 		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')

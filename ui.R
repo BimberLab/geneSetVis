@@ -25,6 +25,26 @@ ui = shinydashboard::dashboardPage(
         text = 'Reactome',
         tabName = 'reactome',
         icon = icon(NULL)
+      ),
+      shinydashboard::menuItem(
+        text = 'DAVID',
+        tabName = 'david',
+        icon = icon(NULL)
+      ),
+      shinydashboard::menuItem(
+        text = 'DOSE',
+        tabName = 'dose',
+        icon = icon(NULL)
+      ),
+      shinydashboard::menuItem(
+        text = 'NCG',
+        tabName = 'ncg',
+        icon = icon(NULL)
+      ),
+      shinydashboard::menuItem(
+        text = 'DGN',
+        tabName = 'dgn',
+        icon = icon(NULL)
       )
     )
   ),
@@ -32,6 +52,10 @@ ui = shinydashboard::dashboardPage(
     shinydashboard::tabItems(tab_load_data,
                              tab_stringdb,
                              tab_msigdbr,
-                             tab_reactome)
+                             tab_reactome,
+                             tab_david,
+                             tab_dose,
+                             tab_ncg,
+                             tab_dgn)
   )
 )

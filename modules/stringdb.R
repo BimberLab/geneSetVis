@@ -1,11 +1,11 @@
 runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
-	string_db <-
-	STRINGdb::STRINGdb$new(
-	version = '10',
-	species = refSpeciesNum,
-	score_threshold = scoreThreshold,
-	input_directory = ''
-	)
+  string_db <-
+    STRINGdb::STRINGdb$new(
+      version = '10',
+      species = refSpeciesNum,
+      score_threshold = scoreThreshold,
+      input_directory = ''
+    )
 
 	##dedup table to remove multiple tests
 	if (!is.null(DEtable$test)){
@@ -27,16 +27,16 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 			max_hits_to_plot <- cluster.map$STRING_id[1:maxHitsToPlot]
 
 			enrichmentGO <-
-			string_db$get_enrichment(hits,
-			category = 'Process',
-			methodMT = 'fdr',
-			iea = TRUE)
+			  string_db$get_enrichment(hits,
+			                           category = 'Process',
+			                           methodMT = 'fdr',
+			                           iea = TRUE)
 
 			enrichmentKEGG <-
-			string_db$get_enrichment(hits,
-			category = 'KEGG',
-			methodMT = 'fdr',
-			iea = TRUE)
+			  string_db$get_enrichment(hits,
+			                           category = 'KEGG',
+			                           methodMT = 'fdr',
+			                           iea = TRUE)
 
 
 			hit_term_proteins <-
@@ -68,10 +68,10 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 			##payload mechanism for upregulated vs downregulated genes:
 			##adds a color column for up vs downregulated genes
 			cluster.color <-
-			string_db$add_diff_exp_color(cluster.map, logFcColStr = 'avg_logFC')
+			  string_db$add_diff_exp_color(cluster.map, logFcColStr = 'avg_logFC')
 			# post payload information to the STRING server
 			payload_id <-
-			string_db$post_payload(cluster.color$STRING_id, colors = cluster.color$color)
+			  string_db$post_payload(cluster.color$STRING_id, colors = cluster.color$color)
 			#string_db$plot_network(hits, payload_id = payload_id)
 
 			##clustering/community algorithms: ”fastgreedy”, ”walktrap”, ”spinglass”, ”edge.betweenness”.
@@ -130,7 +130,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 		print('making StringDB query')
 		withProgress(message = 'making STRING query..', {
-		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$stringdb_maxHitsToPlot_input, refSpeciesNum, input$stringdb_scoreThreshold_input))
+		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$stringdb_maxHitsToPlot_input, refSpeciesNum, input$stringdb_scoreThreshold_input, 'string'))
 		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')
@@ -169,14 +169,14 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	  stringResults$results[[toSubset]]
 	})
 
-	output$stringdb_network_png <- renderImage(deleteFile = T, {
+	output$stringdb_network_png <- renderImage(deleteFile = F, {
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
 		png_file <- paste('network', '.png', sep = '')
 		list(src = paste('', png_file, sep = ''), height='100%', width='100%')
 	})
 
 	# TODO: download entire dataset
-	output$stringdb_GO <- renderDataTable({
+	output$stringdb_GO <- renderDataTable(server = FALSE, {
 		validate(need(!is.null(stringResults$results), ""))
 	  validate(need(!is.null(stringResults$results), "No mapped genes."))
 	  toSubset <- paste('GO', sep = '')
@@ -202,7 +202,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	})
 
 	# TODO: download entire dataset
-	output$stringdb_KEGG <- renderDataTable({
+	output$stringdb_KEGG <- renderDataTable(server = FALSE, {
 		validate(need(!is.null(stringResults$results), ""))
 	  toSubset <- paste('KEGG', sep = '')
 	  table <- stringResults$results[[toSubset]] %>%
