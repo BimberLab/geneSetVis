@@ -18,8 +18,7 @@ runMSigDB <- function(DEtable, species, category = NULL, subcategory = NULL) {
 
 		if (nrow(clusterTable) > 0) {
 			##Use the gene sets data frame for clusterProfiler (for genes as gene symbols)
-			msig_enricher <-
-			clusterProfiler::enricher(gene = clusterTable$gene, TERM2GENE = msigTerm)
+			msig_enricher <- clusterProfiler::enricher(gene = clusterTable$gene, TERM2GENE = msigTerm)
 			#msig_enricher_plot <- dotplot(msig_enricher)
 
 			#clusterProfiler::geneInCategory()
@@ -138,7 +137,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		  if (category == '') {category <- NULL}     
 		  if (subcategory == '') {subcategory <- NULL} 
 		  
-		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$msigdbr_species_input, category, subcategory, 'msigdb'))
+		  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$msigdbr_species_input, category, subcategory), 'msigdb')
 		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')

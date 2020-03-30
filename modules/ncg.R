@@ -31,7 +31,7 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
     
     print('making ncg query')
     withProgress(message = 'making NCG query...', {
-      cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$ncg_OrgDB_input, 'ncg'))
+      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$ncg_OrgDB_input), 'ncg')
       cacheVal <- appDiskCache$get(cacheKey)
       if (class(cacheVal) == 'key_missing') {
         print('missing cache key...')

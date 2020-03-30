@@ -31,7 +31,7 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
     
     print('making david query')
     withProgress(message = 'making DAVID query...', {
-      cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$david_OrgDB_input, 'david'))
+      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$david_OrgDB_input), 'david')
       cacheVal <- appDiskCache$get(cacheKey)
       if (class(cacheVal) == 'key_missing') {
         print('missing cache key...')

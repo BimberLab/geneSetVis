@@ -31,7 +31,7 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
     
     print('making dgn query')
     withProgress(message = 'making DGN query...', {
-      cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$dgn_OrgDB_input, 'dgn'))
+      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$dgn_OrgDB_input), 'dgn')
       cacheVal <- appDiskCache$get(cacheKey)
       if (class(cacheVal) == 'key_missing') {
         print('missing cache key...')
