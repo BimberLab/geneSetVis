@@ -31,7 +31,7 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
     
     print('making dose query')
     withProgress(message = 'making DOSE query...', {
-      cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$dose_OrgDB_input, 'dose'))
+      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$dose_OrgDB_input), 'dose')
       cacheVal <- appDiskCache$get(cacheKey)
       if (class(cacheVal) == 'key_missing') {
         print('missing cache key...')

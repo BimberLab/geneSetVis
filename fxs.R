@@ -62,14 +62,8 @@ multi_hyperlink_text <- function(labels, links){
 }
 
 
-makeDiskCacheKey <- function(parameters) {
-  hashConcat <- ''
-  for (param in parameters) {
-   hashSub <-  substr(digest::digest(param), 1, 10)
-      
-   hashConcat <- paste0(hashConcat, hashSub)
-  }
-  return(hashConcat)
+makeDiskCacheKey <- function(inputList, prefix) {
+  return(paste0(str_to_lower(prefix), digest::digest(inputList)))
 }
 
 

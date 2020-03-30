@@ -31,7 +31,7 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 
 		print('making Reactome query')
 		withProgress(message = 'making reactomePA query...', {
-		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$reactome_OrgDB_input, 'reactome'))
+		  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$reactome_OrgDB_input), 'reactome')
 		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')

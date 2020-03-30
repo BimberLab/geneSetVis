@@ -1,6 +1,5 @@
 runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
-  string_db <-
-    STRINGdb::STRINGdb$new(
+  string_db <- STRINGdb::STRINGdb$new(
       version = '10',
       species = refSpeciesNum,
       score_threshold = scoreThreshold,
@@ -13,34 +12,29 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 		DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
 	}
 
-
 	return_list = list()
 	tryCatch({
 		clusterTable <- DEtable
 
 		if (nrow(DEtable) > 0) {
-			cluster.map <-
-			string_db$map(clusterTable, 'gene', removeUnmappedRows = FALSE)
+			cluster.map <- string_db$map(clusterTable, 'gene', removeUnmappedRows = FALSE)
 			hits <- cluster.map$STRING_id
 			if ( sum(!is.na(hits)) == 0 ) {stop('No mapped genes.')}
 
 			max_hits_to_plot <- cluster.map$STRING_id[1:maxHitsToPlot]
 
-			enrichmentGO <-
-			  string_db$get_enrichment(hits,
+			enrichmentGO <- string_db$get_enrichment(hits,
 			                           category = 'Process',
 			                           methodMT = 'fdr',
 			                           iea = TRUE)
 
-			enrichmentKEGG <-
-			  string_db$get_enrichment(hits,
+			enrichmentKEGG <- string_db$get_enrichment(hits,
 			                           category = 'KEGG',
 			                           methodMT = 'fdr',
 			                           iea = TRUE)
 
 
-			hit_term_proteins <-
-			string_db$get_term_proteins(enrichmentGO$term_id, hits)
+			hit_term_proteins <- string_db$get_term_proteins(enrichmentGO$term_id, hits)
 			hit_term_genes <- hit_term_proteins %>%
 				dplyr::select(term_id, preferred_name) %>%
 				dplyr::group_by(term_id) %>%
@@ -49,8 +43,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 			enrichmentGO <- merge(hit_term_genes, enrichmentGO)
 
 
-			hit_term_proteins <-
-			string_db$get_term_proteins(enrichmentKEGG$term_id, hits)
+			hit_term_proteins <- string_db$get_term_proteins(enrichmentKEGG$term_id, hits)
 			hit_term_genes <- hit_term_proteins %>%
 				dplyr::select(term_id, preferred_name) %>%
 				dplyr::group_by(term_id) %>%
@@ -67,11 +60,9 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 			#______
 			##payload mechanism for upregulated vs downregulated genes:
 			##adds a color column for up vs downregulated genes
-			cluster.color <-
-			  string_db$add_diff_exp_color(cluster.map, logFcColStr = 'avg_logFC')
+			cluster.color <- string_db$add_diff_exp_color(cluster.map, logFcColStr = 'avg_logFC')
 			# post payload information to the STRING server
-			payload_id <-
-			  string_db$post_payload(cluster.color$STRING_id, colors = cluster.color$color)
+			payload_id <- string_db$post_payload(cluster.color$STRING_id, colors = cluster.color$color)
 			#string_db$plot_network(hits, payload_id = payload_id)
 
 			##clustering/community algorithms: ”fastgreedy”, ”walktrap”, ”spinglass”, ”edge.betweenness”.
@@ -130,7 +121,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 		print('making StringDB query')
 		withProgress(message = 'making STRING query..', {
-		  cacheKey <- makeDiskCacheKey(c(envir$gene_list, input$stringdb_maxHitsToPlot_input, refSpeciesNum, input$stringdb_scoreThreshold_input, 'string'))
+		  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_maxHitsToPlot_input, refSpeciesNum, input$stringdb_scoreThreshold_input), 'stringdb')
 		  cacheVal <- appDiskCache$get(cacheKey)
 		  if (class(cacheVal) == 'key_missing') {
 		    print('missing cache key...')
