@@ -38,7 +38,8 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
           
-          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
+          if (!require(input$dose_OrgDB_input)) install.packages(input$dose_OrgDB_input)
+          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType=str_to_upper(input$geneIdType), toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
           doseRes <- DOSE::enrichDO(entrezIDs$ENTREZID, readable = T)
           appDiskCache$set(key = cacheKey, value = doseRes)
         } else {

@@ -142,13 +142,13 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	        stringRes <- cacheVal
 	      }
 	      stringResults$results <- stringRes
-	      if (is.null(stringRes)) {stop('No significant enrichment found.')}
+	      if (is.null(stringRes) | length(stringRes) == 0) {stop('No significant enrichment found.')}
 	    })
 	  })
 	})
 
 	output$string_map_stats <- renderText({
-	  validate(need(!is.null(stringResults$results), "No mapped genes."))
+	  validate(need(!is.null(stringResults$results) & length(stringRes) != 0, "No mapped genes."))
 	  num_genes_mapped <- sum(!is.na(stringResults$results[['hits']]))
 	  HTML(
 	    '<b>Mapped genes</b><br>',
@@ -166,7 +166,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	  stringResults$results[[toSubset]]
 	})
 
-	output$stringdb_network_png <- renderImage(deleteFile = F, {
+	output$stringdb_network_png <- renderImage(deleteFile = T, {
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
 		png_file <- paste('network', '.png', sep = '')
 		list(src = paste('', png_file, sep = ''), height='100%', width='100%')
@@ -174,8 +174,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 	# TODO: download entire dataset
 	output$stringdb_GO <- renderDataTable(server = FALSE, {
-		validate(need(!is.null(stringResults$results), ""))
-	  validate(need(!is.null(stringResults$results), "No mapped genes."))
+	  validate(need(!is.null(stringResults$results) & length(stringResults$results) != 0, ""))
 	  toSubset <- paste('GO', sep = '')
 	  table <- stringResults$results[[toSubset]] %>%
 	    dplyr::rename(
@@ -200,7 +199,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 	# TODO: download entire dataset
 	output$stringdb_KEGG <- renderDataTable(server = FALSE, {
-		validate(need(!is.null(stringResults$results), ""))
+		validate(need(!is.null(stringResults$results) & length(stringResults$results) != 0, ""))
 	  toSubset <- paste('KEGG', sep = '')
 	  table <- stringResults$results[[toSubset]] %>%
 	    dplyr::rename(

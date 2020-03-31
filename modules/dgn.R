@@ -38,7 +38,8 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
           
-          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
+          if (!require(input$dgn_OrgDB_input)) install.packages(input$dgn_OrgDB_input)
+          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType=str_to_upper(input$geneIdType), toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
           dgnRes <- DOSE::enrichDGN(entrezIDs$ENTREZID, readable = T)
           appDiskCache$set(key = cacheKey, value = dgnRes)
         } else {

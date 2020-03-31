@@ -30,7 +30,7 @@ tab_load_data <- shinydashboard::tabItem(
       ),
       actionButton('submit', 'Submit'),
       checkboxInput('checkGeneIdTranslate', 
-        label = 'Gene ID Translation:', 
+        label = 'Gene ID Translation', 
         value = FALSE, 
       ),
     ),
@@ -189,7 +189,7 @@ tab_reactome <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('runreactome_button', 'Run')),
@@ -227,7 +227,7 @@ tab_david <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('rundavid_button', 'Run')), 
@@ -265,7 +265,7 @@ tab_dose <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('rundose_button', 'Run')), 
@@ -303,7 +303,7 @@ tab_ncg <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('runncg_button', 'Run')), 
@@ -341,7 +341,7 @@ tab_dgn <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('rundgn_button', 'Run')), 

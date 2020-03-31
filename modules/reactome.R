@@ -38,7 +38,8 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
 	        
-	        entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
+	        if (!require(input$reactome_OrgDB_input)) install.packages(input$reactome_OrgDB_input)
+	        entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType=str_to_upper(input$geneIdType), toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
 	        reactomeRes <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
 	        appDiskCache$set(key = cacheKey, value = reactomeRes)
 	      } else {

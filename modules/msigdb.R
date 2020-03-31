@@ -158,14 +158,15 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	    })
 	    msigdbResults$result <- msigdbrRes
 	    
+	    if (is.null(stringRes) | length(msigdbrRes[['enricher_result']]) == 0) {stop('No significant enrichment found.')}
+	    
 	    msigdbResults$enricher_result <- msigdbrRes[['enricher_result']]
 	    msigdbResults$fgsea_result <- as.enrichResult(
 	      result = msigdbrRes[['fgsea_result']],
 	      inputIds = msigdbrRes[['enricher_result']]@gene,
 	      geneSet = msigdbrRes[['enricher_result']]@geneSets
 	    )
-	    if (is.null(msigdbrRes)) {stop('No significant enrichment found.')}
-	    ##nrow for fgsea & enricher?
+	    
 	  })
 	})
 	

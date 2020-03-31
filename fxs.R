@@ -159,11 +159,7 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = 
   output[[paste(key, 'heatplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
     # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
-    validate(
-      need(class(er) == 'enrichResult', 'Need result of enrichResult type.'),
-      need(!is.null(er), 'No enriched terms.'), 
-      need(nrow(er) != 0, 'No enriched terms.')
-    )
+    validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::heatplot(er)
   })
 }
