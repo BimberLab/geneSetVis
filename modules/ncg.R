@@ -26,24 +26,29 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
   })
   
   observeEvent(input$runncg_button, {
-    #TODO: validate input present?
-    validate(need(input$ncg_OrgDB_input != '', "Please select OrgDB..."))
-    
-    print('making ncg query')
-    withProgress(message = 'making NCG query...', {
-      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$ncg_OrgDB_input), 'ncg')
-      cacheVal <- appDiskCache$get(cacheKey)
-      if (class(cacheVal) == 'key_missing') {
-        print('missing cache key...')
+    withBusyIndicatorServer("runncg_button", {
+      Sys.sleep(1)
+      #TODO: validate input present?
+      validate(need(input$ncg_OrgDB_input != '', "Please select OrgDB..."))
+      
+      print('making ncg query')
+      withProgress(message = 'making NCG query...', {
+        cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$ncg_OrgDB_input), 'ncg')
+        cacheVal <- appDiskCache$get(cacheKey)
+        if (class(cacheVal) == 'key_missing') {
+          print('missing cache key...')
+          
+          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$ncg_OrgDB_input)
+          ncgRes <- DOSE::enrichNCG(entrezIDs$ENTREZID, readable = T)
+          appDiskCache$set(key = cacheKey, value = ncgRes)
+        } else {
+          print('loading from cache...')
+          ncgRes <- cacheVal
+        }
+        ncgResults$results <- ncgRes
         
-        entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$ncg_OrgDB_input)
-        ncgRes <- DOSE::enrichNCG(entrezIDs$ENTREZID, readable = T)
-        appDiskCache$set(key = cacheKey, value = ncgRes)
-      } else {
-        print('loading from cache...')
-        ncgRes <- cacheVal
-      }
-      ncgResults$results <- ncgRes
+        if ( is.null(ncgRes) || nrow(ncgRes) == 0 ) {stop('No significant enrichment found.')}
+      })
     })
   })
   

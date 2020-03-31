@@ -26,25 +26,31 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
   })
   
   observeEvent(input$rundose_button, {
-    #TODO: validate input present?
-    validate(need(input$dose_OrgDB_input != '', "Please select OrgDB..."))
-    
-    print('making dose query')
-    withProgress(message = 'making DOSE query...', {
-      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$dose_OrgDB_input), 'dose')
-      cacheVal <- appDiskCache$get(cacheKey)
-      if (class(cacheVal) == 'key_missing') {
-        print('missing cache key...')
+    withBusyIndicatorServer("rundose_button", {
+      Sys.sleep(1)
+      #TODO: validate input present?
+      validate(need(input$dose_OrgDB_input != '', "Please select OrgDB..."))
+      
+      print('making dose query')
+      withProgress(message = 'making DOSE query...', {
+        cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$dose_OrgDB_input), 'dose')
+        cacheVal <- appDiskCache$get(cacheKey)
+        if (class(cacheVal) == 'key_missing') {
+          print('missing cache key...')
+          
+          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
+          doseRes <- DOSE::enrichDO(entrezIDs$ENTREZID, readable = T)
+          appDiskCache$set(key = cacheKey, value = doseRes)
+        } else {
+          print('loading from cache...')
+          doseRes <- cacheVal
+        }
+        doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
+        rownames(doseRes@result) <- doseRes@result$ID
+        doseResults$results <- doseRes
         
-        entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
-        doseRes <- DOSE::enrichDO(entrezIDs$ENTREZID, readable = T)
-        appDiskCache$set(key = cacheKey, value = doseRes)
-      } else {
-        print('loading from cache...')
-        doseRes <- cacheVal
-      }
-      doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
-      doseResults$results <- doseRes
+        if ( is.null(doseRes) || nrow(doseRes) == 0 ) {stop('No significant enrichment found.')}
+      })
     })
   })
   

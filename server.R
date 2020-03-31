@@ -15,23 +15,47 @@ server = function(input, output, session) {
 
   #---------------------------
   observeEvent(input$submit, {
-    gene_list <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
-                            header = FALSE,
-                            col.names = c("gene", "avg_logFC"),
-                            quote = "",
-                            allowEscapes = T)
+    if (input$inputType == "Gene only") {
+      print('true')
+      gene_list <- read.table(text = gsub(",", "\n", perl = TRUE, x = input$areaInput),
+                                header = FALSE,
+                                col.names = c("gene"),
+                                quote = "",
+                                allowEscapes = T)
+      gene_list <- data.frame(gene = gene_list, avg_logFC = NA)
+    } else {
+      gene_list <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
+                              header = FALSE,
+                              col.names = c("gene", "avg_logFC"),
+                              quote = "",
+                              allowEscapes = T)
+    }
     
-    if (!is.null(input$select_gene_conversion)) {
+    
+    if (input$checkGeneIdTranslate == T) {
       withProgress(message = 'Translating genes..', {
-        print(paste0('print gene conversion options:', input$select_gene_conversion))
-        cacheKey <- makeDiskCacheKey(list(gene_list, input$select_gene_conversion), 'genelist')
+        print(paste0('gene translate: ', input$checkGeneIdTranslate))
+        print(paste0('gene id type: ', input$geneIdType))
+        cacheKey <- makeDiskCacheKey(list(gene_list, input$checkGeneIdTranslate, input$geneIdType), 'genelist')
         cacheVal <- appDiskCache$get(cacheKey)
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
-          gene_list_tr <- TranslateGeneNames(ensemblIds = gene_list$gene, geneSymbols = gene_list$gene, davidEmail = 'oosap.ohsu.edu',
-                                              useEnsembl = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
-                                              useSTRINGdb = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
-                                              useDAVID = ifelse('useDAVID' %in% input$select_gene_conversion, T, F))
+          
+          if (input$geneIdType == 'Symbol') {
+            ensemblIds <- NULL
+            geneSymbols <- gene_list$gene
+          } else {
+            ensemblIds <- gene_list$gene
+            geneSymbols <- NULL
+          }
+          
+          # gene_list_tr <- TranslateGeneNames(ensemblIds = ensemblIds, geneSymbols = geneSymbols, davidEmail = 'oosap@ohsu.edu', 
+          #                                     useEnsembl = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
+          #                                     useSTRINGdb = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
+          #                                     useDAVID = F)
+          
+          gene_list_tr <- TranslateToEnsembl(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
+          gene_list_tr <- gene_list_tr[, !(colnames(gene_list_tr) %in% c('EnsemblId', 'GeneSymbol'))]
         
           gene_list <- dplyr::bind_cols(gene_list[1:nrow(gene_list),], gene_list_tr[1:nrow(gene_list_tr),])
           appDiskCache$set(key = cacheKey, value = gene_list)

@@ -26,25 +26,29 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	})
 
 	observeEvent(input$runreactome_button, {
-		#TODO: validate input present?
-		validate(need(input$reactome_OrgDB_input != '', "Please select OrgDB..."))
-
-		print('making Reactome query')
-		withProgress(message = 'making reactomePA query...', {
-		  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$reactome_OrgDB_input), 'reactome')
-		  cacheVal <- appDiskCache$get(cacheKey)
-		  if (class(cacheVal) == 'key_missing') {
-		    print('missing cache key...')
-
-				entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
-				reactomePAres <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
-				appDiskCache$set(key = cacheKey, value = reactomePAres)
-		  } else {
-		    print('loading from cache...')
-		    reactomePAres <- cacheVal
-		  }
-		  reactomeResults$results <- reactomePAres
-		})
+	  withBusyIndicatorServer("runreactome_button", {
+	    Sys.sleep(1)
+	    #TODO: validate input present?
+	    validate(need(input$reactome_OrgDB_input != '', "Please select OrgDB..."))
+	    
+	    print('making Reactome query')
+	    withProgress(message = 'making reactomePA query...', {
+	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$reactome_OrgDB_input), 'reactome')
+	      cacheVal <- appDiskCache$get(cacheKey)
+	      if (class(cacheVal) == 'key_missing') {
+	        print('missing cache key...')
+	        
+	        entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
+	        reactomeRes <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
+	        appDiskCache$set(key = cacheKey, value = reactomeRes)
+	      } else {
+	        print('loading from cache...')
+	        reactomeRes <- cacheVal
+	      }
+	      reactomeResults$results <- reactomeRes
+	      if ( is.null(reactomeRes) || nrow(reactomeRes) == 0 ) {stop('No significant enrichment found.')}
+	    })
+	  })
 	})
 
 	renderPlotSet(

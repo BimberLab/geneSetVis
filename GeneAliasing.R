@@ -238,6 +238,8 @@ TranslateToStringDb <- function(ensemblIds = NULL, geneSymbols = NULL, speciesId
 	results <- rbind(results, resultsBase[!(resultsBase$Order %in% results$Order),])
 	results <- dplyr::arrange(results, Order)
 	results <- results[names(results) != 'Order']
+	
+	colnames(results)[colnames(results) == 'STRING_id'] <- 'STRING.id'
 
 	return(results)
 }

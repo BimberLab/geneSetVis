@@ -126,41 +126,47 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	})
 
 	observeEvent(input$runmsigdbr_button, {
-		print('making MSigDB query')
-
-		req(input$msigdbr_species_input)
-
-		withProgress(message = 'making MSigDB query..', {
-		  category <- input$msigdbr_category_input
-		  subcategory <- input$msigdbr_subcategory_input
-		  
-		  if (category == '') {category <- NULL}     
-		  if (subcategory == '') {subcategory <- NULL} 
-		  
-		  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$msigdbr_species_input, category, subcategory), 'msigdb')
-		  cacheVal <- appDiskCache$get(cacheKey)
-		  if (class(cacheVal) == 'key_missing') {
-		    print('missing cache key...')
-		    msigdbrRes <- runMSigDB(
-		      DEtable = envir$gene_list,
-		      species = input$msigdbr_species_input,
-		      category = category,
-		      subcategory = subcategory
-		    )
-		    appDiskCache$set(key = cacheKey, value = msigdbrRes)
-			} else {
-			  print('loading from cache...')
-			  msigdbrRes <- cacheVal
-			}
-		})
-		msigdbResults$result <- msigdbrRes
-
-		msigdbResults$enricher_result <- msigdbrRes[['enricher_result']]
-		msigdbResults$fgsea_result <- as.enrichResult(
-			result = msigdbrRes[['fgsea_result']],
-			inputIds = msigdbrRes[['enricher_result']]@gene,
-			geneSet = msigdbrRes[['enricher_result']]@geneSets
-		)
+	  withBusyIndicatorServer("runmsigdbr_button", {
+	    Sys.sleep(1)
+	    
+	    print('making MSigDB query')
+	    
+	    req(input$msigdbr_species_input)
+	    
+	    withProgress(message = 'making MSigDB query..', {
+	      category <- input$msigdbr_category_input
+	      subcategory <- input$msigdbr_subcategory_input
+	      
+	      if (category == '') {category <- NULL}     
+	      if (subcategory == '') {subcategory <- NULL} 
+	      
+	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$msigdbr_species_input, category, subcategory), 'msigdb')
+	      cacheVal <- appDiskCache$get(cacheKey)
+	      if (class(cacheVal) == 'key_missing') {
+	        print('missing cache key...')
+	        msigdbrRes <- runMSigDB(
+	          DEtable = envir$gene_list,
+	          species = input$msigdbr_species_input,
+	          category = category,
+	          subcategory = subcategory
+	        )
+	        appDiskCache$set(key = cacheKey, value = msigdbrRes)
+	      } else {
+	        print('loading from cache...')
+	        msigdbrRes <- cacheVal
+	      }
+	    })
+	    msigdbResults$result <- msigdbrRes
+	    
+	    msigdbResults$enricher_result <- msigdbrRes[['enricher_result']]
+	    msigdbResults$fgsea_result <- as.enrichResult(
+	      result = msigdbrRes[['fgsea_result']],
+	      inputIds = msigdbrRes[['enricher_result']]@gene,
+	      geneSet = msigdbrRes[['enricher_result']]@geneSets
+	    )
+	    if (is.null(msigdbrRes)) {stop('No significant enrichment found.')}
+	    ##nrow for fgsea & enricher?
+	  })
 	})
 	
 	renderPlotSet(

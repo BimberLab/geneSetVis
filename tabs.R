@@ -7,7 +7,16 @@ tab_load_data <- shinydashboard::tabItem(
       title = 'Input Gene List',
       status = 'primary',
       solidHeader = TRUE,
-      height = '700px',
+      height = '800px',
+      radioButtons("geneIdType",
+                   label = "Select Gene ID Type:",
+                   choices = list("Ensembl" = "Ensembl", 
+                                  "Symbol" = "Symbol"),
+                   selected = "Symbol"),
+      selectInput("inputType",
+                   label = "Input Type:",
+                   choices = list("Gene only", "Gene & avg. LogFC"),
+                   selected = "Gene & avg. LogFC"),
       textAreaInput(
         inputId = 'areaInput',
         label = 'Enter Gene and Average Log Fold Change (avg. LogFC)',
@@ -20,20 +29,18 @@ tab_load_data <- shinydashboard::tabItem(
         resize = NULL
       ),
       actionButton('submit', 'Submit'),
-      checkboxGroupInput(
-        "select_gene_conversion",
-        label = 'Gene ID conversion:',
-        choiceNames = c('Ensembl', 'STRING', 'DAVID'),
-        choiceValues = c('useEnsembl', 'useSTRINGdb', 'useDAVID')
-      )
+      checkboxInput('checkGeneIdTranslate', 
+        label = 'Gene ID Translation:', 
+        value = FALSE, 
+      ),
     ),
     #column = 10,
     shinydashboard::box(
       title = 'Parsed Genes',
       status = 'primary',
       solidHeader = TRUE,
-      height = '700px',
-      div(DT::dataTableOutput('inputTable'))
+      height = '800px',
+      DT::dataTableOutput('inputTable')
     )
   )
 )
@@ -72,7 +79,7 @@ tab_stringdb <- shinydashboard::tabItem(
         value = 0
       )
     ),
-    actionButton('runstringdb_button', 'Run')
+    withBusyIndicatorUI(actionButton('runstringdb_button', 'Run'))
   ),
   #browser(),
   shinydashboard::tabBox(
@@ -146,7 +153,7 @@ tab_msigdbr <- shinydashboard::tabItem(
         choices = NULL
       )
     ),
-    actionButton('runmsigdbr_button', 'Run')
+    withBusyIndicatorUI(actionButton('runmsigdbr_button', 'Run'))
   ),
   shinydashboard::tabBox(
     title = NULL,
@@ -185,8 +192,8 @@ tab_reactome <- shinydashboard::tabItem(
         choices = c('org.Hs.eg.db')
       )
     ),
-      actionButton('runreactome_button', 'Run')
-    ),
+    withBusyIndicatorUI(actionButton('runreactome_button', 'Run')),
+  ), 
   shinydashboard::tabBox(
     title = NULL,
     side = 'right',
@@ -223,7 +230,7 @@ tab_david <- shinydashboard::tabItem(
         choices = c('org.Hs.eg.db')
       )
     ),
-    actionButton('rundavid_button', 'Run')
+    withBusyIndicatorUI(actionButton('rundavid_button', 'Run')), 
   ),
   shinydashboard::tabBox(
     title = NULL,
@@ -233,7 +240,7 @@ tab_david <- shinydashboard::tabItem(
     width = 16,
     tabPanel('Mapped', uiOutput('david_map_stats'))
   ),
-  makeTabBox(title = 'DAVID', key = 'david')
+  makeTabBox(title = 'DAVID', key = 'david'),
 )
 
 
@@ -261,7 +268,7 @@ tab_dose <- shinydashboard::tabItem(
         choices = c('org.Hs.eg.db')
       )
     ),
-    actionButton('rundose_button', 'Run')
+    withBusyIndicatorUI(actionButton('rundose_button', 'Run')), 
   ),
   shinydashboard::tabBox(
     title = NULL,
@@ -299,7 +306,7 @@ tab_ncg <- shinydashboard::tabItem(
         choices = c('org.Hs.eg.db')
       )
     ),
-    actionButton('runncg_button', 'Run')
+    withBusyIndicatorUI(actionButton('runncg_button', 'Run')), 
   ),
   shinydashboard::tabBox(
     title = NULL,
@@ -337,7 +344,7 @@ tab_dgn <- shinydashboard::tabItem(
         choices = c('org.Hs.eg.db')
       )
     ),
-    actionButton('rundgn_button', 'Run')
+    withBusyIndicatorUI(actionButton('rundgn_button', 'Run')), 
   ),
   shinydashboard::tabBox(
     title = NULL,

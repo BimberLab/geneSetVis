@@ -1,26 +1,26 @@
 
 as.enrichResult <- function(result, inputIds, geneSet) {
-  if (nrow(result) == 0) {stop('No terms in input.')}
-
   gene <- inputIds
   gene.length <- length(gene)
   
   result <- result %>% 
     dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, 'Description' = pathway) %>% 
     dplyr::arrange(p.adjust)
-
-  result$GeneRatio <- paste(result$Count, '/', gene.length, sep = '')
-  result$size <- result$Count
-  result$ID <- result$Description
   
-  geneSetsOI <- geneSet[c(result$Description)]
-  genesInGeneSet <- lapply(geneSetsOI, intersect, y=gene)
-  genesInGeneSet.stack <- stack(genesInGeneSet) %>% 
-    rename(ind = 'Description') %>% group_by(Description) %>%
-    summarise(geneID = paste(values, collapse = '/'))
-  
-  result <- merge(result, genesInGeneSet.stack, by = 'Description')
-  rownames(result) <- result$Description
+  if (nrow(result) > 0) {
+    result$GeneRatio <- paste(result$Count, '/', gene.length, sep = '')
+    result$size <- result$Count
+    result$ID <- result$Description
+    
+    geneSetsOI <- geneSet[c(result$Description)]
+    genesInGeneSet <- lapply(geneSetsOI, intersect, y=gene)
+    genesInGeneSet.stack <- stack(genesInGeneSet) %>% 
+      rename(ind = 'Description') %>% group_by(Description) %>%
+      summarise(geneID = paste(values, collapse = '/'))
+    
+    result <- merge(result, genesInGeneSet.stack, by = 'Description')
+    rownames(result) <- result$Description
+  }
 
   new(
     'enrichResult',
@@ -110,9 +110,8 @@ makeTermsTable <- function(table, genesDelim,
 renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = NULL, caption = NULL) {
   output[[paste(key, 'table', sep = '_')]] <- renderDataTable(server = FALSE, {
     er <- enrichTypeResult()
-    validate(need(!is.null(er), paste0('')))
-    validate(need(class(er) == 'enrichResult', 'Input should be of enrichResult type...'))
-    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(!is.null(er) & nrow(er) != 0, ''))
     table <- er %>% as.data.frame() %>% 
       dplyr::rename(
       'Term Description' = Description,
@@ -131,36 +130,40 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = 
   
   output[[paste(key, 'dotplot', sep = '_')]] <- renderPlotly({
     er <- enrichTypeResult()
-    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
-    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::dotplot(er)
   })
   
   output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
-    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
-    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::emapplot(er)
   })
   
   output[[paste(key, 'cnetplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
-    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
-    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::cnetplot(er)
   })
   
   output[[paste(key, 'upsetplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
-    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
-    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::upsetplot(er)
   })
   
   output[[paste(key, 'heatplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
-    validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
-    validate(need(nrow(er) != 0, 'No enriched terms found.'))
+    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
+    validate(
+      need(class(er) == 'enrichResult', 'Need result of enrichResult type.'),
+      need(!is.null(er), 'No enriched terms.'), 
+      need(nrow(er) != 0, 'No enriched terms.')
+    )
     enrichplot::heatplot(er)
   })
 }
@@ -182,4 +185,74 @@ makeTabBox <- function(title, key) {
   )
 }
 
+#https://github.com/daattali/advanced-shiny/tree/master/busy-indicator
+withBusyIndicatorCSS <- "
+.btn-loading-container {
+margin-left: 10px;
+font-size: 1.2em;
+}
+.btn-done-indicator {
+color: green;
+}
+.btn-err {
+margin-top: 10px;
+color: red;
+}
+"
 
+withBusyIndicatorUI <- function(button) {
+  id <- button[['attribs']][['id']]
+  div(
+    shinyjs::useShinyjs(),
+    singleton(tags$head(
+      tags$style(withBusyIndicatorCSS)
+    )),
+    `data-for-btn` = id,
+    button,
+    span(
+      class = "btn-loading-container",
+      shinyjs::hidden(
+        icon("spinner", class = "btn-loading-indicator fa-spin"),
+        icon("check", class = "btn-done-indicator")
+      )
+    ),
+    shinyjs::hidden(
+      div(class = "btn-err",
+          div(icon("exclamation-circle"),
+              tags$b("Error: "),
+              span(class = "btn-err-msg")
+          )
+      )
+    )
+  )
+}
+
+withBusyIndicatorServer <- function(buttonId, expr) {
+  loadingEl <- sprintf("[data-for-btn=%s] .btn-loading-indicator", buttonId)
+  doneEl <- sprintf("[data-for-btn=%s] .btn-done-indicator", buttonId)
+  errEl <- sprintf("[data-for-btn=%s] .btn-err", buttonId)
+  shinyjs::disable(buttonId)
+  shinyjs::show(selector = loadingEl)
+  shinyjs::hide(selector = doneEl)
+  shinyjs::hide(selector = errEl)
+  on.exit({
+    shinyjs::enable(buttonId)
+    shinyjs::hide(selector = loadingEl)
+  })
+  
+  tryCatch({
+    value <- expr
+    shinyjs::show(selector = doneEl)
+    shinyjs::delay(2000, shinyjs::hide(selector = doneEl, anim = TRUE, animType = "fade",
+                                       time = 0.5))
+    value
+  }, error = function(err) { errorFunc(err, buttonId) })
+}
+
+errorFunc <- function(err, buttonId) {
+  errEl <- sprintf("[data-for-btn=%s] .btn-err", buttonId)
+  errElMsg <- sprintf("[data-for-btn=%s] .btn-err-msg", buttonId)
+  errMessage <- gsub("^ddpcr: (.*)", "\\1", err$message)
+  shinyjs::html(html = errMessage, selector = errElMsg)
+  shinyjs::show(selector = errEl, anim = TRUE, animType = "fade")
+}

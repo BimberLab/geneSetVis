@@ -26,25 +26,31 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
   })
   
   observeEvent(input$rundgn_button, {
-    #TODO: validate input present?
-    validate(need(input$dgn_OrgDB_input != '', "Please select OrgDB..."))
-    
-    print('making dgn query')
-    withProgress(message = 'making DGN query...', {
-      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$dgn_OrgDB_input), 'dgn')
-      cacheVal <- appDiskCache$get(cacheKey)
-      if (class(cacheVal) == 'key_missing') {
-        print('missing cache key...')
+    withBusyIndicatorServer("rundgn_button", {
+      Sys.sleep(1)
+      #TODO: validate input present?
+      validate(need(input$dgn_OrgDB_input != '', "Please select OrgDB..."))
+      
+      print('making dgn query')
+      withProgress(message = 'making DGN query...', {
+        cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$dgn_OrgDB_input), 'dgn')
+        cacheVal <- appDiskCache$get(cacheKey)
+        if (class(cacheVal) == 'key_missing') {
+          print('missing cache key...')
+          
+          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
+          dgnRes <- DOSE::enrichDGN(entrezIDs$ENTREZID, readable = T)
+          appDiskCache$set(key = cacheKey, value = dgnRes)
+        } else {
+          print('loading from cache...')
+          dgnRes <- cacheVal
+        }
+        dgnRes@result$ID <- gsub(pattern = 'umls:', replacement = '', dgnRes@result$ID)
+        rownames(dgnRes@result) <- dgnRes@result$ID
         
-        entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
-        dgnRes <- DOSE::enrichDGN(entrezIDs$ENTREZID, readable = T)
-        appDiskCache$set(key = cacheKey, value = dgnRes)
-      } else {
-        print('loading from cache...')
-        dgnRes <- cacheVal
-      }
-      dgnRes@result$ID <- gsub(pattern = 'umls:', replacement = '', dgnRes@result$ID)
-      dgnResults$results <- dgnRes
+        dgnResults$results <- dgnRes
+        if ( is.null(dgnRes) || nrow(dgnRes) == 0 ) {stop('No significant enrichment found.')}
+      })
     })
   })
   

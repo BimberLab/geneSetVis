@@ -114,33 +114,37 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 	stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
 	observeEvent(input$runstringdb_button, {
-		validate(need(input$stringdb_maxHitsToPlot_input != '', "Please type in maxHitsToPlot..."))
-		validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
-		validate(need(input$stringdb_refSpecies_input != '', "Please type in refSpecies..."))
-		refSpeciesNum = stringdbSpecies$species_id[stringdbSpecies$compact_name == input$stringdb_refSpecies_input]
-
-		print('making StringDB query')
-		withProgress(message = 'making STRING query..', {
-		  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_maxHitsToPlot_input, refSpeciesNum, input$stringdb_scoreThreshold_input), 'stringdb')
-		  cacheVal <- appDiskCache$get(cacheKey)
-		  if (class(cacheVal) == 'key_missing') {
-		    print('missing cache key...')
-
-		    stringRes <- runSTRINGdb(
-		      DEtable = envir$gene_list,
-		      maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
-		      refSpeciesNum = refSpeciesNum,
-		      scoreThreshold = input$stringdb_scoreThreshold_input
-		    )
-		    
-		    appDiskCache$set(key = cacheKey, value = stringRes)
-		  
-			} else {
-			  print('loading from cache...')
-			  stringRes <- cacheVal
-			}
-			stringResults$results <- stringRes
-		})
+	  withBusyIndicatorServer("runstringdb_button", {
+	    Sys.sleep(1)
+	    validate(need(input$stringdb_maxHitsToPlot_input != '', "Please type in maxHitsToPlot..."))
+	    validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
+	    validate(need(input$stringdb_refSpecies_input != '', "Please type in refSpecies..."))
+	    refSpeciesNum = stringdbSpecies$species_id[stringdbSpecies$compact_name == input$stringdb_refSpecies_input]
+	    
+	    print('making StringDB query')
+	    withProgress(message = 'making STRING query..', {
+	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_maxHitsToPlot_input, refSpeciesNum, input$stringdb_scoreThreshold_input), 'stringdb')
+	      cacheVal <- appDiskCache$get(cacheKey)
+	      if (class(cacheVal) == 'key_missing') {
+	        print('missing cache key...')
+	        
+	        stringRes <- runSTRINGdb(
+	          DEtable = envir$gene_list,
+	          maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
+	          refSpeciesNum = refSpeciesNum,
+	          scoreThreshold = input$stringdb_scoreThreshold_input
+	        )
+	        
+	        appDiskCache$set(key = cacheKey, value = stringRes)
+	        
+	      } else {
+	        print('loading from cache...')
+	        stringRes <- cacheVal
+	      }
+	      stringResults$results <- stringRes
+	      if (is.null(stringRes)) {stop('No significant enrichment found.')}
+	    })
+	  })
 	})
 
 	output$string_map_stats <- renderText({

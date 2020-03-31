@@ -26,24 +26,29 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
   })
   
   observeEvent(input$rundavid_button, {
-    #TODO: validate input present?
-    validate(need(input$david_OrgDB_input != '', "Please select OrgDB..."))
-    
-    print('making david query')
-    withProgress(message = 'making DAVID query...', {
-      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$david_OrgDB_input), 'david')
-      cacheVal <- appDiskCache$get(cacheKey)
-      if (class(cacheVal) == 'key_missing') {
-        print('missing cache key...')
-        
-        entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$david_OrgDB_input)
-        davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = 'oosap@ohsu.edu')
-        appDiskCache$set(key = cacheKey, value = davidRes)
-      } else {
-        print('loading from cache...')
-        davidRes <- cacheVal
-      }
-      davidResults$results <- davidRes
+    withBusyIndicatorServer("rundavid_button", {
+      Sys.sleep(1)
+      #TODO: validate input present?
+      validate(need(input$david_OrgDB_input != '', "Please select OrgDB..."))
+      
+      print('making david query')
+      withProgress(message = 'making DAVID query...', {
+        cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$david_OrgDB_input), 'david')
+        cacheVal <- appDiskCache$get(cacheKey)
+        if (class(cacheVal) == 'key_missing') {
+          print('missing cache key...')
+          
+          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType="SYMBOL", toType="ENTREZID", OrgDb=input$david_OrgDB_input)
+          davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = 'oosap@ohsu.edu')
+          
+          appDiskCache$set(key = cacheKey, value = davidRes)
+        } else {
+          print('loading from cache...')
+          davidRes <- cacheVal
+        }
+        davidResults$results <- davidRes
+        if (is.null(davidRes)) {stop('No significant enrichment found.')}
+      })
     })
   })
   
