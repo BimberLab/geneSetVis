@@ -38,19 +38,22 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
           
-          if (!require(input$dose_OrgDB_input)) install.packages(input$dose_OrgDB_input)
-          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType=str_to_upper(input$geneIdType), toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
+          #if (!require(input$dose_OrgDB_input)) install.packages(input$dose_OrgDB_input)
+          fromType <- ifelse(grepl('id', input$dose_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+          entrezIDs <- bitr(geneID = envir$gene_list[[input$dose_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
           doseRes <- DOSE::enrichDO(entrezIDs$ENTREZID, readable = T)
           appDiskCache$set(key = cacheKey, value = doseRes)
         } else {
           print('loading from cache...')
           doseRes <- cacheVal
         }
+        
+        if ( is.null(doseRes) || nrow(doseRes) == 0 ) {stop('No significant enrichment found.')}
         doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
         rownames(doseRes@result) <- doseRes@result$ID
         doseResults$results <- doseRes
         
-        if ( is.null(doseRes) || nrow(doseRes) == 0 ) {stop('No significant enrichment found.')}
+        
       })
     })
   })

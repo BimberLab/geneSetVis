@@ -38,9 +38,10 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
           
-          if (!require(input$david_OrgDB_input)) install.packages(input$david_OrgDB_input)
+          #if (!require(input$david_OrgDB_input)) install.packages(input$david_OrgDB_input)
           
-          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType=str_to_upper(input$geneIdType), toType="ENTREZID", OrgDb=input$david_OrgDB_input)
+          fromType <- ifelse(grepl('id', input$david_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+          entrezIDs <- bitr(geneID = envir$gene_list[[input$david_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$david_OrgDB_input)
           davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = 'oosap@ohsu.edu')
           
           appDiskCache$set(key = cacheKey, value = davidRes)
@@ -48,8 +49,9 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
           print('loading from cache...')
           davidRes <- cacheVal
         }
+        
+        if ( is.null(davidRes)|| nrow(davidRes) == 0 ) {stop('No significant enrichment found.')}
         davidResults$results <- davidRes
-        if (is.null(davidRes)) {stop('No significant enrichment found.')}
       })
     })
   })

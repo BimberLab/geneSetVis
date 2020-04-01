@@ -88,6 +88,16 @@ server = function(input, output, session) {
       )
     ) 
   })
+  
+  observe({
+    geneColnames <- envir$gene_list
+    geneColnames['avg_logFC'] <- NULL
+    updateSelectInput(session, "reactome_selectGeneCol", choices = colnames(geneColnames))
+    updateSelectInput(session, "david_selectGeneCol", choices = colnames(geneColnames))
+    updateSelectInput(session, "dose_selectGeneCol", choices = colnames(geneColnames))
+    updateSelectInput(session, "ncg_selectGeneCol", choices = colnames(geneColnames))
+    updateSelectInput(session, "dgn_selectGeneCol", choices = colnames(geneColnames))
+    })
 
   stringDbModule(session, input, output, envir, appDiskCache)
   msigdbModule(session, input, output, envir, appDiskCache)

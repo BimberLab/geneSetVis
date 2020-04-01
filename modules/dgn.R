@@ -38,19 +38,21 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
           
-          if (!require(input$dgn_OrgDB_input)) install.packages(input$dgn_OrgDB_input)
-          entrezIDs <- bitr(geneID = envir$gene_list$gene, fromType=str_to_upper(input$geneIdType), toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
+          #if (!require(input$dgn_OrgDB_input)) install.packages(input$dgn_OrgDB_input)
+          fromType <- ifelse(grepl('id', input$dgn_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+          entrezIDs <- bitr(geneID = envir$gene_list[[input$dgn_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
           dgnRes <- DOSE::enrichDGN(entrezIDs$ENTREZID, readable = T)
           appDiskCache$set(key = cacheKey, value = dgnRes)
         } else {
           print('loading from cache...')
           dgnRes <- cacheVal
         }
+        if ( is.null(dgnRes) || nrow(dgnRes) == 0 ) {stop('No significant enrichment found.')}
         dgnRes@result$ID <- gsub(pattern = 'umls:', replacement = '', dgnRes@result$ID)
         rownames(dgnRes@result) <- dgnRes@result$ID
         
         dgnResults$results <- dgnRes
-        if ( is.null(dgnRes) || nrow(dgnRes) == 0 ) {stop('No significant enrichment found.')}
+        
       })
     })
   })

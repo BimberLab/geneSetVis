@@ -189,7 +189,13 @@ tab_reactome <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+      ),
+      selectInput(
+        inputId = 'reactome_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('runreactome_button', 'Run')),
@@ -227,7 +233,13 @@ tab_david <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+      ),
+      selectInput(
+        inputId = 'david_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('rundavid_button', 'Run')), 
@@ -265,7 +277,13 @@ tab_dose <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+      ),
+      selectInput(
+        inputId = 'dose_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('rundose_button', 'Run')), 
@@ -303,7 +321,13 @@ tab_ncg <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+      ),
+      selectInput(
+        inputId = 'ncg_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('runncg_button', 'Run')), 
@@ -341,7 +365,13 @@ tab_dgn <- shinydashboard::tabItem(
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+      ),
+      selectInput(
+        inputId = 'dgn_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('rundgn_button', 'Run')), 
