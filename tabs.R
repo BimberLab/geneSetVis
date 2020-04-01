@@ -90,14 +90,14 @@ tab_stringdb <- shinydashboard::tabItem(
     width = 16,
     tabPanel('Mapped', uiOutput('string_map_stats'))
   ),
-  shinydashboard::tabBox(
-    title = NULL,
-    side = 'right',
-    height = NULL,
-    selected = 'Network (PNG)',
-    width = 16,
-    tabPanel( 'Network (PNG)', imageOutput('stringdb_network_png'))
-  ), 
+  # shinydashboard::tabBox(
+  #   title = NULL,
+  #   side = 'right',
+  #   height = NULL,
+  #   selected = 'Network (PNG)',
+  #   width = 16,
+  #   tabPanel( 'Network (PNG)', imageOutput('stringdb_network_png'))
+  # ), 
   shinydashboard::tabBox(
     title = NULL,
     side = 'right',

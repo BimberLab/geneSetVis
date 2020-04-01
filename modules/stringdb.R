@@ -91,6 +91,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 
 			addSubset = paste('link', sep = '')
 			return_list[[addSubset]] <- link
+			
 
 		}
 
@@ -123,7 +124,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	    
 	    print('making StringDB query')
 	    withProgress(message = 'making STRING query..', {
-	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_maxHitsToPlot_input, refSpeciesNum, input$stringdb_scoreThreshold_input), 'stringdb')
+	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdb')
 	      cacheVal <- appDiskCache$get(cacheKey)
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
@@ -148,7 +149,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	})
 
 	output$string_map_stats <- renderText({
-	  validate(need(!is.null(stringResults$results) & length(stringRes) != 0, "No mapped genes."))
+	  validate(need(!is.null(stringResults$results) | length(stringResults$results) != 0, "No mapped genes."))
 	  num_genes_mapped <- sum(!is.na(stringResults$results[['hits']]))
 	  HTML(
 	    '<b>Mapped genes</b><br>',
@@ -166,10 +167,25 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	  stringResults$results[[toSubset]]
 	})
 
-	output$stringdb_network_png <- renderImage(deleteFile = T, {
+	output$stringdb_network_png <- renderImage(deleteFile = F, {
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
-		png_file <- paste('network', '.png', sep = '')
-		list(src = paste('', png_file, sep = ''), height='100%', width='100%')
+	  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdbpng')
+	  cacheVal <- appDiskCache$get(cacheKey)
+	  if (class(cacheVal) == 'key_missing') {
+	    print('missing cache key...')
+	    
+	    png_file <- paste('network', '.png', sep = '')
+	    plot_png <- list(src = paste('', png_file, sep = ''), height='100%', width='100%')
+	    #plot_png
+	    appDiskCache$set(key = cacheKey, value = plot_png)
+	    
+	  } else {
+	    print('loading from cache...')
+	    plot_png <- cacheVal
+	  }
+		
+	  plot_png
+		
 	})
 
 	# TODO: download entire dataset
