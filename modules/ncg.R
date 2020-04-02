@@ -1,13 +1,13 @@
-runNCG <- function(DEtable, species) {
+runNCG <- function(DEtable, geneCol, species) {
   ##dedup table to remove multiple tests
   if (!is.null(DEtable$test)){
     DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
-    DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
+    DEtable <- DEtable[match(unique(DEtable[[geneCol]]), DEtable[[geneCol]]), ]
   }
   
   return_list = list()
   tryCatch({
-    entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable$gene), 'ENTREZID', 'SYMBOL')
+    entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable[[geneCol]]), 'ENTREZID', 'SYMBOL')
     
     ncg <- DOSE::enrichNCG(entrezIDs, OrgDb = human, pvalueCutoff = 1, qvalueCutoff = 1)
     
@@ -20,7 +20,7 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
   )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(envir$gene_list, {
+  observeEvent(list(envir$gene_list), {
     print('resetting ncg')
     ncgResults$results <- NULL
   })
@@ -33,12 +33,13 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
       
       print('making ncg query')
       withProgress(message = 'making NCG query...', {
-        cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$ncg_OrgDB_input), 'ncg')
+        cacheKey <- makeDiskCacheKey(list(envir$gene_list[[input$ncg_selectGeneCol]], input$ncg_OrgDB_input), 'ncg')
         cacheVal <- appDiskCache$get(cacheKey)
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
           
           #if (!require(input$ncg_OrgDB_input)) install.packages(input$ncg_OrgDB_input)
+          ncgResults$results <- NULL
           fromType <- ifelse(grepl('id', input$ncg_selectGeneCol), 'ENSEMBL', 'SYMBOL')
           entrezIDs <- bitr(geneID = envir$gene_list[[input$ncg_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$ncg_OrgDB_input)
           ncgRes <- DOSE::enrichNCG(entrezIDs$ENTREZID, readable = T)
@@ -47,9 +48,10 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
           print('loading from cache...')
           ncgRes <- cacheVal
         }
-        ncgResults$results <- ncgRes
         
-        if ( is.null(ncgRes) || nrow(ncgRes) == 0 ) {stop('No significant enrichment found.')}
+        ncgResults$results <- ncgRes
+        if ( is.null(ncgResults$results) || nrow(ncgResults$results) == 0 ) {stop('No significant enrichment found.')}
+        
       })
     })
   })
@@ -63,7 +65,7 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
   )
   
   output$ncg_map_stats <- renderText({
-    validate(need(!is.null(ncgResults$results), "No mapped genes."))
+    validate(need(!is.null(ncgResults$results) & length(ncgResults$results) != 0, "No mapped genes."))
     if (nrow(ncgResults$results@result) > 0) {
       num_genes_mapped <- str_split(noquote(ncgResults$results@result$GeneRatio[1]), '/')[[1]][2]
     } else {
@@ -71,7 +73,7 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
     }
     HTML(
       '<b>Mapped genes</b><br>',
-      paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')
+      paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$ncg_selectGeneCol]]), ' genes were mapped.')
     )
   })
   

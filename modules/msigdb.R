@@ -1,15 +1,15 @@
 
-runMSigDB <- function(DEtable, species, category = NULL, subcategory = NULL) {
+runMSigDB <- function(DEtable, geneCol, species, category = NULL, subcategory = NULL) {
 	##get species datdset
   species.msig = msigdbr::msigdbr(species = species, category = category, subcategory = subcategory)
 
 	##subset columms of interest: gene-set name (gs_name) and gene symbols or enterez id
-  msigTerm = species.msig %>% dplyr::select(gs_name, gene_symbol, gs_cat, gs_subcat) %>% as.data.frame()
+  msigTerm = species.msig %>% dplyr::select(gs_name, gene_symbol, entrez_gene, gs_cat, gs_subcat) %>% as.data.frame()
 
 	##dedup table to remove multiple tests
 	if (!is.null(DEtable$test)){
 		DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
-		DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
+		DEtable <- DEtable[match(unique(DEtable[[geneCol]]), DEtable[[geneCol]]), ]
 	}
 
 	return_list = list()
@@ -17,8 +17,9 @@ runMSigDB <- function(DEtable, species, category = NULL, subcategory = NULL) {
 		clusterTable <- DEtable
 
 		if (nrow(clusterTable) > 0) {
+		  
 			##Use the gene sets data frame for clusterProfiler (for genes as gene symbols)
-			msig_enricher <- clusterProfiler::enricher(gene = clusterTable$gene, TERM2GENE = msigTerm)
+			msig_enricher <- clusterProfiler::enricher(gene = clusterTable[[geneCol]], TERM2GENE = msigTerm)
 			#msig_enricher_plot <- dotplot(msig_enricher)
 
 			#clusterProfiler::geneInCategory()
@@ -42,7 +43,7 @@ runMSigDB <- function(DEtable, species, category = NULL, subcategory = NULL) {
 
 			##name the marker genes with their avgLogFC
 			ranks <- clusterTable$avg_logFC
-			ranks <- setNames(ranks, clusterTable$gene)
+			ranks <- setNames(ranks, clusterTable[[geneCol]])
 
 			set.seed(1234)
 			fgsea_results <- fgsea(
@@ -96,7 +97,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	)
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(envir$gene_list, {
+	observeEvent(list(envir$gene_list), {
 		print('resetting msigdb')
 		msigdbResults$results <- NULL
 		msigdbResults$enricher_result <- NULL
@@ -140,12 +141,21 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	      if (category == '') {category <- NULL}     
 	      if (subcategory == '') {subcategory <- NULL} 
 	      
-	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$msigdbr_species_input, category, subcategory), 'msigdb')
+	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$msigdb_selectGeneCol, input$msigdbr_species_input, category, subcategory), 'msigdb')
 	      cacheVal <- appDiskCache$get(cacheKey)
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
+	        
+	        type <- ifelse(grepl('id', input$msigdb_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+	        if (type != 'SYMBOL') {
+	          msigdbResults$enricher_result <- NULL
+	          msigdbResults$fgsea_result <- NULL
+	          stop('MsigDB only accepts gene columns of type SYMBOL')
+	          }
+	        
 	        msigdbrRes <- runMSigDB(
 	          DEtable = envir$gene_list,
+	          geneCol = input$msigdb_selectGeneCol,
 	          species = input$msigdbr_species_input,
 	          category = category,
 	          subcategory = subcategory
@@ -156,11 +166,17 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	        msigdbrRes <- cacheVal
 	      }
 	    })
+	    
 	    msigdbResults$result <- msigdbrRes
-	    
-	    if (is.null(stringRes) | length(msigdbrRes[['enricher_result']]) == 0) {stop('No significant enrichment found.')}
-	    
 	    msigdbResults$enricher_result <- msigdbrRes[['enricher_result']]
+	    
+	    if (is.null(msigdbResults$enricher_result) | length(msigdbResults$enricher_result) == 0) {
+	      msigdbResults$enricher_result <- NULL
+	      msigdbResults$fgsea_result <- NULL
+	      stop('No significant enrichment found.')
+	      }
+	    
+	    
 	    msigdbResults$fgsea_result <- as.enrichResult(
 	      result = msigdbrRes[['fgsea_result']],
 	      inputIds = msigdbrRes[['enricher_result']]@gene,

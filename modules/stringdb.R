@@ -1,4 +1,4 @@
-runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
+runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
   string_db <- STRINGdb::STRINGdb$new(
       version = '10',
       species = refSpeciesNum,
@@ -17,7 +17,7 @@ runSTRINGdb <- function(DEtable, maxHitsToPlot = 200, refSpeciesNum = 9606, scor
 		clusterTable <- DEtable
 
 		if (nrow(DEtable) > 0) {
-			cluster.map <- string_db$map(clusterTable, 'gene', removeUnmappedRows = FALSE)
+			cluster.map <- string_db$map(clusterTable, geneCol, removeUnmappedRows = FALSE)
 			hits <- cluster.map$STRING_id
 			if ( sum(!is.na(hits)) == 0 ) {stop('No mapped genes.')}
 
@@ -108,7 +108,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	)
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(envir$gene_list, {
+	observeEvent(list(envir$gene_list), {
 		print('resetting stringdb')
 		stringResults$results <- NULL
 	})
@@ -124,13 +124,14 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	    
 	    print('making StringDB query')
 	    withProgress(message = 'making STRING query..', {
-	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdb')
+	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdb')
 	      cacheVal <- appDiskCache$get(cacheKey)
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
 	        
 	        stringRes <- runSTRINGdb(
 	          DEtable = envir$gene_list,
+	          geneCol = input$stringdb_selectGeneCol,
 	          maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
 	          refSpeciesNum = refSpeciesNum,
 	          scoreThreshold = input$stringdb_scoreThreshold_input
@@ -142,18 +143,20 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	        print('loading from cache...')
 	        stringRes <- cacheVal
 	      }
+	      
 	      stringResults$results <- stringRes
-	      if (is.null(stringRes) | length(stringRes) == 0) {stop('No significant enrichment found.')}
+	      if (is.null(stringResults$results) | length(stringResults$results) == 0) {stop('No significant enrichment found.')}
+	      
 	    })
 	  })
 	})
 
 	output$string_map_stats <- renderText({
-	  validate(need(!is.null(stringResults$results) | length(stringResults$results) != 0, "No mapped genes."))
+	  validate(need(!is.null(stringResults$results) & length(stringResults$results) != 0, "No mapped genes."))
 	  num_genes_mapped <- sum(!is.na(stringResults$results[['hits']]))
 	  HTML(
 	    '<b>Mapped genes</b><br>',
-	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.'),
+	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$stringdb_selectGeneCol]]), ' genes were mapped.'),
 	    '<p>',
 	    hyperlink_text(url = stringResults$results[['link']], text = 'View mapped genes on string-db website', hide = NULL)
 	  )

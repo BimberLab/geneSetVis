@@ -1,13 +1,13 @@
-runDGN <- function(DEtable, species) {
+runDGN <- function(DEtable, geneCol, species) {
   ##dedup table to remove multiple tests
   if (!is.null(DEtable$test)){
     DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
-    DEtable <- DEtable[match(unique(DEtable$gene), DEtable$gene), ]
+    DEtable <- DEtable[match(unique(DEtable[[geneCol]]), DEtable[[geneCol]]), ]
   }
   
   return_list = list()
   tryCatch({
-    entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable$gene), 'ENTREZID', 'SYMBOL')
+    entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable[[geneCol]]), 'ENTREZID', 'SYMBOL')
     
     dgn <- DOSE::enrichDGN(entrezIDs, OrgDb = human, pvalueCutoff = 1, qvalueCutoff = 1)
     
@@ -20,7 +20,7 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
   )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(envir$gene_list, {
+  observeEvent(list(envir$gene_list), {
     print('resetting dgn')
     dgnResults$results <- NULL
   })
@@ -33,12 +33,13 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
       
       print('making dgn query')
       withProgress(message = 'making DGN query...', {
-        cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$dgn_OrgDB_input), 'dgn')
+        cacheKey <- makeDiskCacheKey(list(envir$gene_list[[input$dgn_selectGeneCol]], input$dgn_OrgDB_input), 'dgn')
         cacheVal <- appDiskCache$get(cacheKey)
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
           
           #if (!require(input$dgn_OrgDB_input)) install.packages(input$dgn_OrgDB_input)
+          dgnResults$results <- NULL
           fromType <- ifelse(grepl('id', input$dgn_selectGeneCol), 'ENSEMBL', 'SYMBOL')
           entrezIDs <- bitr(geneID = envir$gene_list[[input$dgn_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
           dgnRes <- DOSE::enrichDGN(entrezIDs$ENTREZID, readable = T)
@@ -47,11 +48,14 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
           print('loading from cache...')
           dgnRes <- cacheVal
         }
-        if ( is.null(dgnRes) || nrow(dgnRes) == 0 ) {stop('No significant enrichment found.')}
+        
+        dgnResults$results <- dgnRes
+        if ( is.null(dgnResults$results) || nrow(dgnResults$results) == 0 ) {stop('No significant enrichment found.')}
+        
         dgnRes@result$ID <- gsub(pattern = 'umls:', replacement = '', dgnRes@result$ID)
         rownames(dgnRes@result) <- dgnRes@result$ID
         
-        dgnResults$results <- dgnRes
+        
         
       })
     })
@@ -66,11 +70,11 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
   )
   
   output$dgn_map_stats <- renderText({
-    validate(need(!is.null(dgnResults$results), "No mapped genes."))
+    validate(need(!is.null(dgnResults$results) & length(dgnResults$results) != 0, "No mapped genes."))
     num_genes_mapped <- str_split(noquote(dgnResults$results@result$GeneRatio[1]), '/')[[1]][2]
     HTML(
       '<b>Mapped genes</b><br>',
-      paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')
+      paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$dgn_selectGeneCol]]), ' genes were mapped.')
     )
   })
   

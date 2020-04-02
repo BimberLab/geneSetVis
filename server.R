@@ -92,6 +92,8 @@ server = function(input, output, session) {
   observe({
     geneColnames <- envir$gene_list
     geneColnames['avg_logFC'] <- NULL
+    updateSelectInput(session, "stringdb_selectGeneCol", choices = colnames(geneColnames))
+    updateSelectInput(session, "msigdb_selectGeneCol", choices = colnames(geneColnames))
     updateSelectInput(session, "reactome_selectGeneCol", choices = colnames(geneColnames))
     updateSelectInput(session, "david_selectGeneCol", choices = colnames(geneColnames))
     updateSelectInput(session, "dose_selectGeneCol", choices = colnames(geneColnames))

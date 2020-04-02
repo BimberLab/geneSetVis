@@ -63,6 +63,12 @@ tab_stringdb <- shinydashboard::tabItem(
     collapsible = TRUE,
     flowLayout(
       selectInput(
+        inputId = 'stringdb_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
+      ),
+      selectInput(
         inputId = 'stringdb_refSpecies_input',
         label = 'Reference species:',
         selected = 'Homo sapiens',
@@ -134,6 +140,12 @@ tab_msigdbr <- shinydashboard::tabItem(
     collapsible = TRUE,
     HTML('<a href="https://www.gsea-msigdb.org/gsea/msigdb/index.jsp" target="_blank" style="font-weight: bold;">Click here for more information on available MSigDB collections</a><br><br>'),
   	flowLayout(
+  	  selectInput(
+  	    inputId = 'msigdb_selectGeneCol',
+  	    label = 'Select gene column to use:',
+  	    selected = 'gene',
+  	    choices = ''
+  	  ),
       selectInput(
         inputId = 'msigdbr_species_input',
         label = 'Reference species',
@@ -183,19 +195,18 @@ tab_reactome <- shinydashboard::tabItem(
     solidHeader = TRUE,
     width = 16,
     collapsible = TRUE,
-    flowLayout(
+    flowLayout(selectInput(
+      inputId = 'reactome_selectGeneCol',
+      label = 'Select gene column to use:',
+      selected = 'gene',
+      choices = ''
+    ),
       selectInput(
         inputId = 'reactome_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
-      ),
-      selectInput(
-        inputId = 'reactome_selectGeneCol',
-        label = 'Select gene column to use:',
-        selected = 'gene',
-        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('runreactome_button', 'Run')),
@@ -229,17 +240,17 @@ tab_david <- shinydashboard::tabItem(
     collapsible = TRUE,
     flowLayout(
       selectInput(
+        inputId = 'david_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
+      ),
+      selectInput(
         inputId = 'david_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
-      ),
-      selectInput(
-        inputId = 'david_selectGeneCol',
-        label = 'Select gene column to use:',
-        selected = 'gene',
-        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('rundavid_button', 'Run')), 
@@ -273,17 +284,17 @@ tab_dose <- shinydashboard::tabItem(
     collapsible = TRUE,
     flowLayout(
       selectInput(
+        inputId = 'dose_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
+      ),
+      selectInput(
         inputId = 'dose_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
-      ),
-      selectInput(
-        inputId = 'dose_selectGeneCol',
-        label = 'Select gene column to use:',
-        selected = 'gene',
-        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('rundose_button', 'Run')), 
@@ -317,17 +328,17 @@ tab_ncg <- shinydashboard::tabItem(
     collapsible = TRUE,
     flowLayout(
       selectInput(
+        inputId = 'ncg_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
+      ),
+      selectInput(
         inputId = 'ncg_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
-      ),
-      selectInput(
-        inputId = 'ncg_selectGeneCol',
-        label = 'Select gene column to use:',
-        selected = 'gene',
-        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('runncg_button', 'Run')), 
@@ -361,17 +372,17 @@ tab_dgn <- shinydashboard::tabItem(
     collapsible = TRUE,
     flowLayout(
       selectInput(
+        inputId = 'dgn_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
+      ),
+      selectInput(
         inputId = 'dgn_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
-      ),
-      selectInput(
-        inputId = 'dgn_selectGeneCol',
-        label = 'Select gene column to use:',
-        selected = 'gene',
-        choices = ''
       )
     ),
     withBusyIndicatorUI(actionButton('rundgn_button', 'Run')), 
