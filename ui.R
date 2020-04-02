@@ -45,6 +45,11 @@ ui = shinydashboard::dashboardPage(
         text = 'DGN',
         tabName = 'dgn',
         icon = icon(NULL)
+      ),
+      shinydashboard::menuItem(
+        text = 'enrichR',
+        tabName = 'enrichr',
+        icon = icon(NULL)
       )
     )
   ),
@@ -56,6 +61,7 @@ ui = shinydashboard::dashboardPage(
                              tab_david,
                              tab_dose,
                              tab_ncg,
-                             tab_dgn)
+                             tab_dgn,
+                             tab_enrichr)
   )
 )

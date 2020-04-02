@@ -162,7 +162,6 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	  )
 	})
 	
-	
 
 	output$stringdb_network <- renderPlot({
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))

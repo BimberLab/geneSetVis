@@ -99,6 +99,7 @@ server = function(input, output, session) {
     updateSelectInput(session, "dose_selectGeneCol", choices = colnames(geneColnames))
     updateSelectInput(session, "ncg_selectGeneCol", choices = colnames(geneColnames))
     updateSelectInput(session, "dgn_selectGeneCol", choices = colnames(geneColnames))
+    updateSelectInput(session, "enrichr_selectGeneCol", choices = colnames(geneColnames))
     })
 
   stringDbModule(session, input, output, envir, appDiskCache)
@@ -108,6 +109,7 @@ server = function(input, output, session) {
   doseModule(session, input, output, envir, appDiskCache)
   ncgModule(session, input, output, envir, appDiskCache)
   dgnModule(session, input, output, envir, appDiskCache)
+  enrichrModule(session, input, output, envir, appDiskCache)
 }
 
 
