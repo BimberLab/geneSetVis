@@ -398,3 +398,48 @@ tab_dgn <- shinydashboard::tabItem(
   makeTabBox(title = 'DGN', key = 'dgn')
 )
 
+
+tab_enrichr <- shinydashboard::tabItem(
+  tabName = 'enrichr',
+  shinydashboard::box(
+    title = tagList(p('Run enrichR', style = "padding-right: 5px; display: inline"), 
+                    actionButton(
+                      inputId = "enrichr_resource_info",
+                      label = "info",
+                      icon = NULL,
+                      class = "btn-xs",
+                      title = "Show additional information for this panel."
+                    )),
+    status = 'primary',
+    solidHeader = TRUE,
+    width = 16,
+    collapsible = TRUE,
+    flowLayout(
+      selectInput(
+        inputId = 'enrichr_selectGeneCol',
+        label = 'Select gene column to use:',
+        selected = 'gene',
+        choices = ''
+      ),
+      shinyWidgets::pickerInput(inputId = "enrichr_db", 
+                                label = 'Select database(s) to query:', 
+                                choices = c('', listEnrichrDbs()$libraryName),
+                                options = list(`actions-box` = TRUE), 
+                                multiple = T)
+      ),
+    withBusyIndicatorUI(actionButton('runenrichr_button', 'Run'))
+  ), 
+  uiOutput('enrichrResults_selected_ui'),
+  dataTableOutput('enrichrResults_selected_table')
+  # ),
+  # shinydashboard::tabBox(
+  #   title = NULL,
+  #   side = 'right',
+  #   height = NULL,
+  #   selected = 'Mapped',
+  #   width = 16,
+  #   tabPanel('Mapped', uiOutput('enrichr_map_stats'))
+  # ),
+  # makeTabBox(title = 'enrichR', key = 'enrichr')
+)
+
