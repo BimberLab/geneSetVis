@@ -60,7 +60,7 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	  output = output,
 		key = 'reactome',
 		enrichTypeResult = reactive(reactomeResults$results),
-		termURL = "https://reactome.org/PathwayBrowser/#/",
+		datasetURL = "https://reactome.org/PathwayBrowser/#/",
 		datasetName = 'Reactome'
 	)
 

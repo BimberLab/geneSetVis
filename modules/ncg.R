@@ -60,7 +60,7 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
     output = output,
     key = 'ncg',
     enrichTypeResult = reactive(ncgResults$results),
-    termURL = "",
+    datasetURL = "",
     datasetName = 'ncg'
   )
   

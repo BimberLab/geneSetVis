@@ -65,7 +65,7 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
     output = output,
     key = 'dgn',
     enrichTypeResult = reactive(dgnResults$results),
-    termURL = "https://www.disgenet.org/browser/0/1/0/",
+    datasetURL = "https://www.disgenet.org/browser/0/1/0/",
     datasetName = 'dgn'
   )
   

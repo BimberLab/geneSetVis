@@ -39,9 +39,9 @@ as.enrichResult <- function(result, inputIds, geneSet) {
 }
 
 
-hyperlink_text <- function(url, text, hide=text) {
-  for (t in text) {
-   s <-  paste0('<a href="',url,hide,'" target="_blank">',text,'</a>')
+hyperlink_text <- function(href_base, href_cont, link_text=href_cont) {
+  for (h in href_cont) {
+   s <-  paste0('<a href="',href_base,href_cont,'" target="_blank">',link_text,'</a>')
    return(s)
     }
 }
@@ -49,12 +49,12 @@ hyperlink_text <- function(url, text, hide=text) {
 
 multi_hyperlink_text <- function(labels, links){
   out <- mapply(
-    function(text, url){
-      dat <- hyperlink_text(text, url = url)
-      dat <- split(dat, seq_along(text))
+    function(hrefs, link_texts){
+      ret <- hyperlink_text(href_base = hrefs, href_cont = link_texts)
+      ret <- split(ret, seq_along(link_texts))
       }, 
-    text = strsplit(labels, split = ","),
-    url = strsplit(links, split = ","), SIMPLIFY = FALSE, USE.NAMES = FALSE
+    link_texts = strsplit(labels, split = ","),
+    hrefs = strsplit(links, split = ","), SIMPLIFY = FALSE, USE.NAMES = FALSE
   )
   
   out <- sapply(out, paste, collapse=",")
@@ -68,14 +68,17 @@ makeDiskCacheKey <- function(inputList, prefix) {
 
 
 makeTermsTable <- function(table, genesDelim,
-                           termURL, 
+                           datasetURL, 
                            caption = NULL, 
                            includeColumns = c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')) {
   
   table$'Genes in Term' <- gsub(pattern = genesDelim, replacement = ',', x = table$'Genes in Term')
-  
-  table$'Term Description' <- hyperlink_text(url = termURL, text = table$'Term Description', hide = table$'Term ID')
   table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+  
+  if(!is.null(datasetURL)) {
+    table$'Term Description' <- hyperlink_text(href_base = datasetURL, href_cont = table$'Term ID', link_text = table$'Term Description')
+  }
+  
   
   table <- table %>%
     dplyr::select(tidyselect::all_of(includeColumns)) %>%
@@ -107,7 +110,7 @@ makeTermsTable <- function(table, genesDelim,
 }
 
 
-renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = NULL, caption = NULL) {
+renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName = NULL, caption = NULL) {
   output[[paste(key, 'table', sep = '_')]] <- renderDataTable(server = FALSE, {
     er <- enrichTypeResult()
     # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
@@ -124,7 +127,7 @@ renderPlotSet <- function(output, key, enrichTypeResult, termURL, datasetName = 
     )  
     
     makeTermsTable(table = table, genesDelim = '/',
-                   termURL = termURL, 
+                   datasetURL = datasetURL, 
                    caption = caption,
                    includeColumns = c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term'))  })
   

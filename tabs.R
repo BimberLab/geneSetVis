@@ -414,6 +414,7 @@ tab_enrichr <- shinydashboard::tabItem(
     solidHeader = TRUE,
     width = 16,
     collapsible = TRUE,
+    HTML('<a href="https://amp.pharm.mssm.edu/Enrichr/#stats" target="_blank" style="font-weight: bold;">Click here for more information on available enrichR databases/libraries</a><br><br>'),
     flowLayout(
       selectInput(
         inputId = 'enrichr_selectGeneCol',

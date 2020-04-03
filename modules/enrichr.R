@@ -1,8 +1,4 @@
 
-# y <- enrichr(genes = as.vector(sample_data$gene), databases = dbs$libraryName[15])
-# y[['GO_Molecular_Function_2015']]
-
-
 enrichrModule <- function(session, input, output, envir, appDiskCache) {
   enrichrResults <- reactiveValues(
     results = NULL
@@ -58,7 +54,6 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
           table <- enrichrResults$results[[input$enrichrResults_selected]] %>%
             dplyr::rename(
               'Term Description' = Term,
-              'Proteins' = Overlap,
               'p-Value' = P.value,
               'p-Value (adj.)' = Adjusted.P.value,
               'Genes in Term' = Genes
@@ -66,10 +61,10 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
           
           makeTermsTable(
             table = table,
-            genesDelim = ',',
-            termURL = NULL,
+            genesDelim = ';',
+            datasetURL = NULL,
             caption = NULL,
-            includeColumns = c('Term Description', 'Proteins', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
+            includeColumns = c('Term Description', 'p-Value (adj.)', 'p-Value', 'Genes in Term', 'Overlap', 'Odds.Ratio', 'Combined.Score')
           )
           
         })
@@ -78,13 +73,11 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
     })
   })
   
-  
-  
   renderPlotSet(
     output = output,
     key = 'enrichr',
     enrichTypeResult = reactive(enrichrResults$results),
-    termURL = "https://www.disgenet.org/browser/0/1/0/",
+    datasetURL = "https://www.disgenet.org/browser/0/1/0/",
     datasetName = 'enrichr'
   )
   
@@ -99,14 +92,15 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
   
   observeEvent(input$enrichr_resource_info, {
     enrichr_resource_info <- list(
-      title = "enrichr Resource info",
+      title = "enrichR Resource info",
       text = HTML(
-        '<b>DisGeNET Browser</b><br>
-				DisGeNET integrates data from expert curated repositories, GWAS catalogues, animal models and the scientific literature. DisGeNET data are homogeneously annotated with controlled vocabularies and community-driven ontologies. Additionally, several original metrics are provided to assist the prioritization of genotype–phenotype relationships.
+        '<b>enrichR</b><br>
+				\"Enrichr contains 164 gene-set libraries where some libraries are borrowed from other tools while many other libraries are newly created and only available in Enrichr. The gene-set libraries provided by Enrichr are divided into six categories: transcription, pathways, ontologies, diseases/drugs, cell types and miscellaneous.\"
+				<a href=https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-128#Sec2 target="_blank"><b>Chen et al. (2013)</b></a>
 				<p>
-				<li><a href=https://www.disgenet.org/home/
-				title="DisGeNET Browser website"
-				target="_blank"><b>DisGeNET Browser website</b></a></li>
+				<li><a href=https://amp.pharm.mssm.edu/Enrichr/
+				title="enrichR website"
+				target="_blank"><b>enrichR website</b></a></li>
 				'
       )
     )

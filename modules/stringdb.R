@@ -208,7 +208,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	  makeTermsTable(
 	    table = table,
 	    genesDelim = ',',
-	    termURL = "https://www.ebi.ac.uk/QuickGO/term/",
+	    datasetURL = "https://www.ebi.ac.uk/QuickGO/term/",
 	    caption = NULL,
 	    includeColumns = c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
 	  )
@@ -233,7 +233,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	  makeTermsTable(
 	    table = table,
 	    genesDelim = ',',
-	    termURL = "https://www.genome.jp/dbget-bin/www_bget?map",
+	    datasetURL = "https://www.genome.jp/dbget-bin/www_bget?map",
 	    caption = NULL,
 	    includeColumns = c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
 	  )

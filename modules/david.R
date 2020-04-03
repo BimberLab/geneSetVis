@@ -61,7 +61,7 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
     output = output,
     key = 'david',
     enrichTypeResult = reactive(davidResults$results),
-    termURL = "",
+    datasetURL = "",
     datasetName = 'david'
   )
   

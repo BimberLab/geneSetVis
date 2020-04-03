@@ -63,7 +63,7 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
     output = output,
     key = 'dose',
     enrichTypeResult = reactive(doseResults$results),
-    termURL = "https://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http%3A%2F%2Fpurl.obolibrary.org%2Fobo%2FDOID_",
+    datasetURL = "https://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http%3A%2F%2Fpurl.obolibrary.org%2Fobo%2FDOID_",
     datasetName = 'dose'
   )
   

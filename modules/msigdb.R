@@ -190,7 +190,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	  output = output,
 	  key = 'enricher',
 	  enrichTypeResult = reactive(msigdbResults$enricher_result),
-	  termURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
+	  datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
 	  datasetName = 'MSigDB'
 	)
 	
@@ -198,7 +198,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	  output = output,
 	  key = 'fgsea',
 	  enrichTypeResult = reactive(msigdbResults$fgsea_result),
-	  termURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
+	  datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
 	  datasetName = 'MSigDB',
 	  caption = 'Click on Term Description cell to view enrichment plot.'
 	)
