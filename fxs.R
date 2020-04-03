@@ -17,7 +17,7 @@ as.enrichResult <- function( gseType = 'GSE', gseResult, gseGenes, idCol, descCo
                             bgRatioCol = NULL,  qvalCol = NULL, pvalueCutoff = 0.05, pAdjustMethod = '', qvalueCutoff = 0, 
                             universe = '', geneSets = list(), organism = '', keytype = '', ontology = '', readable = T) {
   
-  if (nrow(gseResult) == 0) {stop(paste0('No terms in', gseType, 'result.'))}
+  if (nrow(gseResult) == 0) {stop(paste0('No terms in ', gseType, ' result.'))}
   
   result <- NULL
   result$ID <- idCol
