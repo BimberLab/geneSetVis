@@ -158,7 +158,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	    '<b>Mapped genes</b><br>',
 	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$stringdb_selectGeneCol]]), ' genes were mapped.'),
 	    '<p>',
-	    hyperlink_text(url = stringResults$results[['link']], text = 'View mapped genes on string-db website', hide = NULL)
+	    hyperlink_text(href_base = stringResults$results[['link']], link_text = 'View mapped genes on string-db website', href_cont = NULL)
 	  )
 	})
 	
