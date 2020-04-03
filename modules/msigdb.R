@@ -177,6 +177,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	      }
 	    
 	    msigdbResults$fgsea_result <- as.enrichResult(
+	      gseType = 'FGSEA',
 	      gseResult = msigdbrRes$fgsea_result,
 	      gseGenes = msigdbrRes$enricher_result@gene,
 	      idCol = msigdbrRes$fgsea_result$pathway,

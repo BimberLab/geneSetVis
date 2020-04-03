@@ -13,11 +13,11 @@ getEnrichResGeneID <- function(gseResult, idCol, idColName, gseGenes, geneSet) {
   return(gseResult$geneID)
 }
 
-as.enrichResult <- function(gseResult, gseGenes, idCol, descCol = idCol, geneIDCol, countCol, pvalCol, padjCol, geneRatioCol, 
+as.enrichResult <- function( gseType = 'GSE', gseResult, gseGenes, idCol, descCol = idCol, geneIDCol, countCol, pvalCol, padjCol, geneRatioCol, 
                             bgRatioCol = NULL,  qvalCol = NULL, pvalueCutoff = 0.05, pAdjustMethod = '', qvalueCutoff = 0, 
                             universe = '', geneSets = list(), organism = '', keytype = '', ontology = '', readable = T) {
   
-  if (nrow(gseResult) == 0) {stop('No terms in GSE result.')}
+  if (nrow(gseResult) == 0) {stop(paste0('No terms in', gseType, 'result.'))}
   
   result <- NULL
   result$ID <- idCol
