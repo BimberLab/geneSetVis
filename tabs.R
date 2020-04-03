@@ -205,8 +205,8 @@ tab_reactome <- shinydashboard::tabItem(
         inputId = 'reactome_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
-        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.Mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('runreactome_button', 'Run')),
@@ -249,8 +249,8 @@ tab_david <- shinydashboard::tabItem(
         inputId = 'david_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
-        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.Mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('rundavid_button', 'Run')), 
@@ -293,8 +293,8 @@ tab_dose <- shinydashboard::tabItem(
         inputId = 'dose_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
-        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.Mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('rundose_button', 'Run')), 
@@ -337,8 +337,8 @@ tab_ncg <- shinydashboard::tabItem(
         inputId = 'ncg_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
-        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.Mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('runncg_button', 'Run')), 
@@ -381,8 +381,8 @@ tab_dgn <- shinydashboard::tabItem(
         inputId = 'dgn_OrgDB_input',
         label = 'OrgDB:',
         selected = 'org.Hs.eg.db',
-        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.mm.eg.db')
+        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.Mm.eg.db')
+        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
       )
     ),
     withBusyIndicatorUI(actionButton('rundgn_button', 'Run')), 
