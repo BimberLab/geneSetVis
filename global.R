@@ -31,7 +31,7 @@ library(testthat)
 #library(Seurat)
 #library(OOSAP)
 
-library(org.Hs.eg.db, org.Mmu.eg.db, org.mm.eg.db)
+library(org.Hs.eg.db, org.Mmu.eg.db, org.Mm.eg.db)
 library(AnnotationHub)
 library(ReactomePA)
 library(clusterProfiler)
