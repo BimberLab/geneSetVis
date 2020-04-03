@@ -1,49 +1,61 @@
 
-as.enrichResult <- function(result, inputIds, geneSet) {
-  gene <- inputIds
-  gene.length <- length(gene)
+getEnrichResGeneID <- function(gseResult, idCol, idColName, gseGenes, geneSet) {
   
-  result <- result %>% 
-    dplyr::rename('Count' = size, 'p.adjust' = padj, 'pvalue' = pval, 'Description' = pathway) %>% 
-    dplyr::arrange(p.adjust)
+  geneSetsOI <- geneSet[idCol]
   
-  if (nrow(result) > 0) {
-    result$GeneRatio <- paste(result$Count, '/', gene.length, sep = '')
-    result$size <- result$Count
-    result$ID <- result$Description
-    
-    geneSetsOI <- geneSet[c(result$Description)]
-    genesInGeneSet <- lapply(geneSetsOI, intersect, y=gene)
-    genesInGeneSet.stack <- stack(genesInGeneSet) %>% 
-      rename(ind = 'Description') %>% group_by(Description) %>%
-      summarise(geneID = paste(values, collapse = '/'))
-    
-    result <- merge(result, genesInGeneSet.stack, by = 'Description')
-    rownames(result) <- result$Description
-  }
+  genesInGeneSet <- lapply(geneSetsOI, intersect, y=gseGenes)
+  genesInGeneSet.stack <- stack(genesInGeneSet) %>% 
+    rename(ind = idColName) %>% group_by(.dots = idColName) %>%
+    summarise(geneID = paste(values, collapse = '/'))
+  
+  gseResult <- merge(gseResult, genesInGeneSet.stack, by = idColName)
+  
+  return(gseResult$geneID)
+}
 
+as.enrichResult <- function(gseResult, gseGenes, idCol, descCol = idCol, geneIDCol, countCol, pvalCol, padjCol, geneRatioCol, 
+                            bgRatioCol = NULL,  qvalCol = NULL, pvalueCutoff = 0.05, pAdjustMethod = '', qvalueCutoff = 0, 
+                            universe = '', geneSets = list(), organism = '', keytype = '', ontology = '', readable = T) {
+  
+  if (nrow(gseResult) == 0) {stop('No terms in GSE result.')}
+  
+  result <- NULL
+  result$ID <- idCol
+  result$Description <- descCol
+  result$GeneRatio <- geneRatioCol
+  result$BgRatio <- bgRatioCol
+  result$pvalue <- pvalCol
+  result$p.adjust <- padjCol
+  #result$qvalue <- qvalCol
+  result$geneID <- geneIDCol
+  result$Count <- as.integer(countCol)
+  
+  result <- data.frame(result)
+  
+  result <- result %>% dplyr::arrange(p.adjust)
+  
+  rownames(result) <- result$ID
+  
   new(
-    'enrichResult',
+    Class = 'enrichResult',
     result         = result,
-    pvalueCutoff   = 0.05,
-    pAdjustMethod  = 'UNKNOWN',
-    #qvalueCutoff   = 1,
-    gene           = as.character(gene),
-    #universe       = extID,
-    geneSets       = geneSet,
-    organism       = 'UNKNOWN',
-    keytype        = 'UNKNOWN',
-    ontology       = 'UNKNOWN',
-    readable       = T
+    pvalueCutoff   = pvalueCutoff,
+    pAdjustMethod  = pAdjustMethod,
+    #qvalueCutoff   = qvalueCutoff,
+    gene           = as.character(gseGenes),
+    universe       = universe,
+    geneSets       = geneSets,
+    organism       = organism,
+    keytype        = keytype,
+    ontology       = ontology,
+    readable       = readable
   )
 }
 
 
 hyperlink_text <- function(href_base, href_cont, link_text=href_cont) {
-  for (h in href_cont) {
-   s <-  paste0('<a href="',href_base,href_cont,'" target="_blank">',link_text,'</a>')
-   return(s)
-    }
+  h <-  paste0('<a href="',href_base,href_cont,'" target="_blank">',link_text,'</a>')
+  return(h)
 }
 
 

@@ -176,11 +176,26 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	      stop('No significant enrichment found.')
 	      }
 	    
-	    
 	    msigdbResults$fgsea_result <- as.enrichResult(
-	      result = msigdbrRes[['fgsea_result']],
-	      inputIds = msigdbrRes[['enricher_result']]@gene,
-	      geneSet = msigdbrRes[['enricher_result']]@geneSets
+	      gseResult = msigdbrRes$fgsea_result,
+	      gseGenes = msigdbrRes$enricher_result@gene,
+	      idCol = msigdbrRes$fgsea_result$pathway,
+	      padjCol = msigdbrRes$fgsea_result$padj,
+	      pvalCol = msigdbrRes$fgsea_result$pval,
+	      geneIDCol = getEnrichResGeneID(
+	        gseResult = msigdbrRes$fgsea_result,
+	        idCol = msigdbrRes$fgsea_result$pathway,
+	        gseGenes = msigdbrRes$enricher_result@gene,
+	        geneSet = msigdbrRes$msig_geneSet,
+	        idColName = 'pathway'
+	      ),
+	      countCol = msigdbrRes$fgsea_result$size,
+	      geneRatioCol = paste(
+	        msigdbrRes$fgsea_result$size,
+	        '/',
+	        length(msigdbrRes$enricher_result@gene),
+	        sep = ''
+	      )
 	    )
 	    
 	  })

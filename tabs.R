@@ -430,8 +430,13 @@ tab_enrichr <- shinydashboard::tabItem(
       ),
     withBusyIndicatorUI(actionButton('runenrichr_button', 'Run'))
   ), 
-  uiOutput('enrichrResults_selected_ui'),
-  dataTableOutput('enrichrResults_selected_table')
+  selectInput(
+    inputId = 'enrichrResults_selected',
+    label = 'Select query result to view:',
+    choices = ''
+  ),
+  #uiOutput('enrichrResults_selected_ui'),
+  #dataTableOutput('enrichrResults_selected_table'),
   # ),
   # shinydashboard::tabBox(
   #   title = NULL,
@@ -441,6 +446,6 @@ tab_enrichr <- shinydashboard::tabItem(
   #   width = 16,
   #   tabPanel('Mapped', uiOutput('enrichr_map_stats'))
   # ),
-  # makeTabBox(title = 'enrichR', key = 'enrichr')
+  makeTabBox(title = 'enrichR', key = 'enrichr')
 )
 
