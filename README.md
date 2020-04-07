@@ -1,5 +1,7 @@
 # geneSetVis
 
-gene set visualization in Shiny:
+* geneSetViz is a shiny app for the vizualization of enrichment analysis of sets of genes:
 
-https://kolabx.shinyapps.io/genesetvis/
+* Deployed on:
+[Shiny](https://kolabx.shinyapps.io/genesetvis/)
+[Docker](https://hub.docker.com/r/kvonwuzu/genesetvis)
