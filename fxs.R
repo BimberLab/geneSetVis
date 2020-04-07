@@ -17,24 +17,29 @@ as.enrichResult <- function( gseType = 'GSE', gseResult, gseGenes, idCol, descCo
                             bgRatioCol = NULL,  qvalCol = NULL, pvalueCutoff = 0.05, pAdjustMethod = '', qvalueCutoff = 0, 
                             universe = '', geneSets = list(), organism = '', keytype = '', ontology = '', readable = T) {
   
-  if (nrow(gseResult) == 0) {stop(paste0('No terms in ', gseType, ' result.'))}
+  #if (nrow(gseResult) == 0) {stop(paste0('No terms in ', gseType, ' result.'))}
+  if (nrow(gseResult) != 0) {
+    result <- NULL
+    result$ID <- idCol
+    result$Description <- descCol
+    result$GeneRatio <- geneRatioCol
+    result$BgRatio <- bgRatioCol
+    result$pvalue <- pvalCol
+    result$p.adjust <- padjCol
+    #result$qvalue <- qvalCol
+    result$geneID <- geneIDCol
+    result$Count <- as.integer(countCol)
+    
+    result <- data.frame(result)
+    
+    result <- result %>% dplyr::arrange(p.adjust)
+    
+    rownames(result) <- result$ID
+  } else {
+    result <- data.frame(NULL)
+  }
   
-  result <- NULL
-  result$ID <- idCol
-  result$Description <- descCol
-  result$GeneRatio <- geneRatioCol
-  result$BgRatio <- bgRatioCol
-  result$pvalue <- pvalCol
-  result$p.adjust <- padjCol
-  #result$qvalue <- qvalCol
-  result$geneID <- geneIDCol
-  result$Count <- as.integer(countCol)
   
-  result <- data.frame(result)
-  
-  result <- result %>% dplyr::arrange(p.adjust)
-  
-  rownames(result) <- result$ID
   
   new(
     Class = 'enrichResult',

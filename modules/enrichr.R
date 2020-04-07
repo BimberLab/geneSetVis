@@ -52,26 +52,39 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
     })
   
   observe({
-    updateSelectInput(session, "enrichrResults_selected", choices = names(enrichrResults$results))
+    updateSelectInput(session, "enrichrResults_selected", choices = names(enrichrResults$results), selected = tail(names(enrichrResults$results), 1))
   })
   
   observeEvent(input$enrichrResults_selected, ignoreInit = T, {
-    print(enrichrResults$results[[input$enrichrResults_selected]])
-    enrichrResults$asenrichResult <-
-      as.enrichResult(pvalueCutoff = 1,
-        gseResult = enrichrResults$results[[input$enrichrResults_selected]],
-        gseGenes = envir$gene_list[[input$enrichr_selectGeneCol]],
-        idCol = enrichrResults$results[[input$enrichrResults_selected]]$Term,
-        padjCol = enrichrResults$results[[input$enrichrResults_selected]]$Adjusted.P.value,
-        pvalCol = enrichrResults$results[[input$enrichrResults_selected]]$P.value,
-        geneIDCol = gsub(
-          pattern = ';',
-          replacement = '/',
-          x = enrichrResults$results[[input$enrichrResults_selected]]$Genes
-        ),
-        countCol = noquote(str_split_fixed(enrichrResults$results[[input$enrichrResults_selected]]$Overlap, "/", 2)[, 1]),
-        geneRatioCol = paste(noquote(str_split_fixed(enrichrResults$results[[input$enrichrResults_selected]]$Overlap, "/", 2)[, 1]), '/', length(envir$gene_list[[input$enrichr_selectGeneCol]]), sep = '')
-      )
+    # withBusyIndicatorServer("enrichrResults_selected", {
+    #   Sys.sleep(1)
+      #print(enrichrResults$results[[input$enrichrResults_selected]])
+      enrichrResults$asenrichResult <-
+        as.enrichResult(
+          pvalueCutoff = 1,
+          gseResult = enrichrResults$results[[input$enrichrResults_selected]],
+          gseGenes = envir$gene_list[[input$enrichr_selectGeneCol]],
+          idCol = enrichrResults$results[[input$enrichrResults_selected]]$Term,
+          padjCol = enrichrResults$results[[input$enrichrResults_selected]]$Adjusted.P.value,
+          pvalCol = enrichrResults$results[[input$enrichrResults_selected]]$P.value,
+          geneIDCol = gsub(
+            pattern = ';',
+            replacement = '/',
+            x = enrichrResults$results[[input$enrichrResults_selected]]$Genes
+          ),
+          countCol = noquote(
+            str_split_fixed(enrichrResults$results[[input$enrichrResults_selected]]$Overlap, "/", 2)[, 1]
+          ),
+          geneRatioCol = paste(
+            noquote(
+              str_split_fixed(enrichrResults$results[[input$enrichrResults_selected]]$Overlap, "/", 2)[, 1]
+            ),
+            '/',
+            length(envir$gene_list[[input$enrichr_selectGeneCol]]),
+            sep = ''
+          )
+        )
+    #})
   })
   
   # output$enrichrResults_selected_table <- renderDataTable(server = FALSE, {
@@ -91,7 +104,6 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
   #     caption = NULL,
   #     includeColumns = c('Term Description', 'p-Value (adj.)', 'p-Value', 'Genes in Term', 'Overlap', 'Odds.Ratio', 'Combined.Score')
   #   )
-  
   
   renderPlotSet(
     output = output,

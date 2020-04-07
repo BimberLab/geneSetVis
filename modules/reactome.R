@@ -50,7 +50,7 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	      }
 	      
 	      reactomeResults$results <- reactomeRes
-	      if ( is.null(reactomeResults$results) | nrow(reactomeResults$results) == 0 ) {stop('No significant enrichment found.')}
+	      if ( is.null(reactomeResults$results) || nrow(reactomeResults$results) == 0 ) {stop('No significant enrichment found.')}
 	      
 	    })
 	  })

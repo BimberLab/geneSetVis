@@ -430,11 +430,11 @@ tab_enrichr <- shinydashboard::tabItem(
       ),
     withBusyIndicatorUI(actionButton('runenrichr_button', 'Run'))
   ), 
-  selectInput(
-    inputId = 'enrichrResults_selected',
-    label = 'Select query result to view:',
-    choices = ''
-  ),
+    selectInput(
+      inputId = 'enrichrResults_selected',
+      label = 'Select query result to view:',
+      choices = ''
+  ), 
   #uiOutput('enrichrResults_selected_ui'),
   #dataTableOutput('enrichrResults_selected_table'),
   # ),

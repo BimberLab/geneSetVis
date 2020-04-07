@@ -171,7 +171,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 	output$stringdb_network_png <- renderImage(deleteFile = F, {
 		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
-	  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdbpng')
+	  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdbpng')
 	  cacheVal <- appDiskCache$get(cacheKey)
 	  if (class(cacheVal) == 'key_missing') {
 	    print('missing cache key...')
