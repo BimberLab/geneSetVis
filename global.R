@@ -1,36 +1,30 @@
 
+options(repos=structure(BiocManager::repositories()))
+#packrat::init(project = '.')
+#warnings()
+#packrat::restore(project = '.')
+#packrat::snapshot()
+
+packrat::on()
+
+#recordTest("/Users/onwuzu/Documents/BimberLab/geneSetVis/geneSetVis/", loadTimeout=100000)
+
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
 library(flexdashboard)
-
-#library(shinyMatrix)
-#library(shinyBS)
-#library(rsconnect)
+# library(shinytest)
+# shinytest::installDependencies()
 
 library(dplyr)
 library(ggplot2)
 library(ggupset)
 library(tidyr)
-#library(reshape2)
 library(stringr)
-#library(readxl) 
-#library(datapasta)
 library(plotly)
-#library(cowplot)
-#library(kableExtra)
 library(DT)
 library(formattable)
-#library(gridExtra)
-#library(grid)
-#library(Matrix)
-#library(rhandsontable)
 library(stats)
-
-#library(testthat)
-
-#library(Seurat)
-#library(OOSAP)
 
 library(org.Hs.eg.db)
 library(org.Mmu.eg.db)
@@ -45,11 +39,7 @@ library(enrichR)
 
 library(biomaRt)
 library(STRINGdb) 
-#library(RDAVIDWebService)
 library(msigdbr)
-
-
-options(repos = BiocManager::repositories())
 
 
 wd <- '.'
@@ -57,16 +47,16 @@ setwd(wd)
 
 
 source('fxs.R', local = TRUE)
-source('GeneAliasing.R')
-source('modules/stringdb.R')
-source('modules/msigdb.R')
-source('modules/reactome.R')
-source('modules/david.R')
-source('modules/dose.R')
-source('modules/ncg.R')
-source('modules/dgn.R')
-source('modules/enrichr.R')
-source('tabs.R')
-source('ui.R')
-source('server.R')
+source('GeneAliasing.R', local = TRUE)
+source('modules/stringdb.R', local = TRUE)
+source('modules/msigdb.R', local = TRUE)
+source('modules/reactome.R', local = TRUE)
+source('modules/david.R', local = TRUE)
+source('modules/dose.R', local = TRUE)
+source('modules/ncg.R', local = TRUE)
+source('modules/dgn.R', local = TRUE)
+source('modules/enrichr.R', local = TRUE)
+source('tabs.R', local = TRUE)
+source('ui.R', local = TRUE)
+source('server.R', local = TRUE)
 
