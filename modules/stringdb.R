@@ -1,4 +1,6 @@
 runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
+  #DEtable <- gene_list
+  #geneCol <- 'gene'
   string_db <- STRINGdb::STRINGdb$new(
       version = '10',
       species = refSpeciesNum,
@@ -17,8 +19,14 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 		clusterTable <- DEtable
 
 		if (nrow(DEtable) > 0) {
-			cluster.map <- string_db$map(clusterTable, geneCol, removeUnmappedRows = FALSE)
+			cluster.map <- string_db$map(as.data.frame(clusterTable), geneCol, removeUnmappedRows = FALSE)
 			hits <- cluster.map$STRING_id
+			# STRING does not support lists with more than 400 genes
+			if (length(hits) > 400) {
+			  hits <- hits[1:400] 
+			  print('STRING will only map the first 400 of your genes.')
+			}
+			
 			if ( sum(!is.na(hits)) == 0 ) {stop('No mapped genes.')}
 
 			max_hits_to_plot <- cluster.map$STRING_id[1:maxHitsToPlot]

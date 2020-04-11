@@ -55,6 +55,7 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
     updateSelectInput(session, "enrichrResults_selected", choices = names(enrichrResults$results), selected = tail(names(enrichrResults$results), 1))
   })
   
+  #TODO: wait to pass to as as.enrich when searching 
   observeEvent(input$enrichrResults_selected, ignoreInit = T, {
     # withBusyIndicatorServer("enrichrResults_selected", {
     #   Sys.sleep(1)

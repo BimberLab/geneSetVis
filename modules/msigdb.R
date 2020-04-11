@@ -176,6 +176,8 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	      stop('No significant enrichment found.')
 	      }
 	    
+	    fgsea_geneIDCol <- getEnrichResGeneID(gseResult = msigdbrRes$fgsea_result, idCol = msigdbrRes$fgsea_result$pathway, gseGenes = msigdbrRes$enricher_result@gene, geneSet = msigdbrRes$msig_geneSet, idColName = 'pathway')
+	    #fgsea_geneIDCol <- getEnrichResGeneID(gseResult = fgsea_results, idCol = fgsea_results$pathway, gseGenes = clusterTable$gene, geneSet = msig_geneSet, idColName = 'pathway')
 	    msigdbResults$fgsea_result <- as.enrichResult(
 	      gseType = 'FGSEA',
 	      gseResult = msigdbrRes$fgsea_result,
@@ -183,14 +185,10 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	      idCol = msigdbrRes$fgsea_result$pathway,
 	      padjCol = msigdbrRes$fgsea_result$padj,
 	      pvalCol = msigdbrRes$fgsea_result$pval,
-	      geneIDCol = getEnrichResGeneID(
-	        gseResult = msigdbrRes$fgsea_result,
-	        idCol = msigdbrRes$fgsea_result$pathway,
-	        gseGenes = msigdbrRes$enricher_result@gene,
-	        geneSet = msigdbrRes$msig_geneSet,
-	        idColName = 'pathway'
-	      ),
-	      countCol = msigdbrRes$fgsea_result$size,
+	      geneIDCol = fgsea_geneIDCol,
+	      #?size is not Count
+	      #countCol = msigdbrRes$fgsea_result$size,
+	      countCol = lapply(str_split(fgsea_geneIDCol, pattern = '/'), length),
 	      geneRatioCol = paste(
 	        msigdbrRes$fgsea_result$size,
 	        '/',

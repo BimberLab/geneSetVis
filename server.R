@@ -14,22 +14,47 @@ server = function(input, output, session) {
 
 
   #---------------------------
+  observeEvent(input$demo1, {
+    updateTextInput(session, 'areaInput', value = demo1)
+    updateRadioButtons(session, 'inputType', selected = "Gene & avg. LogFC")
+    updateRadioButtons(session, 'geneIdType', selected = "Symbol")
+  })
+  
+  observeEvent(input$demo2, {
+    updateTextInput(session, 'areaInput', value = demo2)
+    updateRadioButtons(session, 'inputType', selected = "Gene only")
+    updateRadioButtons(session, 'geneIdType', selected = "Symbol")
+  })
+  
   observeEvent(input$submit, {
-    if (input$inputType == "Gene only") {
-      print('true')
-      gene_list <- read.table(text = gsub(",", "\n", perl = TRUE, x = input$areaInput),
+    if (is.null(input$fileInput)){
+      if (input$inputType == "Gene only") {
+        gene_list <- read.table(text = gsub(",", "\n", perl = TRUE, x = input$areaInput),
                                 header = FALSE,
                                 col.names = c("gene"),
                                 quote = "",
                                 allowEscapes = T)
-      gene_list <- data.frame(gene = gene_list, avg_logFC = NA)
+        gene_list <- data.frame(gene = gene_list, avg_logFC = NA)
+      } else {
+        gene_list <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
+                                header = FALSE,
+                                col.names = c("gene", "avg_logFC"),
+                                quote = "",
+                                allowEscapes = T)
+      }
     } else {
-      gene_list <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
-                              header = FALSE,
-                              col.names = c("gene", "avg_logFC"),
-                              quote = "",
-                              allowEscapes = T)
+      #TODO: rm excel skip lines
+      fileType <- tools::file_ext(input$fileInput) 
+      if ((fileType == 'xlsx') | (fileType == 'xls')) {
+        gene_list <- readxl::read_excel(path = input$fileInput$datapath, sheet = 1, skip = 1, col_names = T)
+      }
+      if (fileType == 'csv') {
+        gene_list <- read.csv(file = input$fileInput$datapath, header = T, sep = ',')
+      }
+      
+      gene_list <- gene_list %>% dplyr::select(gene, avg_logFC, p_val_adj) %>% dplyr::filter(p_val_adj <= 0.5)
     }
+    
     
     
     if (input$checkGeneIdTranslate == T) {
