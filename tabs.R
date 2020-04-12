@@ -13,8 +13,8 @@ tab_load_data <- shinydashboard::tabItem(
         label = tagList(
           'Enter Gene-sets:',
           div(style = "display:inline-block", em('Example')),
-          div(style = "display:inline-block", actionButton('demo1', '#1')),
-          div(style = "display:inline-block", actionButton('demo2', '#2'))
+          div(style = "display:inline-block", actionLink('demo1', '#1')),
+          div(style = "display:inline-block", actionLink('demo2', '#2'))
         ),
         height = '150px',
         width = NULL,
@@ -253,6 +253,12 @@ tab_david <- shinydashboard::tabItem(
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.Mm.eg.db')
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
+      ), 
+      textInput(
+        inputId = 'davidUserEmail',
+        label = 'DAVID user email:',
+        value = 'oosap@ohsu.edu',
+        placeholder = 'enter DAVID account email',
       )
     ),
     withBusyIndicatorUI(actionButton('rundavid_button', 'Run')), 
@@ -310,6 +316,7 @@ tab_dose <- shinydashboard::tabItem(
     tabPanel('Mapped', uiOutput('dose_map_stats'))
   ),
   makeTabBox(title = 'DOSE', key = 'dose')
+  #sliderInput('pvalueCutoff', label = 'p Value cutoff:', min = 0, max = 1, value = 0.5)
 )
 
 

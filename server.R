@@ -2,10 +2,8 @@
 server = function(input, output, session) {
   
   options(shiny.maxRequestSize=50*1024^2) 
-  
-  
-  #shinyOptions(cache = diskCache("./cache"))
-  appDiskCache <- diskCache("./cache")
+
+  appDiskCache <- diskCache("./cache", max_size = 75*1024^2, evict = 'lru', logfile = stdout())
   
   
   envir <- reactiveValues(
@@ -45,7 +43,7 @@ server = function(input, output, session) {
     } else {
       #TODO: rm excel skip lines
       fileType <- tools::file_ext(input$fileInput) 
-      if ((fileType == 'xlsx') | (fileType == 'xls')) {
+      if (fileType == 'xlsx') {
         gene_list <- readxl::read_excel(path = input$fileInput$datapath, sheet = 1, skip = 1, col_names = T)
       }
       if (fileType == 'csv') {

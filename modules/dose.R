@@ -54,7 +54,7 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
         doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
         rownames(doseRes@result) <- doseRes@result$ID
         
-        
+        #doseResults$results@pvalueCutoff <- input$pvalueCutoff
       })
     })
   })

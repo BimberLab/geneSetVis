@@ -42,7 +42,12 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
           davidResults$results <- NULL
           fromType <- ifelse(grepl('id', input$david_selectGeneCol), 'ENSEMBL', 'SYMBOL')
           entrezIDs <- bitr(geneID = envir$gene_list[[input$david_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$david_OrgDB_input)
-          davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = 'oosap@ohsu.edu')
+          davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = input$davidUserEmail)
+          
+          ##change result replace entrezIDs with SYMBOLS; replace with & to replace
+          davidRes@result$geneID <- lapply(davidRes@result$geneID, function(x) sapply(strsplit(as.character(x), "/"), 
+                                        function(y) paste(entrezIDs$SYMBOL[match(y, entrezIDs$ENTREZID)], collapse='/')))
+          davidRes@gene <- entrezIDs$ENTREZID
           
           appDiskCache$set(key = cacheKey, value = davidRes)
         } else {

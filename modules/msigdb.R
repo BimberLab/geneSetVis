@@ -190,7 +190,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	      #countCol = msigdbrRes$fgsea_result$size,
 	      countCol = lapply(str_split(fgsea_geneIDCol, pattern = '/'), length),
 	      geneRatioCol = paste(
-	        msigdbrRes$fgsea_result$size,
+	        lapply(str_split(fgsea_geneIDCol, pattern = '/'), length),
 	        '/',
 	        length(msigdbrRes$enricher_result@gene),
 	        sep = ''
