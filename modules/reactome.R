@@ -15,14 +15,16 @@ runReactomePA <- function(DEtable, geneCol, species) {
 }
 
 reactomeModule <- function(session, input, output, envir, appDiskCache) {
-	reactomeResults <- reactiveValues(
-		results = NULL
-	)
+	# reactomeResults <- reactiveValues(
+	# 	results = NULL
+	# )
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(list(envir$gene_list), {
+	observeEvent(list(envir$gene_list), ignoreInit = T, {
 		print('resetting reactome')
-		reactomeResults$results <- NULL
+		envir$reactomeRes <- NULL
+		errEl <- NULL
+		if (!is.null(errEl)) {shinyjs::hide(errEl)}
 	})
 
 	observeEvent(input$runreactome_button, {
@@ -39,7 +41,7 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	        print('missing cache key...')
 	        
 	        #if (!require(input$reactome_OrgDB_input)) install.packages(input$reactome_OrgDB_input)
-	        reactomeResults$results <- NULL
+	        envir$reactomeRes <- NULL
 	        fromType <- ifelse(grepl('id', input$reactome_selectGeneCol), 'ENSEMBL', 'SYMBOL')
 	        entrezIDs <- bitr(geneID = envir$gene_list[[input$reactome_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
 	        reactomeRes <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
@@ -49,8 +51,8 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	        reactomeRes <- cacheVal
 	      }
 	      
-	      reactomeResults$results <- reactomeRes
-	      if ( is.null(reactomeResults$results) || nrow(reactomeResults$results) == 0 ) {stop('No significant enrichment found.')}
+	      envir$reactomeRes <- reactomeRes
+	      if ( is.null(envir$reactomeRes) || nrow(envir$reactomeRes) == 0 ) {stop('No significant enrichment found.')}
 	      
 	    })
 	  })
@@ -59,15 +61,15 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	renderPlotSet(
 	  output = output,
 		key = 'reactome',
-		enrichTypeResult = reactive(reactomeResults$results),
+		enrichTypeResult = reactive(envir$reactomeRes),
 		datasetURL = "https://reactome.org/PathwayBrowser/#/",
 		datasetName = 'Reactome'
 	)
 
 	output$reactome_map_stats <- renderText({
-	  validate(need(!is.null(reactomeResults$results) & length(reactomeResults$results) != 0, "No mapped genes."))
-	  if (nrow(reactomeResults$results@result) > 0) {
-	    num_genes_mapped <- str_split(noquote(reactomeResults$results@result$GeneRatio[1]), '/')[[1]][2]
+	  validate(need(!is.null(envir$reactomeRes) & length(envir$reactomeRes) != 0, "No mapped genes."))
+	  if (nrow(envir$reactomeRes@result) > 0) {
+	    num_genes_mapped <- str_split(noquote(envir$reactomeRes@result$GeneRatio[1]), '/')[[1]][2]
 	  } else {
 	    num_genes_mapped <- 0
 	  }

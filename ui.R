@@ -18,7 +18,7 @@ ui = shinydashboard::dashboardPage(
       ),
       shinydashboard::menuItem(
         text = 'MsigDB',
-        tabName = 'msigdbr',
+        tabName = 'msigdb',
         icon = icon(NULL)
       ),
       shinydashboard::menuItem(
@@ -50,13 +50,14 @@ ui = shinydashboard::dashboardPage(
         text = 'enrichR',
         tabName = 'enrichr',
         icon = icon(NULL)
-      )
+      ),
+      div(style = "display:inline-block;width:32%;text-align: center;", actionButton("make_report", label = NULL, icon = icon("paper-plane")))
     )
   ),
   shinydashboard::dashboardBody(
     shinydashboard::tabItems(tab_load_data,
                              tab_stringdb,
-                             tab_msigdbr,
+                             tab_msigdb,
                              tab_reactome,
                              tab_david,
                              tab_dose,

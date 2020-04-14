@@ -7,7 +7,9 @@ server = function(input, output, session) {
   
   
   envir <- reactiveValues(
-    gene_list = NULL
+    gene_list = NULL,
+    stringRes = NULL,
+    msigRes = NULL
   )
 
 
@@ -53,7 +55,8 @@ server = function(input, output, session) {
       gene_list <- gene_list %>% dplyr::select(gene, avg_logFC, p_val_adj) %>% dplyr::filter(p_val_adj <= 0.5)
     }
     
-    
+    print(input$fileInput$name)
+    print(tools::file_path_sans_ext(basename(input$fileInput$name)))
     
     if (input$checkGeneIdTranslate == T) {
       withProgress(message = 'Translating genes..', {
@@ -125,7 +128,7 @@ server = function(input, output, session) {
     updateSelectInput(session, "enrichr_selectGeneCol", choices = colnames(geneColnames))
     })
 
-  stringDbModule(session, input, output, envir, appDiskCache)
+  stringdbModule(session, input, output, envir, appDiskCache)
   msigdbModule(session, input, output, envir, appDiskCache)
   reactomeModule(session, input, output, envir, appDiskCache)
   davidModule(session, input, output, envir, appDiskCache)
@@ -133,6 +136,20 @@ server = function(input, output, session) {
   ncgModule(session, input, output, envir, appDiskCache)
   dgnModule(session, input, output, envir, appDiskCache)
   enrichrModule(session, input, output, envir, appDiskCache)
+  
+  
+  observeEvent(input$make_report, {
+    runname <- tools::file_path_sans_ext(basename(input$fileInput$name))
+    stringdbRes <- envir$stringdbRes
+    msigdbRes <- envir$msigdbRes
+    reactomeRes <- envir$reactomeRes
+    davidRes <- envir$davidRes
+    doseRes <- envir$doseRes
+    dgnRes <- envir$dgnRes
+    ncgRes <- envir$ncgRes
+    enrichrRes <- envir$enrichrRes
+    rmarkdown::render(input = 'report.Rmd', output_format = 'html_clean', output_file = paste0(runname,'_Report.html'), output_dir = 'report')
+  })
 }
 
 

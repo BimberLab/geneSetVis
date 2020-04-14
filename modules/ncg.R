@@ -15,14 +15,16 @@ runNCG <- function(DEtable, geneCol, species) {
 }
 
 ncgModule <- function(session, input, output, envir, appDiskCache) {
-  ncgResults <- reactiveValues(
-    results = NULL
-  )
+  # ncgResults <- reactiveValues(
+  #   results = NULL
+  # )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), {
+  observeEvent(list(envir$gene_list), ignoreInit = T, {
     print('resetting ncg')
-    ncgResults$results <- NULL
+    envir$ncgRes <- NULL
+    errEl <- NULL
+    if (!is.null(errEl)) {shinyjs::hide(errEl)}
   })
   
   observeEvent(input$runncg_button, {
@@ -39,7 +41,7 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
           print('missing cache key...')
           
           #if (!require(input$ncg_OrgDB_input)) install.packages(input$ncg_OrgDB_input)
-          ncgResults$results <- NULL
+          envir$ncgRes <- NULL
           fromType <- ifelse(grepl('id', input$ncg_selectGeneCol), 'ENSEMBL', 'SYMBOL')
           entrezIDs <- bitr(geneID = envir$gene_list[[input$ncg_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$ncg_OrgDB_input)
           ncgRes <- DOSE::enrichNCG(entrezIDs$ENTREZID, readable = T)
@@ -49,8 +51,8 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
           ncgRes <- cacheVal
         }
         
-        ncgResults$results <- ncgRes
-        if ( is.null(ncgResults$results) || nrow(ncgResults$results) == 0 ) {stop('No significant enrichment found.')}
+        envir$ncgRes <- ncgRes
+        if ( is.null(envir$ncgRes) || nrow(envir$ncgRes) == 0 ) {stop('No significant enrichment found.')}
         
       })
     })
@@ -59,15 +61,15 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
   renderPlotSet(
     output = output,
     key = 'ncg',
-    enrichTypeResult = reactive(ncgResults$results),
+    enrichTypeResult = reactive(envir$ncgRes),
     datasetURL = "",
     datasetName = 'ncg'
   )
   
   output$ncg_map_stats <- renderText({
-    validate(need(!is.null(ncgResults$results) & length(ncgResults$results) != 0, "No mapped genes."))
-    if (nrow(ncgResults$results@result) > 0) {
-      num_genes_mapped <- str_split(noquote(ncgResults$results@result$GeneRatio[1]), '/')[[1]][2]
+    validate(need(!is.null(envir$ncgRes) & length(envir$ncgRes) != 0, "No mapped genes."))
+    if (nrow(envir$ncgRes@result) > 0) {
+      num_genes_mapped <- str_split(noquote(envir$ncgRes@result$GeneRatio[1]), '/')[[1]][2]
     } else {
       num_genes_mapped <- 0
     }

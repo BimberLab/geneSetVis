@@ -2,14 +2,16 @@
 enrichrModule <- function(session, input, output, envir, appDiskCache) {
   enrichrResults <- reactiveValues(
     results = NULL,
-    enrichResult = NULL
+    asenrichResult = NULL
   )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), {
+  observeEvent(list(envir$gene_list), ignoreInit = T, {
     print('resetting enrichr')
-    enrichrResults$results <- NULL
-    enrichrResults$result_selected <- NULL
+    envir$enrichrRes <- NULL
+    envir$enrichRes_selected <- NULL
+    errEl <- NULL
+    if (!is.null(errEl)) {shinyjs::hide(errEl)}
   })
   
   observeEvent(input$runenrichr_button, {
@@ -25,10 +27,10 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
           
-          #enrichrResults$results <- NULL
+          #envir$enrichrRes <- NULL
           fromType <- ifelse(grepl('id', input$enrichr_selectGeneCol), 'ENSEMBL', 'SYMBOL')
           if (fromType != 'SYMBOL') {
-            enrichrResults$results <- NULL
+            envir$enrichrRes <- NULL
             stop('MsigDB only accepts gene columns of type SYMBOL')
           }
           enrichrRes <- enrichr(genes = as.vector(envir$gene_list[[input$enrichr_selectGeneCol]]), databases = input$enrichr_db)
@@ -40,8 +42,8 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
           enrichrRes <- cacheVal
         }
         
-        enrichrResults$results <- enrichrRes
-        if ( is.null(enrichrResults$results) || length(enrichrResults$results) == 0 ) {stop('No significant enrichment found.')}
+        envir$enrichrRes <- enrichrRes
+        if ( is.null(envir$enrichrRes) || length(envir$enrichrRes) == 0 ) {stop('No significant enrichment found.')}
         
         #enrichrRes@result$ID <- gsub(pattern = 'umls:', replacement = '', enrichrRes@result$ID)
         #rownames(enrichrRes@result) <- enrichrRes@result$ID
@@ -52,33 +54,33 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
     })
   
   observe({
-    updateSelectInput(session, "enrichrResults_selected", choices = names(enrichrResults$results), selected = tail(names(enrichrResults$results), 1))
+    updateSelectInput(session, "enrichr_selectQuery", choices = names(envir$enrichrRes), selected = tail(names(envir$enrichrRes), 1))
   })
   
   #TODO: wait to pass to as as.enrich when searching 
-  observeEvent(input$enrichrResults_selected, ignoreInit = T, {
-    # withBusyIndicatorServer("enrichrResults_selected", {
+  observeEvent(input$enrichr_selectQuery, ignoreInit = T, {
+    # withBusyIndicatorServer("enrichr_selectQuery", {
     #   Sys.sleep(1)
-      #print(enrichrResults$results[[input$enrichrResults_selected]])
-      enrichrResults$asenrichResult <-
+      #print(envir$enrichrRes[[input$enrichr_selectQuery]])
+      envir$enrichRes_selected <-
         as.enrichResult(
           pvalueCutoff = 1,
-          gseResult = enrichrResults$results[[input$enrichrResults_selected]],
+          gseResult = envir$enrichrRes[[input$enrichr_selectQuery]],
           gseGenes = envir$gene_list[[input$enrichr_selectGeneCol]],
-          idCol = enrichrResults$results[[input$enrichrResults_selected]]$Term,
-          padjCol = enrichrResults$results[[input$enrichrResults_selected]]$Adjusted.P.value,
-          pvalCol = enrichrResults$results[[input$enrichrResults_selected]]$P.value,
+          idCol = envir$enrichrRes[[input$enrichr_selectQuery]]$Term,
+          padjCol = envir$enrichrRes[[input$enrichr_selectQuery]]$Adjusted.P.value,
+          pvalCol = envir$enrichrRes[[input$enrichr_selectQuery]]$P.value,
           geneIDCol = gsub(
             pattern = ';',
             replacement = '/',
-            x = enrichrResults$results[[input$enrichrResults_selected]]$Genes
+            x = envir$enrichrRes[[input$enrichr_selectQuery]]$Genes
           ),
           countCol = noquote(
-            str_split_fixed(enrichrResults$results[[input$enrichrResults_selected]]$Overlap, "/", 2)[, 1]
+            str_split_fixed(envir$enrichrRes[[input$enrichr_selectQuery]]$Overlap, "/", 2)[, 1]
           ),
           geneRatioCol = paste(
             noquote(
-              str_split_fixed(enrichrResults$results[[input$enrichrResults_selected]]$Overlap, "/", 2)[, 1]
+              str_split_fixed(envir$enrichrRes[[input$enrichr_selectQuery]]$Overlap, "/", 2)[, 1]
             ),
             '/',
             length(envir$gene_list[[input$enrichr_selectGeneCol]]),
@@ -88,9 +90,9 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
     #})
   })
   
-  # output$enrichrResults_selected_table <- renderDataTable(server = FALSE, {
-  #   validate(need(!is.null(enrichrResults$results) & length(enrichrResults$results) != 0, ""))
-  #   table <- enrichrResults$results[[input$enrichrResults_selected]] %>%
+  # output$enrichr_selectQuery_table <- renderDataTable(server = FALSE, {
+  #   validate(need(!is.null(envir$enrichrRes) & length(envir$enrichrRes) != 0, ""))
+  #   table <- envir$enrichrRes[[input$enrichr_selectQuery]] %>%
   #     dplyr::rename(
   #       'Term Description' = Term,
   #       'p-Value' = P.value,
@@ -109,14 +111,14 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
   renderPlotSet(
     output = output,
     key = 'enrichr',
-    enrichTypeResult = reactive(enrichrResults$asenrichResult),
+    enrichTypeResult = reactive(envir$enrichRes_selected),
     datasetURL = NULL,
     datasetName = 'enrichr'
   )
   
   output$enrichr_map_stats <- renderText({
-    validate(need(!is.null(enrichrResults$results) & length(enrichrResults$results) != 0, "No mapped genes."))
-    num_genes_mapped <- str_split(noquote(enrichrResults$results@result$GeneRatio[1]), '/')[[1]][2]
+    validate(need(!is.null(envir$enrichrRes) & length(envir$enrichrRes) != 0, "No mapped genes."))
+    num_genes_mapped <- str_split(noquote(envir$enrichrRes@result$GeneRatio[1]), '/')[[1]][2]
     HTML(
       '<b>Mapped genes</b><br>',
       paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$enrichr_selectGeneCol]]), ' genes were mapped.')

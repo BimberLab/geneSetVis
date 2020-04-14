@@ -152,8 +152,7 @@ renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName
     er <- enrichTypeResult()
     # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
-    enrichplot::dotplot(er) + 
-      scale_y_discrete(labels = function(x) stringr::str_wrap(stringr::str_replace_all(x, "pattern_" , "_"), width = 40))
+    enrichplot::dotplot(er) 
   })
   
   output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({

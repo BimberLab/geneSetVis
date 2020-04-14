@@ -15,14 +15,16 @@ runDAVID <- function(DEtable, geneCol, species) {
 }
 
 davidModule <- function(session, input, output, envir, appDiskCache) {
-  davidResults <- reactiveValues(
-    results = NULL
-  )
+  # davidResults <- reactiveValues(
+  #   results = NULL
+  # )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), {
+  observeEvent(list(envir$gene_list), ignoreInit = T, {
     print('resetting david')
-    davidResults$results <- NULL
+    envir$davidRes <- NULL
+    errEl <- NULL
+    if (!is.null(errEl)) {shinyjs::hide(errEl)}
   })
   
   observeEvent(input$rundavid_button, {
@@ -39,15 +41,10 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
           print('missing cache key...')
           
           #if (!require(input$david_OrgDB_input)) install.packages(input$david_OrgDB_input)
-          davidResults$results <- NULL
+          envir$davidRes <- NULL
           fromType <- ifelse(grepl('id', input$david_selectGeneCol), 'ENSEMBL', 'SYMBOL')
           entrezIDs <- bitr(geneID = envir$gene_list[[input$david_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$david_OrgDB_input)
           davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = input$davidUserEmail)
-          
-          ##change result replace entrezIDs with SYMBOLS; replace with & to replace
-          davidRes@result$geneID <- lapply(davidRes@result$geneID, function(x) sapply(strsplit(as.character(x), "/"), 
-                                        function(y) paste(entrezIDs$SYMBOL[match(y, entrezIDs$ENTREZID)], collapse='/')))
-          davidRes@gene <- entrezIDs$ENTREZID
           
           appDiskCache$set(key = cacheKey, value = davidRes)
         } else {
@@ -55,8 +52,12 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
           davidRes <- cacheVal
         }
         
-        davidResults$results <- davidRes
-        if ( is.null(davidResults$results)|| nrow(davidResults$results) == 0 ) {stop('No significant enrichment found.')}
+        envir$davidRes <- davidRes
+        if ( is.null(envir$davidRes)|| nrow(envir$davidRes) == 0 ) {stop('No significant enrichment found.')}
+        ##change result replace entrezIDs with SYMBOLS; replace with & to replace
+        davidRes@result$geneID <- lapply(davidRes@result$geneID, function(x) sapply(strsplit(as.character(x), "/"), 
+                                                                                    function(y) paste(entrezIDs$SYMBOL[match(y, entrezIDs$ENTREZID)], collapse='/')))
+        davidRes@gene <- entrezIDs$ENTREZID
         
       })
     })
@@ -65,15 +66,15 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
   renderPlotSet(
     output = output,
     key = 'david',
-    enrichTypeResult = reactive(davidResults$results),
+    enrichTypeResult = reactive(envir$davidRes),
     datasetURL = "",
     datasetName = 'david'
   )
   
   output$david_map_stats <- renderText({
-    validate(need(!is.null(davidResults$results) & length(davidResults$results) != 0, "No mapped genes."))
-    if (nrow(davidResults$results@result) > 0) {
-      num_genes_mapped <- str_split(noquote(davidResults$results@result$GeneRatio[1]), '/')[[1]][2]
+    validate(need(!is.null(envir$davidRes) & length(envir$davidRes) != 0, "No mapped genes."))
+    if (nrow(envir$davidRes@result) > 0) {
+      num_genes_mapped <- str_split(noquote(envir$davidRes@result$GeneRatio[1]), '/')[[1]][2]
     } else {
       num_genes_mapped <- 0
     }

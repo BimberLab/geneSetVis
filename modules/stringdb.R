@@ -110,15 +110,17 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 	return(return_list)
 }
 
-stringDbModule <- function(session, input, output, envir, appDiskCache) {
-	stringResults <- reactiveValues(
-		results = NULL
-	)
+stringdbModule <- function(session, input, output, envir, appDiskCache) {
+	# stringdbResults <- reactiveValues(
+	# 	results = NULL
+	# )
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(list(envir$gene_list), {
+	observeEvent(list(envir$gene_list), ignoreInit = T, {
 		print('resetting stringdb')
-		stringResults$results <- NULL
+	  envir$stringdbRes <- NULL
+		errEl <- NULL
+		if (!is.null(errEl)) {shinyjs::hide(errEl)}
 	})
 
 	stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
@@ -137,7 +139,7 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
 	        
-	        stringRes <- runSTRINGdb(
+	        stringdbRes <- runSTRINGdb(
 	          DEtable = envir$gene_list,
 	          geneCol = input$stringdb_selectGeneCol,
 	          maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
@@ -145,40 +147,41 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 	          scoreThreshold = input$stringdb_scoreThreshold_input
 	        )
 	        
-	        appDiskCache$set(key = cacheKey, value = stringRes)
+	        appDiskCache$set(key = cacheKey, value = stringdbRes)
 	        
 	      } else {
 	        print('loading from cache...')
-	        stringRes <- cacheVal
+	        stringdbRes <- cacheVal
 	      }
 	      
-	      stringResults$results <- stringRes
-	      if (is.null(stringResults$results) | length(stringResults$results) == 0) {stop('No significant enrichment found.')}
+	      envir$stringdbRes <- stringdbRes
+	      #if (is.null(envir$stringdbRes) | length(envir$stringdbRes) == 0) {stop('No significant enrichment found.')}
+	      if (is.null(envir$stringdbRes) | length(envir$stringdbRes) == 0) {stop('No significant enrichment found.')}
 	      
 	    })
 	  })
 	})
 
-	output$string_map_stats <- renderText({
-	  validate(need(!is.null(stringResults$results) & length(stringResults$results) != 0, "No mapped genes."))
-	  num_genes_mapped <- sum(!is.na(stringResults$results[['hits']]))
+	output$stringdb_map_stats <- renderText({
+	  validate(need(!is.null(envir$stringdbRes) & length(envir$stringdbRes) != 0, "No mapped genes."))
+	  num_genes_mapped <- sum(!is.na(envir$stringdbRes[['hits']]))
 	  HTML(
 	    '<b>Mapped genes</b><br>',
 	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$stringdb_selectGeneCol]]), ' genes were mapped.'),
 	    '<p>',
-	    hyperlink_text(href_base = stringResults$results[['link']], link_text = 'View mapped genes on string-db website', href_cont = NULL)
+	    hyperlink_text(href_base = envir$stringdbRes[['link']], link_text = 'View mapped genes on string-db website', href_cont = NULL)
 	  )
 	})
 	
 
 	output$stringdb_network <- renderPlot({
-		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
+	  validate(need(!is.null(envir$stringdbRes), "Please Run STRINGdb on input..."))
 	  toSubset <- paste('network', sep = '')
-	  stringResults$results[[toSubset]]
+	  envir$stringdbRes[[toSubset]]
 	})
 
 	output$stringdb_network_png <- renderImage(deleteFile = F, {
-		validate(need(!is.null(stringResults$results), "Please Run STRINGdb on input..."))
+		validate(need(!is.null(envir$stringdbRes), "Please Run STRINGdb on input..."))
 	  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdbpng')
 	  cacheVal <- appDiskCache$get(cacheKey)
 	  if (class(cacheVal) == 'key_missing') {
@@ -200,9 +203,9 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 	# TODO: download entire dataset
 	output$stringdb_GO <- renderDataTable(server = FALSE, {
-	  validate(need(!is.null(stringResults$results) & length(stringResults$results) != 0, ""))
+	  validate(need(!is.null(envir$stringdbRes$GO) & length(envir$stringdbRes$GO) != 0, ""))
 	  toSubset <- paste('GO', sep = '')
-	  table <- stringResults$results[[toSubset]] %>%
+	  table <- envir$stringdbRes[[toSubset]] %>%
 	    dplyr::rename(
 	      'Term Description' = term_description,
 	      'Term ID' = term_id,
@@ -225,9 +228,9 @@ stringDbModule <- function(session, input, output, envir, appDiskCache) {
 
 	# TODO: download entire dataset
 	output$stringdb_KEGG <- renderDataTable(server = FALSE, {
-		validate(need(!is.null(stringResults$results) & length(stringResults$results) != 0, ""))
+		validate(need(!is.null(envir$stringdbRes$KEGG) & length(envir$stringdbRes$KEGG) != 0, ""))
 	  toSubset <- paste('KEGG', sep = '')
-	  table <- stringResults$results[[toSubset]] %>%
+	  table <- envir$stringdbRes[[toSubset]] %>%
 	    dplyr::rename(
 	      'Term Description' = term_description,
 	      'Term ID' = term_id,

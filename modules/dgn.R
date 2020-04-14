@@ -15,14 +15,16 @@ runDGN <- function(DEtable, geneCol, species) {
 }
 
 dgnModule <- function(session, input, output, envir, appDiskCache) {
-  dgnResults <- reactiveValues(
-    results = NULL
-  )
+  # dgnResults <- reactiveValues(
+  #   results = NULL
+  # )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), {
+  observeEvent(list(envir$gene_list), ignoreInit = T, {
     print('resetting dgn')
-    dgnResults$results <- NULL
+    envir$dgnRes <- NULL
+    errEl <- NULL
+    if (!is.null(errEl)) {shinyjs::hide(errEl)}
   })
   
   observeEvent(input$rundgn_button, {
@@ -39,7 +41,7 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
           print('missing cache key...')
           
           #if (!require(input$dgn_OrgDB_input)) install.packages(input$dgn_OrgDB_input)
-          dgnResults$results <- NULL
+          envir$dgnRes <- NULL
           fromType <- ifelse(grepl('id', input$dgn_selectGeneCol), 'ENSEMBL', 'SYMBOL')
           entrezIDs <- bitr(geneID = envir$gene_list[[input$dgn_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
           dgnRes <- DOSE::enrichDGN(entrezIDs$ENTREZID, readable = T)
@@ -49,8 +51,8 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
           dgnRes <- cacheVal
         }
         
-        dgnResults$results <- dgnRes
-        if ( is.null(dgnResults$results) || nrow(dgnResults$results) == 0 ) {stop('No significant enrichment found.')}
+        envir$dgnRes <- dgnRes
+        if ( is.null(envir$dgnRes) || nrow(envir$dgnRes) == 0 ) {stop('No significant enrichment found.')}
         
         dgnRes@result$ID <- gsub(pattern = 'umls:', replacement = '', dgnRes@result$ID)
         rownames(dgnRes@result) <- dgnRes@result$ID
@@ -64,14 +66,14 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
   renderPlotSet(
     output = output,
     key = 'dgn',
-    enrichTypeResult = reactive(dgnResults$results),
+    enrichTypeResult = reactive(envir$dgnRes),
     datasetURL = "https://www.disgenet.org/browser/0/1/0/",
     datasetName = 'dgn'
   )
   
   output$dgn_map_stats <- renderText({
-    validate(need(!is.null(dgnResults$results) & length(dgnResults$results) != 0, "No mapped genes."))
-    num_genes_mapped <- str_split(noquote(dgnResults$results@result$GeneRatio[1]), '/')[[1]][2]
+    validate(need(!is.null(envir$dgnRes) & length(envir$dgnRes) != 0, "No mapped genes."))
+    num_genes_mapped <- str_split(noquote(envir$dgnRes@result$GeneRatio[1]), '/')[[1]][2]
     HTML(
       '<b>Mapped genes</b><br>',
       paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$dgn_selectGeneCol]]), ' genes were mapped.')

@@ -28,12 +28,12 @@ tab_load_data <- shinydashboard::tabItem(
       radioButtons("inputType",
                   label = "Input Type:",
                   choices = list("Gene only", "Gene & avg. LogFC"),
-                  selected = NULL),
+                  selected = 'Gene & avg. LogFC'),
       radioButtons("geneIdType",
                    label = "Select Gene ID Type:",
                    choices = list("Ensembl" = "Ensembl", 
                                   "Symbol" = "Symbol"),
-                   selected = NULL),
+                   selected = 'Symbol'),
       checkboxInput('checkGeneIdTranslate',label = strong('Gene ID Translation'), value = FALSE),
       actionButton('submit', 'Submit'),
     ),
@@ -96,7 +96,7 @@ tab_stringdb <- shinydashboard::tabItem(
     height = NULL,
     selected = 'Mapped',
     width = 16,
-    tabPanel('Mapped', uiOutput('string_map_stats'))
+    tabPanel('Mapped', uiOutput('stringdb_map_stats'))
   ),
   # shinydashboard::tabBox(
   #   title = NULL,
@@ -118,19 +118,19 @@ tab_stringdb <- shinydashboard::tabItem(
 )
 
 
-msigCategories <- read.table(file = './data/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
-msigCategories <- unique(msigCategories[c('Category', 'CategoryLabel')])
-msigCategories$CategoryLabel <- paste0(msigCategories$Category, ': ', msigCategories$CategoryLabel)
-msigdb_categories <- msigCategories$Category
-names(msigdb_categories) <- msigCategories$CategoryLabel
-rm(msigCategories)
+msigdbCategories <- read.table(file = './data/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+msigdbCategories <- unique(msigdbCategories[c('Category', 'CategoryLabel')])
+msigdbCategories$CategoryLabel <- paste0(msigdbCategories$Category, ': ', msigdbCategories$CategoryLabel)
+msigdb_categories <- msigdbCategories$Category
+names(msigdb_categories) <- msigdbCategories$CategoryLabel
+rm(msigdbCategories)
 
-tab_msigdbr <- shinydashboard::tabItem(
-  tabName = 'msigdbr',
+tab_msigdb <- shinydashboard::tabItem(
+  tabName = 'msigdb',
   shinydashboard::box(
     title = tagList(p('Run MSigDB', style = "padding-right: 5px; display: inline"), 
                     actionButton(
-                      inputId = "msigdbr_resource_info",
+                      inputId = "msigdb_resource_info",
                       label = "info",
                       icon = NULL,
                       class = "btn-xs",
@@ -149,25 +149,25 @@ tab_msigdbr <- shinydashboard::tabItem(
   	    choices = ''
   	  ),
       selectInput(
-        inputId = 'msigdbr_species_input',
+        inputId = 'msigdb_species_input',
         label = 'Reference species',
         selected = 'Homo sapiens',
         choices = sort(msigdbr::msigdbr_show_species())
       ),
       selectInput(
-        inputId = 'msigdbr_category_input',
+        inputId = 'msigdb_category_input',
         label = 'Select category (optional):',
         selected = '',
         choices = c('', msigdb_categories)
       ),
       selectInput(
-        inputId = 'msigdbr_subcategory_input',
+        inputId = 'msigdb_subcategory_input',
         label = 'Select subcategory (optional):',
         selected = '',
         choices = NULL
       )
     ),
-    withBusyIndicatorUI(actionButton('runmsigdbr_button', 'Run'))
+    withBusyIndicatorUI(actionButton('runmsigdb_button', 'Run'))
   ),
   shinydashboard::tabBox(
     title = NULL,
@@ -175,7 +175,7 @@ tab_msigdbr <- shinydashboard::tabItem(
     height = NULL,
     selected = 'Mapped',
     width = 16,
-    tabPanel('Mapped', uiOutput('msig_map_stats'))
+    tabPanel('Mapped', uiOutput('msigdb_map_stats'))
   ),
   makeTabBox(title = 'Enricher', key = 'enricher'),
   makeTabBox(title = 'FGSEA', key = 'fgsea')
@@ -440,7 +440,7 @@ tab_enrichr <- shinydashboard::tabItem(
     withBusyIndicatorUI(actionButton('runenrichr_button', 'Run'))
   ), 
     selectInput(
-      inputId = 'enrichrResults_selected',
+      inputId = 'enrichr_selectQuery',
       label = 'Select query result to view:',
       choices = ''
   ), 

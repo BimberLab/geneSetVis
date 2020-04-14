@@ -15,14 +15,16 @@ runDOSE <- function(DEtable, geneCol, species) {
 }
 
 doseModule <- function(session, input, output, envir, appDiskCache) {
-  doseResults <- reactiveValues(
-    results = NULL
-  )
+  # doseResults <- reactiveValues(
+  #   results = NULL
+  # )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), {
+  observeEvent(list(envir$gene_list), ignoreInit = T, {
     print('resetting dose')
-    doseResults$results <- NULL
+    envir$doseRes <- NULL
+    errEl <- NULL
+    if (!is.null(errEl)) {shinyjs::hide(errEl)}
   })
   
   observeEvent(input$rundose_button, {
@@ -39,7 +41,7 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
           print('missing cache key...')
           
           #if (!require(input$dose_OrgDB_input)) install.packages(input$dose_OrgDB_input)
-          doseResults$results <- NULL
+          envir$doseRes <- NULL
           fromType <- ifelse(grepl('id', input$dose_selectGeneCol), 'ENSEMBL', 'SYMBOL')
           entrezIDs <- bitr(geneID = envir$gene_list[[input$dose_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
           doseRes <- DOSE::enrichDO(entrezIDs$ENTREZID, readable = T)
@@ -49,12 +51,12 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
           doseRes <- cacheVal
         }
         
-        doseResults$results <- doseRes
-        if ( is.null(doseResults$results) || nrow(doseResults$results) == 0 ) {stop('No significant enrichment found.')}
+        envir$doseRes <- doseRes
+        if ( is.null(envir$doseRes) || nrow(envir$doseRes) == 0 ) {stop('No significant enrichment found.')}
         doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
         rownames(doseRes@result) <- doseRes@result$ID
         
-        #doseResults$results@pvalueCutoff <- input$pvalueCutoff
+        #envir$doseRes@pvalueCutoff <- input$pvalueCutoff
       })
     })
   })
@@ -62,15 +64,15 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
   renderPlotSet(
     output = output,
     key = 'dose',
-    enrichTypeResult = reactive(doseResults$results),
+    enrichTypeResult = reactive(envir$doseRes),
     datasetURL = "https://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http%3A%2F%2Fpurl.obolibrary.org%2Fobo%2FDOID_",
     datasetName = 'dose'
   )
   
   output$dose_map_stats <- renderText({
-    validate(need(!is.null(doseResults$results) & length(doseResults$results) != 0, "No mapped genes."))
-    if (nrow(doseResults$results@result) > 0) {
-      num_genes_mapped <- str_split(noquote(doseResults$results@result$GeneRatio[1]), '/')[[1]][2]
+    validate(need(!is.null(envir$doseRes) & length(envir$doseRes) != 0, "No mapped genes."))
+    if (nrow(envir$doseRes@result) > 0) {
+      num_genes_mapped <- str_split(noquote(envir$doseRes@result$GeneRatio[1]), '/')[[1]][2]
     } else {
       num_genes_mapped <- 0
     }
