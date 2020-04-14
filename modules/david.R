@@ -15,12 +15,9 @@ runDAVID <- function(DEtable, geneCol, species) {
 }
 
 davidModule <- function(session, input, output, envir, appDiskCache) {
-  # davidResults <- reactiveValues(
-  #   results = NULL
-  # )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), ignoreInit = T, {
+  observeEvent(list(envir$gene_list), ignoreInit = F, {
     print('resetting david')
     envir$davidRes <- NULL
     errEl <- NULL

@@ -15,12 +15,9 @@ runDOSE <- function(DEtable, geneCol, species) {
 }
 
 doseModule <- function(session, input, output, envir, appDiskCache) {
-  # doseResults <- reactiveValues(
-  #   results = NULL
-  # )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), ignoreInit = T, {
+  observeEvent(list(envir$gene_list), ignoreInit = F, {
     print('resetting dose')
     envir$doseRes <- NULL
     errEl <- NULL

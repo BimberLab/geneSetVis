@@ -111,12 +111,9 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 }
 
 stringdbModule <- function(session, input, output, envir, appDiskCache) {
-	# stringdbResults <- reactiveValues(
-	# 	results = NULL
-	# )
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(list(envir$gene_list), ignoreInit = T, {
+	observeEvent(list(envir$gene_list), ignoreInit = F, {
 		print('resetting stringdb')
 	  envir$stringdbRes <- NULL
 		errEl <- NULL
@@ -155,7 +152,6 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	      }
 	      
 	      envir$stringdbRes <- stringdbRes
-	      #if (is.null(envir$stringdbRes) | length(envir$stringdbRes) == 0) {stop('No significant enrichment found.')}
 	      if (is.null(envir$stringdbRes) | length(envir$stringdbRes) == 0) {stop('No significant enrichment found.')}
 	      
 	    })

@@ -15,12 +15,9 @@ runNCG <- function(DEtable, geneCol, species) {
 }
 
 ncgModule <- function(session, input, output, envir, appDiskCache) {
-  # ncgResults <- reactiveValues(
-  #   results = NULL
-  # )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), ignoreInit = T, {
+  observeEvent(list(envir$gene_list), ignoreInit = F, {
     print('resetting ncg')
     envir$ncgRes <- NULL
     errEl <- NULL

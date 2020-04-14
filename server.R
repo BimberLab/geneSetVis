@@ -55,9 +55,6 @@ server = function(input, output, session) {
       gene_list <- gene_list %>% dplyr::select(gene, avg_logFC, p_val_adj) %>% dplyr::filter(p_val_adj <= 0.5)
     }
     
-    print(input$fileInput$name)
-    print(tools::file_path_sans_ext(basename(input$fileInput$name)))
-    
     if (input$checkGeneIdTranslate == T) {
       withProgress(message = 'Translating genes..', {
         print(paste0('gene translate: ', input$checkGeneIdTranslate))
@@ -139,7 +136,11 @@ server = function(input, output, session) {
   
   
   observeEvent(input$make_report, {
-    runname <- tools::file_path_sans_ext(basename(input$fileInput$name))
+    if (isTruthy(input$fileInput$name)) {
+      runname <- tools::file_path_sans_ext(basename(input$fileInput$name))
+    } else {
+      runname <- Sys.time()
+    }
     stringdbRes <- envir$stringdbRes
     msigdbRes <- envir$msigdbRes
     reactomeRes <- envir$reactomeRes

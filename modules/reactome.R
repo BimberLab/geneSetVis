@@ -15,12 +15,9 @@ runReactomePA <- function(DEtable, geneCol, species) {
 }
 
 reactomeModule <- function(session, input, output, envir, appDiskCache) {
-	# reactomeResults <- reactiveValues(
-	# 	results = NULL
-	# )
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(list(envir$gene_list), ignoreInit = T, {
+	observeEvent(list(envir$gene_list), ignoreInit = F, {
 		print('resetting reactome')
 		envir$reactomeRes <- NULL
 		errEl <- NULL

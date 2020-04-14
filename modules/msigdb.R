@@ -90,14 +90,9 @@ runMSigDB <- function(DEtable, geneCol, species, category = NULL, subcategory = 
 }
 
 msigdbModule <- function(session, input, output, envir, appDiskCache) {
-	# msigdbResults <- reactiveValues(
-	# 	results = NULL,
-	# 	enricher_result = NULL,
-	# 	fgsea_result = NULL
-	# )
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(list(envir$gene_list), ignoreInit = T, {
+	observeEvent(list(envir$gene_list), ignoreInit = F, {
 		print('resetting msigdb')
 		envir$msigdbRes <- NULL
 		envir$msigdbRes_fgsea <- NULL
@@ -170,31 +165,44 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	    
 	    envir$msigdbRes <- msigdbRes
 	    
-	    if (is.null(envir$msigdbRes$enricher_result) | length(envir$msigdbRes$enricher_result) == 0) {
+	    if (is.null(envir$msigdbRes$enricher_result) | nrow(envir$msigdbRes$enricher_result) == 0) {
 	      envir$msigdbRes$enricher_result <- NULL
 	      envir$msigdbRes$fgsea_result <- NULL
 	      stop('No significant enrichment found.')
 	      }
 	    
-	    fgsea_geneIDCol <- getEnrichResGeneID(gseResult = msigdbRes$fgsea_result, idCol = msigdbRes$fgsea_result$pathway, gseGenes = msigdbRes$enricher_result@gene, geneSet = msigdbRes$msig_geneSet, idColName = 'pathway')
-	    envir$msigdbRes_fgsea <- as.enrichResult(
-	      gseType = 'FGSEA',
-	      gseResult = msigdbRes$fgsea_result,
-	      gseGenes = msigdbRes$enricher_result@gene,
-	      idCol = msigdbRes$fgsea_result$pathway,
-	      padjCol = msigdbRes$fgsea_result$padj,
-	      pvalCol = msigdbRes$fgsea_result$pval,
-	      geneIDCol = fgsea_geneIDCol,
-	      #?size is not Count
-	      #countCol = msigdbRes$fgsea_result$size,
-	      countCol = lapply(str_split(fgsea_geneIDCol, pattern = '/'), length),
-	      geneRatioCol = paste(
-	        lapply(str_split(fgsea_geneIDCol, pattern = '/'), length),
-	        '/',
-	        length(msigdbRes$enricher_result@gene),
-	        sep = ''
+	    if ( !is.null(envir$msigdbRes$fgsea_result) & nrow(envir$msigdbRes$fgsea_result) != 0 ) {
+	      
+	      fgsea_geneIDCol <-
+	        getEnrichResGeneID(
+	          gseResult = msigdbRes$fgsea_result,
+	          idCol = msigdbRes$fgsea_result$pathway,
+	          gseGenes = msigdbRes$enricher_result@gene,
+	          geneSet = msigdbRes$msig_geneSet,
+	          idColName = 'pathway'
+	        )
+	      
+	      envir$msigdbRes_fgsea <- as.enrichResult(
+	        gseType = 'FGSEA',
+	        gseResult = msigdbRes$fgsea_result,
+	        gseGenes = msigdbRes$enricher_result@gene,
+	        idCol = msigdbRes$fgsea_result$pathway,
+	        padjCol = msigdbRes$fgsea_result$padj,
+	        pvalCol = msigdbRes$fgsea_result$pval,
+	        geneIDCol = fgsea_geneIDCol,
+	        #?size is not Count
+	        #countCol = msigdbRes$fgsea_result$size,
+	        countCol = lapply(str_split(fgsea_geneIDCol, pattern = '/'), length),
+	        geneRatioCol = paste(
+	          lapply(str_split(fgsea_geneIDCol, pattern = '/'), length),
+	          '/',
+	          length(msigdbRes$enricher_result@gene),
+	          sep = ''
+	        )
 	      )
-	    )
+	      
+	    }
+	    
 	    
 	  })
 	})

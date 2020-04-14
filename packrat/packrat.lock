@@ -283,6 +283,12 @@ Version: 1.2.1
 Hash: de88fed092924767ccb739b695f35d2b
 Requires: rlang, vctrs
 
+Package: bookdown
+Source: CRAN
+Version: 0.18
+Hash: 534e9ddb555f663ecf700ddd37aca5f3
+Requires: htmltools, knitr, rmarkdown, tinytex, xfun
+
 Package: caTools
 Source: CRAN
 Version: 1.18.0
@@ -294,6 +300,12 @@ Source: CRAN
 Version: 3.4.3
 Hash: e9b50bc56e655025fde6f2f4b65154de
 Requires: R6, processx
+
+Package: cellranger
+Source: CRAN
+Version: 1.1.0
+Hash: be9d203e7849f73818b36f93e9273c2c
+Requires: rematch, tibble
 
 Package: checkmate
 Source: CRAN
@@ -357,6 +369,12 @@ Version: 1.4.2
 Hash: 98ff6c6b2ff30fd4007dd16c75027b30
 Requires: DBI, R6, assertthat, dplyr, glue, purrr, rlang, tibble,
     tidyselect
+
+Package: debugme
+Source: CRAN
+Version: 1.1.0
+Hash: c233690edd9fa17a63f7c8d83c1ca153
+Requires: crayon
 
 Package: desc
 Source: CRAN
@@ -758,11 +776,23 @@ Source: CRAN
 Version: 0.5.0
 Hash: 498643e765d1442ba7b1160a1df3abf9
 
+Package: parsedate
+Source: CRAN
+Version: 1.2.0
+Hash: 289aca3d85861a48b5a91aa2c49fbe50
+Requires: rematch2
+
 Package: pillar
 Source: CRAN
 Version: 1.4.3
 Hash: 64ebcd61a33f2bd9059ffa8a323fd620
 Requires: cli, crayon, fansi, rlang, utf8, vctrs
+
+Package: pingr
+Source: CRAN
+Version: 2.0.0
+Hash: 4319194b72ee7820c54fbd284923f869
+Requires: processx
 
 Package: pkgbuild
 Source: CRAN
@@ -882,6 +912,23 @@ Version: 1.70.0
 Hash: 9a2c1667ab5412f4a2620460a7f96fa1
 Requires: AnnotationDbi
 
+Package: readxl
+Source: CRAN
+Version: 1.3.1
+Hash: 5ce235f860324321eb9ef71d2810661f
+Requires: Rcpp, cellranger, progress, tibble
+
+Package: rematch
+Source: CRAN
+Version: 1.0.1
+Hash: ad4faf59e7611117ff165817074c50c7
+
+Package: rematch2
+Source: CRAN
+Version: 2.1.1
+Hash: f4d61e2bb5c877b265db263ae07e2b81
+Requires: tibble
+
 Package: reshape2
 Source: CRAN
 Version: 1.4.3
@@ -904,6 +951,12 @@ Version: 2.1
 Hash: 8693e30146ce847a75c5eeff9a42b0d9
 Requires: base64enc, evaluate, htmltools, jsonlite, knitr, mime,
     stringr, tinytex, xfun, yaml
+
+Package: rmdformats
+Source: CRAN
+Version: 0.3.7
+Hash: 02f973f1fe1b90373fa4ea9ffc0b0065
+Requires: bookdown, htmltools, knitr, rmarkdown
 
 Package: rprojroot
 Source: CRAN
@@ -953,6 +1006,20 @@ Source: CRAN
 Version: 1.1
 Hash: 1998b94e4425bcc71539e897bceed880
 Requires: digest, htmltools, jsonlite, shiny
+
+Package: shinytest
+Source: CRAN
+Version: 1.3.1
+Hash: cc8a251b4a57d62f2d2367a2de90ef3b
+Requires: R6, assertthat, callr, crayon, debugme, digest, htmlwidgets,
+    httpuv, httr, jsonlite, parsedate, pingr, rematch, rstudioapi,
+    shiny, testthat, webdriver, withr
+
+Package: showimage
+Source: CRAN
+Version: 1.0.0
+Hash: f058f6b423455d7267a39f920b1d1a64
+Requires: png
 
 Package: snow
 Source: CRAN
@@ -1071,6 +1138,13 @@ Package: viridisLite
 Source: CRAN
 Version: 0.3.0
 Hash: 78bb072c4f9e729a283d4c40ec93f9c6
+
+Package: webdriver
+Source: CRAN
+Version: 1.0.5
+Hash: 886b77eebfb8ba4fbfa31935fb8fd19b
+Requires: R6, base64enc, callr, curl, debugme, httr, jsonlite,
+    showimage, withr
 
 Package: withr
 Source: CRAN

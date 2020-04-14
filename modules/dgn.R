@@ -15,12 +15,9 @@ runDGN <- function(DEtable, geneCol, species) {
 }
 
 dgnModule <- function(session, input, output, envir, appDiskCache) {
-  # dgnResults <- reactiveValues(
-  #   results = NULL
-  # )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), ignoreInit = T, {
+  observeEvent(list(envir$gene_list), ignoreInit = F, {
     print('resetting dgn')
     envir$dgnRes <- NULL
     errEl <- NULL

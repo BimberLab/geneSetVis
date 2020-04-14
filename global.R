@@ -1,20 +1,15 @@
 
-options(repos=structure(BiocManager::repositories()))
-#packrat::init(project = '.')
-#warnings()
-#packrat::restore(project = '.')
-#packrat::snapshot()
-
 packrat::on()
+packrat::snapshot(".", snapshot.sources = FALSE)
 
-#recordTest("/Users/onwuzu/Documents/BimberLab/geneSetVis/geneSetVis/", loadTimeout=100000)
+options(repos=structure(BiocManager::repositories()))
 
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
 library(flexdashboard)
-# library(shinytest)
-# shinytest::installDependencies()
+library(shinytest)
+library(testthat)
 
 library(dplyr)
 library(ggplot2)

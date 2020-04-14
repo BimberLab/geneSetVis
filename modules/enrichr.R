@@ -1,12 +1,8 @@
 
 enrichrModule <- function(session, input, output, envir, appDiskCache) {
-  enrichrResults <- reactiveValues(
-    results = NULL,
-    asenrichResult = NULL
-  )
   
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), ignoreInit = T, {
+  observeEvent(list(envir$gene_list), ignoreInit = F, {
     print('resetting enrichr')
     envir$enrichrRes <- NULL
     envir$enrichRes_selected <- NULL

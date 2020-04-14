@@ -176,7 +176,7 @@ if (!is.null(stringdbRes$KEGG) & length(stringdbRes$KEGG) != 0) {
 
 ## Reactome
 ```{r, Reactome1, echo=FALSE}
-if (!is.null(reactomeRes) & nrow(reactomeRes) != 0) {
+if ( !is.null(reactomeRes) & !is.null(nrow(reactomeRes)) ) {
   plotly::ggplotly(
     #enrichplot:::barplot.enrichResult()
     enrichplot::dotplot(reactomeRes) +
@@ -195,7 +195,7 @@ if (!is.null(reactomeRes) & nrow(reactomeRes) != 0) {
 ```
 
 ```{r, Reactome2, echo=FALSE}
-if ( !is.null(reactomeRes) & nrow(reactomeRes) != 0 ) {
+if ( !is.null(reactomeRes) & !is.null(nrow(reactomeRes)) ) {
   table <- reactomeRes %>% as.data.frame() %>%
     dplyr::rename(
       'Term Description' = Description,

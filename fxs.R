@@ -130,7 +130,6 @@ makeTermsTable <- function(table, genesDelim,
 renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName = NULL, caption = NULL) {
   output[[paste(key, 'table', sep = '_')]] <- renderDataTable(server = FALSE, {
     er <- enrichTypeResult()
-    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
     validate(need(!is.null(er) & nrow(er) != 0, ''))
     table <- er %>% as.data.frame() %>% 
       dplyr::rename(
@@ -150,35 +149,30 @@ renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName
   
   output[[paste(key, 'dotplot', sep = '_')]] <- renderPlotly({
     er <- enrichTypeResult()
-    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::dotplot(er) 
   })
   
   output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
-    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::emapplot(er)
   })
   
   output[[paste(key, 'cnetplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
-    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::cnetplot(er)
   })
   
   output[[paste(key, 'upsetplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
-    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::upsetplot(er)
   })
   
   output[[paste(key, 'heatplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
-    # validate(need(!is.null(er), paste0('Please Run ', datasetName,' on input...')))
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::heatplot(er)
   })
