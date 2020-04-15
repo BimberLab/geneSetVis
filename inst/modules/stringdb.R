@@ -60,7 +60,7 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 			enrichmentKEGG <- merge(hit_term_genes, enrichmentKEGG)
 
 
-			string_db$get_png(max_hits_to_plot, file = paste('network.png', sep = ''))
+			#string_db$get_png(max_hits_to_plot, file = paste('network.png', sep = ''))
 
 
 			#network <- string_db$plot_network(max_hits_to_plot)

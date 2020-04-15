@@ -4,8 +4,8 @@
 .RData
 .Ruserdata
 **/*.rds
-report_cache/*
-report/*
+report/exports/*
+report/report_cache/*
 network.png
 packrat/lib*/
 packrat/src/*

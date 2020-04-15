@@ -118,7 +118,7 @@ tab_stringdb <- shinydashboard::tabItem(
 )
 
 
-msigdbCategories <- read.table(file = './data/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+msigdbCategories <- read.table(file = '../data/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
 msigdbCategories <- unique(msigdbCategories[c('Category', 'CategoryLabel')])
 msigdbCategories$CategoryLabel <- paste0(msigdbCategories$Category, ': ', msigdbCategories$CategoryLabel)
 msigdb_categories <- msigdbCategories$Category

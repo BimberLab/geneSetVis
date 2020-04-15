@@ -3,7 +3,7 @@ server = function(input, output, session) {
   
   options(shiny.maxRequestSize=50*1024^2) 
 
-  appDiskCache <- diskCache("./cache", max_size = 75*1024^2, evict = 'lru', logfile = stdout())
+  appDiskCache <- diskCache("../cache", max_size = 75*1024^2, evict = 'lru', logfile = stdout())
   
   
   envir <- reactiveValues(
@@ -149,7 +149,7 @@ server = function(input, output, session) {
     dgnRes <- envir$dgnRes
     ncgRes <- envir$ncgRes
     enrichrRes <- envir$enrichrRes
-    rmarkdown::render(input = 'report.Rmd', output_format = 'html_clean', output_file = paste0(runname,'_Report.html'), output_dir = 'report')
+    rmarkdown::render(input = '../report/report.Rmd', output_format = 'html_clean', output_file = paste0(runname,'_Report.html'), output_dir = '../report/exports/')
   })
 }
 

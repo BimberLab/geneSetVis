@@ -17,7 +17,7 @@ runMSigDB <- function(DEtable, geneCol, species, category = NULL, subcategory = 
 		clusterTable <- DEtable
 
 		if (nrow(clusterTable) > 0) {
-		  
+
 			##Use the gene sets data frame for clusterProfiler (for genes as gene symbols)
 			msig_enricher <- clusterProfiler::enricher(gene = clusterTable[[geneCol]], TERM2GENE = msigTerm)
 			#msig_enricher_plot <- dotplot(msig_enricher)
@@ -100,7 +100,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		if (!is.null(errEl)) {shinyjs::hide(errEl)}
 	})
 
-	msigdbSubcategories <- read.table(file = './data/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+	msigdbSubcategories <- read.table(file = '../data/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
 	msigdbSubcategories <- msigdbSubcategories[!is.na(msigdbSubcategories$Subcategory) & msigdbSubcategories$Subcategory != '',]
 	msigdbSubcategories$SubcategoryLabel <- paste0(msigdbSubcategories$Subcategory, ': ', msigdbSubcategories$SubcategoryLabel)
 
@@ -125,30 +125,30 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	observeEvent(input$runmsigdb_button, {
 	  withBusyIndicatorServer("runmsigdb_button", {
 	    Sys.sleep(1)
-	    
+
 	    print('making MSigDB query')
-	    
+
 	    req(input$msigdb_species_input)
-	    
+
 	    withProgress(message = 'making MSigDB query..', {
 	      category <- input$msigdb_category_input
 	      subcategory <- input$msigdb_subcategory_input
-	      
-	      if (category == '') {category <- NULL}     
-	      if (subcategory == '') {subcategory <- NULL} 
-	      
+
+	      if (category == '') {category <- NULL}
+	      if (subcategory == '') {subcategory <- NULL}
+
 	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$msigdb_selectGeneCol, input$msigdb_species_input, category, subcategory), 'msigdb')
 	      cacheVal <- appDiskCache$get(cacheKey)
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
-	        
+
 	        type <- ifelse(grepl('id', input$msigdb_selectGeneCol), 'ENSEMBL', 'SYMBOL')
 	        if (type != 'SYMBOL') {
 	          envir$msigdbRes$enricher_result <- NULL
 	          envir$msigdbRes$fgsea_result <- NULL
 	          stop('MsigDB only accepts gene columns of type SYMBOL')
 	          }
-	        
+
 	        msigdbRes <- runMSigDB(
 	          DEtable = envir$gene_list,
 	          geneCol = input$msigdb_selectGeneCol,
@@ -162,17 +162,17 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	        msigdbRes <- cacheVal
 	      }
 	    })
-	    
+
 	    envir$msigdbRes <- msigdbRes
-	    
+
 	    if (is.null(envir$msigdbRes$enricher_result) | nrow(envir$msigdbRes$enricher_result) == 0) {
 	      envir$msigdbRes$enricher_result <- NULL
 	      envir$msigdbRes$fgsea_result <- NULL
 	      stop('No significant enrichment found.')
 	      }
-	    
+
 	    if ( !is.null(envir$msigdbRes$fgsea_result) & nrow(envir$msigdbRes$fgsea_result) != 0 ) {
-	      
+
 	      fgsea_geneIDCol <-
 	        getEnrichResGeneID(
 	          gseResult = msigdbRes$fgsea_result,
@@ -181,7 +181,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	          geneSet = msigdbRes$msig_geneSet,
 	          idColName = 'pathway'
 	        )
-	      
+
 	      envir$msigdbRes_fgsea <- as.enrichResult(
 	        gseType = 'FGSEA',
 	        gseResult = msigdbRes$fgsea_result,
@@ -200,13 +200,13 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	          sep = ''
 	        )
 	      )
-	      
+
 	    }
-	    
-	    
+
+
 	  })
 	})
-	
+
 	renderPlotSet(
 	  output = output,
 	  key = 'enricher',
@@ -214,7 +214,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	  datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
 	  datasetName = 'MSigDB'
 	)
-	
+
 	renderPlotSet(
 	  output = output,
 	  key = 'fgsea',
@@ -223,8 +223,8 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	  datasetName = 'MSigDB',
 	  caption = 'Click on Term Description cell to view enrichment plot.'
 	)
-	
-	
+
+
 	output$msigdb_map_stats <- renderText({
 	  validate(need(!is.null(envir$msigdbRes$enricher_result), "No mapped genes."))
 	  num_genes_mapped <- str_split(noquote(envir$msigdbRes$enricher_result@result$GeneRatio[1]), '/')[[1]][2]
@@ -233,7 +233,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')
 	  )
 	})
-	
+
 
 
 	output[["fgsea_table_PPI"]] <- renderPlot({
