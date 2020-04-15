@@ -1,5 +1,7 @@
-app <- ShinyDriver$new("../", seed = 0, loadTimeout = 1e+05)
-app$snapshotInit("twoCol_test")
+#library(shinytest)
+
+app <- shinytest::ShinyDriver$new(system.file("tests/", package = "geneSetVis"), seed = 0, loadTimeout = 1e+05)
+app$snapshotInit("two_col_test")
 
 app$setInputs(demo1 = "click")
 app$setInputs(submit = "click")

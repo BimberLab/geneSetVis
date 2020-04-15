@@ -6,7 +6,48 @@ Authors@R:
            role = c("aut", "cre"),
            email = "kolabx4@googleemail.com")
 Description: Visualization of gene-sets using established packages and databases.
-License: 
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.0
+Depends:
+    R (>= 3.5.0)
+Imports:
+    shiny,
+    AnnotationHub,
+    BiocGenerics,
+    DOSE,
+    DT,
+    ReactomePA,
+    biomaRt,
+    clusterProfiler,
+    dplyr,
+    enrichR,
+    enrichplot,
+    fgsea,
+    flexdashboard,
+    formattable,
+    ggplot2,
+    ggupset,
+    knitr,
+    org.Hs.eg.db,
+    org.Mm.eg.db,
+    org.Mmu.eg.db,
+    plotly,
+    shinyWidgets,
+    shinydashboard,
+    shinytest,
+    stringr,
+    testthat,
+    tidyr,
+    RDAVIDWebService,
+    STRINGdb,
+    rmdformats
+Suggests:
+    ggvis,
+    devtools,
+    testthat (>= 2.1.0)
+Remotes:
+    bioc::release/RDAVIDWebService,
+    bioc::release/STRINGdb
+

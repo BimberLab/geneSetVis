@@ -2,3 +2,16 @@
 ^\.Rproj\.user$
 ^packrat/
 ^\.Rprofile$
+^\.idea/
+^\.Rproj\.user$
+^\.Rhistory$
+^\.RData$
+^\.Ruserdata$
+^.*/.*\.rds$
+^report/exports/
+^report/report_cache/
+^network\.png$
+^tests/shinytestrecord\.R$
+^\.travis\.yml$
+^\.dockerignore$
+^tests/

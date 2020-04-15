@@ -2,7 +2,7 @@
 tab_load_data <- shinydashboard::tabItem(
   tabName = 'loadData',
   fluidRow(
-    #column = 6,  
+    #column = 6,
     shinydashboard::box(
       title = 'Input Gene List',
       status = 'primary',
@@ -31,7 +31,7 @@ tab_load_data <- shinydashboard::tabItem(
                   selected = 'Gene & avg. LogFC'),
       radioButtons("geneIdType",
                    label = "Select Gene ID Type:",
-                   choices = list("Ensembl" = "Ensembl", 
+                   choices = list("Ensembl" = "Ensembl",
                                   "Symbol" = "Symbol"),
                    selected = 'Symbol'),
       checkboxInput('checkGeneIdTranslate',label = strong('Gene ID Translation'), value = FALSE),
@@ -51,7 +51,7 @@ tab_load_data <- shinydashboard::tabItem(
 tab_stringdb <- shinydashboard::tabItem(
   tabName = 'stringdb',
   shinydashboard::box(
-    title = tagList(p('Run STRINGdb', style = "padding-right: 5px; display: inline"), 
+    title = tagList(p('Run STRINGdb', style = "padding-right: 5px; display: inline"),
                     actionButton(
                       inputId = "stringdb_resource_info",
                       label = "info",
@@ -105,7 +105,7 @@ tab_stringdb <- shinydashboard::tabItem(
   #   selected = 'Network (PNG)',
   #   width = 16,
   #   tabPanel( 'Network (PNG)', imageOutput('stringdb_network_png'))
-  # ), 
+  # ),
   shinydashboard::tabBox(
     title = NULL,
     side = 'right',
@@ -118,7 +118,7 @@ tab_stringdb <- shinydashboard::tabItem(
 )
 
 
-msigdbCategories <- read.table(file = '../data/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+msigdbCategories <- read.table(file = system.file('info/msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
 msigdbCategories <- unique(msigdbCategories[c('Category', 'CategoryLabel')])
 msigdbCategories$CategoryLabel <- paste0(msigdbCategories$Category, ': ', msigdbCategories$CategoryLabel)
 msigdb_categories <- msigdbCategories$Category
@@ -128,7 +128,7 @@ rm(msigdbCategories)
 tab_msigdb <- shinydashboard::tabItem(
   tabName = 'msigdb',
   shinydashboard::box(
-    title = tagList(p('Run MSigDB', style = "padding-right: 5px; display: inline"), 
+    title = tagList(p('Run MSigDB', style = "padding-right: 5px; display: inline"),
                     actionButton(
                       inputId = "msigdb_resource_info",
                       label = "info",
@@ -185,7 +185,7 @@ tab_msigdb <- shinydashboard::tabItem(
 tab_reactome <- shinydashboard::tabItem(
   tabName = 'reactome',
   shinydashboard::box(
-    title = tagList(p('Run Reactome', style = "padding-right: 5px; display: inline"), 
+    title = tagList(p('Run Reactome', style = "padding-right: 5px; display: inline"),
                     actionButton(
                       inputId = "reactome_resource_info",
                       label = "info",
@@ -212,7 +212,7 @@ tab_reactome <- shinydashboard::tabItem(
       )
     ),
     withBusyIndicatorUI(actionButton('runreactome_button', 'Run')),
-  ), 
+  ),
   shinydashboard::tabBox(
     title = NULL,
     side = 'right',
@@ -228,7 +228,7 @@ tab_reactome <- shinydashboard::tabItem(
 tab_david <- shinydashboard::tabItem(
   tabName = 'david',
   shinydashboard::box(
-    title = tagList(p('Run DAVID', style = "padding-right: 5px; display: inline"), 
+    title = tagList(p('Run DAVID', style = "padding-right: 5px; display: inline"),
                     actionButton(
                       inputId = "david_resource_info",
                       label = "info",
@@ -253,7 +253,7 @@ tab_david <- shinydashboard::tabItem(
         selected = 'org.Hs.eg.db',
         #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.Mm.eg.db')
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
-      ), 
+      ),
       textInput(
         inputId = 'davidUserEmail',
         label = 'DAVID user email:',
@@ -261,7 +261,7 @@ tab_david <- shinydashboard::tabItem(
         placeholder = 'enter DAVID account email',
       )
     ),
-    withBusyIndicatorUI(actionButton('rundavid_button', 'Run')), 
+    withBusyIndicatorUI(actionButton('rundavid_button', 'Run')),
   ),
   shinydashboard::tabBox(
     title = NULL,
@@ -278,7 +278,7 @@ tab_david <- shinydashboard::tabItem(
 tab_dose <- shinydashboard::tabItem(
   tabName = 'dose',
   shinydashboard::box(
-    title = tagList(p('Run DOSE', style = "padding-right: 5px; display: inline"), 
+    title = tagList(p('Run DOSE', style = "padding-right: 5px; display: inline"),
                     actionButton(
                       inputId = "dose_resource_info",
                       label = "info",
@@ -305,7 +305,7 @@ tab_dose <- shinydashboard::tabItem(
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
       )
     ),
-    withBusyIndicatorUI(actionButton('rundose_button', 'Run')), 
+    withBusyIndicatorUI(actionButton('rundose_button', 'Run')),
   ),
   shinydashboard::tabBox(
     title = NULL,
@@ -323,7 +323,7 @@ tab_dose <- shinydashboard::tabItem(
 tab_ncg <- shinydashboard::tabItem(
   tabName = 'ncg',
   shinydashboard::box(
-    title = tagList(p('Run NCG', style = "padding-right: 5px; display: inline"), 
+    title = tagList(p('Run NCG', style = "padding-right: 5px; display: inline"),
                     actionButton(
                       inputId = "ncg_resource_info",
                       label = "info",
@@ -350,7 +350,7 @@ tab_ncg <- shinydashboard::tabItem(
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
       )
     ),
-    withBusyIndicatorUI(actionButton('runncg_button', 'Run')), 
+    withBusyIndicatorUI(actionButton('runncg_button', 'Run')),
   ),
   shinydashboard::tabBox(
     title = NULL,
@@ -367,7 +367,7 @@ tab_ncg <- shinydashboard::tabItem(
 tab_dgn <- shinydashboard::tabItem(
   tabName = 'dgn',
   shinydashboard::box(
-    title = tagList(p('Run DGN', style = "padding-right: 5px; display: inline"), 
+    title = tagList(p('Run DGN', style = "padding-right: 5px; display: inline"),
                     actionButton(
                       inputId = "dgn_resource_info",
                       label = "info",
@@ -394,7 +394,7 @@ tab_dgn <- shinydashboard::tabItem(
         choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
       )
     ),
-    withBusyIndicatorUI(actionButton('rundgn_button', 'Run')), 
+    withBusyIndicatorUI(actionButton('rundgn_button', 'Run')),
   ),
   shinydashboard::tabBox(
     title = NULL,
@@ -411,7 +411,7 @@ tab_dgn <- shinydashboard::tabItem(
 tab_enrichr <- shinydashboard::tabItem(
   tabName = 'enrichr',
   shinydashboard::box(
-    title = tagList(p('Run enrichR', style = "padding-right: 5px; display: inline"), 
+    title = tagList(p('Run enrichR', style = "padding-right: 5px; display: inline"),
                     actionButton(
                       inputId = "enrichr_resource_info",
                       label = "info",
@@ -431,19 +431,19 @@ tab_enrichr <- shinydashboard::tabItem(
         selected = 'gene',
         choices = ''
       ),
-      shinyWidgets::pickerInput(inputId = "enrichr_db", 
-                                label = 'Select database(s) to query:', 
+      shinyWidgets::pickerInput(inputId = "enrichr_db",
+                                label = 'Select database(s) to query:',
                                 choices = c('', listEnrichrDbs()$libraryName),
-                                options = list(`actions-box` = TRUE), 
+                                options = list(`actions-box` = TRUE),
                                 multiple = T)
       ),
     withBusyIndicatorUI(actionButton('runenrichr_button', 'Run'))
-  ), 
+  ),
     selectInput(
       inputId = 'enrichr_selectQuery',
       label = 'Select query result to view:',
       choices = ''
-  ), 
+  ),
   #uiOutput('enrichrResults_selected_ui'),
   #dataTableOutput('enrichrResults_selected_table'),
   # ),

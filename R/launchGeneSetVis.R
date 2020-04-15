@@ -7,20 +7,19 @@
 #' @import shiny
 #' @import shinydashboard
 #' @import shinyWidgets
-#' @import flexdashboard
 #' @import shinytest
 #' @import testthat
-#' @import dplyr
+#' @importFrom dplyr arrange group_by rename select summarise
 #' @import ggplot2
 #' @import ggupset
 #' @import tidyr
 #' @import stringr
-#' @import plotly
-#' @import DT
+#' @importFrom plotly plotlyOutput renderPlotly
+#' @importFrom DT datatable renderDataTable
 #' @import formattable
 #' @import stats
 #' @import knitr
-#' @import rmdformats
+#' @importFrom rmdformats html_clean
 #' @import org.Hs.eg.db
 #' @import org.Mmu.eg.db
 #' @import org.Mm.eg.db
@@ -31,10 +30,11 @@
 #' @import enrichplot
 #' @import fgsea
 #' @import enrichR
+#' @importFrom utils stack
 #'
 #setwd("/Users/onwuzu/Documents/BimberLab/geneSetVis/")
 launchGeneSetVis <- function(...)
 {
-  shiny::runApp(appDir = system.file(".", package = "geneSetVis"),
+  shiny::runApp(appDir = system.file("app", package = "geneSetVis"),
                 ...)
 }
