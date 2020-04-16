@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 	prompt = FALSE,
 	tidy = TRUE
 )
-opts_knit$set(width=75)
+knitr::opts_knit$set(width=75)
 ```
 
 # `r runname`
