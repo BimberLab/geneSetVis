@@ -112,13 +112,13 @@ tab_stringdb <- shinydashboard::tabItem(
     height = NULL,
     selected = 'GO',
     width = 16,
-    tabPanel('GO', dataTableOutput('stringdb_GO')),
-    tabPanel('KEGG', dataTableOutput('stringdb_KEGG'))
+    tabPanel('GO', DT::dataTableOutput('stringdb_GO')),
+    tabPanel('KEGG', DT::dataTableOutput('stringdb_KEGG'))
   )
 )
 
 
-msigdbCategories <- read.table(file = system.file('info/msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
+msigdbCategories <- read.table(file = system.file('msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
 msigdbCategories <- unique(msigdbCategories[c('Category', 'CategoryLabel')])
 msigdbCategories$CategoryLabel <- paste0(msigdbCategories$Category, ': ', msigdbCategories$CategoryLabel)
 msigdb_categories <- msigdbCategories$Category
@@ -433,7 +433,7 @@ tab_enrichr <- shinydashboard::tabItem(
       ),
       shinyWidgets::pickerInput(inputId = "enrichr_db",
                                 label = 'Select database(s) to query:',
-                                choices = c('', listEnrichrDbs()$libraryName),
+                                choices = c('', enrichR::listEnrichrDbs()$libraryName),
                                 options = list(`actions-box` = TRUE),
                                 multiple = T)
       ),

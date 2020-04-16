@@ -40,9 +40,10 @@ makeTermsTable <- function(table, genesDelim,
     ) # %>% formatStyle( 0, target= 'row',color = 'black', backgroundColor = NULL, fontWeight = NULL, lineHeight='50%')
 }
 
-
+# TODO: download entire dataset:
+# server = FALSE
 renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName = NULL, caption = NULL) {
-  output[[paste(key, 'table', sep = '_')]] <- renderDataTable(server = FALSE, {
+  output[[paste(key, 'table', sep = '_')]] <- DT::renderDataTable({
     er <- enrichTypeResult()
     validate(need(!is.null(er) & nrow(er) != 0, ''))
     table <- er %>% as.data.frame() %>%
@@ -61,7 +62,7 @@ renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName
                    caption = caption,
                    includeColumns = c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term'))  })
 
-  output[[paste(key, 'dotplot', sep = '_')]] <- renderPlotly({
+  output[[paste(key, 'dotplot', sep = '_')]] <- plotly::renderPlotly({
     er <- enrichTypeResult()
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
     enrichplot::dotplot(er)
@@ -100,7 +101,7 @@ makeTabBox <- function(title, key) {
     height = NULL,
     selected = 'Table',
     width = 16,
-    tabPanel('Table', dataTableOutput(paste(key, 'table', sep = '_'))),
+    tabPanel('Table', DT::dataTableOutput(paste(key, 'table', sep = '_'))),
     tabPanel('Dot Plot', plotly::plotlyOutput(paste(key, 'dotplot', sep = '_'))),
     tabPanel('Emap Plot', plotOutput(paste(key, 'emapplot', sep = '_'))),
     tabPanel('Cnet Plot', plotOutput(paste(key, 'cnetplot', sep = '_'))),

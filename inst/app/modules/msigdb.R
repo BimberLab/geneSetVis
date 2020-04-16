@@ -46,7 +46,7 @@ runMSigDB <- function(DEtable, geneCol, species, category = NULL, subcategory = 
 			ranks <- setNames(ranks, clusterTable[[geneCol]])
 
 			set.seed(1234)
-			fgsea_results <- fgsea(
+			fgsea_results <- fgsea::fgsea(
 			  pathways = msig_geneSet,
 			  stats = ranks,
 			  minSize = 5,
@@ -100,7 +100,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		if (!is.null(errEl)) {shinyjs::hide(errEl)}
 	})
 
-	msigdbSubcategories <- read.table(file = system.file('info/msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
+	msigdbSubcategories <- read.table(file = system.file('msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
 	msigdbSubcategories <- msigdbSubcategories[!is.na(msigdbSubcategories$Subcategory) & msigdbSubcategories$Subcategory != '',]
 	msigdbSubcategories$SubcategoryLabel <- paste0(msigdbSubcategories$Subcategory, ': ', msigdbSubcategories$SubcategoryLabel)
 
@@ -192,9 +192,9 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	        geneIDCol = fgsea_geneIDCol,
 	        #?size is not Count
 	        #countCol = msigdbRes$fgsea_result$size,
-	        countCol = lapply(str_split(fgsea_geneIDCol, pattern = '/'), length),
+	        countCol = lapply(stringr::str_split(fgsea_geneIDCol, pattern = '/'), length),
 	        geneRatioCol = paste(
-	          lapply(str_split(fgsea_geneIDCol, pattern = '/'), length),
+	          lapply(stringr::str_split(fgsea_geneIDCol, pattern = '/'), length),
 	          '/',
 	          length(msigdbRes$enricher_result@gene),
 	          sep = ''
@@ -227,7 +227,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 
 	output$msigdb_map_stats <- renderText({
 	  validate(need(!is.null(envir$msigdbRes$enricher_result), "No mapped genes."))
-	  num_genes_mapped <- str_split(noquote(envir$msigdbRes$enricher_result@result$GeneRatio[1]), '/')[[1]][2]
+	  num_genes_mapped <- stringr::str_split(noquote(envir$msigdbRes$enricher_result@result$GeneRatio[1]), '/')[[1]][2]
 	  HTML(
 	    '<b>Mapped genes</b><br>',
 	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')

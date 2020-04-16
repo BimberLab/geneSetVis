@@ -80,6 +80,6 @@ multi_hyperlink_text <- function(labels, links){
 
 
 makeDiskCacheKey <- function(inputList, prefix) {
-  return(paste0(str_to_lower(prefix), digest::digest(inputList)))
+  return(paste0(stringr::str_to_lower(prefix), digest::digest(inputList)))
 }
 

@@ -3,7 +3,8 @@ server = function(input, output, session) {
 
   options(shiny.maxRequestSize=50*1024^2)
 
-  appDiskCache <- diskCache(system.file("cache", package = 'geneSetVis'), max_size = 75*1024^2, evict = 'lru', logfile = stdout())
+  print('cache directory will be created in working directory.')
+  appDiskCache <- diskCache("./geneSetVis/cache/", max_size = 75*1024^2, evict = 'lru', logfile = stdout())
 
 
   envir <- reactiveValues(
@@ -91,7 +92,7 @@ server = function(input, output, session) {
     envir$gene_list <- gene_list
   })
 
-  output$inputTable <- DT::renderDataTable(server = FALSE, {
+  output$inputTable <- DT::renderDataTable({
     validate(need(envir$gene_list, "Please enter the gene list and hit submit"))
 
     req(input$submit)
@@ -139,7 +140,7 @@ server = function(input, output, session) {
     if (isTruthy(input$fileInput$name)) {
       runname <- tools::file_path_sans_ext(basename(input$fileInput$name))
     } else {
-      runname <- Sys.time()
+      runname <- 'geneSetVis'
     }
     stringdbRes <- envir$stringdbRes
     msigdbRes <- envir$msigdbRes
@@ -149,7 +150,8 @@ server = function(input, output, session) {
     dgnRes <- envir$dgnRes
     ncgRes <- envir$ncgRes
     enrichrRes <- envir$enrichrRes
-    rmarkdown::render(input = system.file('report/report.Rmd', package = 'geneSetVis'), output_format = 'html_clean', output_file = paste0(runname,'_Report.html'), output_dir = system.file('report/exports/', package = 'geneSetVis'))
+    print('report directory will be created in working directory.')
+    rmarkdown::render(input = system.file('template_report.Rmd', package = 'geneSetVis'), output_format = 'html_clean', output_file = paste0(runname,'_Report.html'), output_dir = "./geneSetVis/reports/")
   })
 }
 

@@ -1,0 +1,408 @@
+---
+title: "`r runname`"
+author: "geneSetVis"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::html_clean:
+    highlight: kate
+    toc: true
+    toc_depth: 6
+---
+
+
+```{r setup, echo=FALSE, cache=FALSE}
+
+
+# Global options
+options(max.print="75")
+knitr::opts_chunk$set(
+	eval = TRUE,
+	message = FALSE,
+	warning = FALSE,
+	cache = TRUE,
+	comment = NA,
+	include = TRUE,
+	prompt = FALSE,
+	tidy = TRUE
+)
+opts_knit$set(width=75)
+```
+
+# `r runname`
+
+## MSigDB {.tabset .tabset-fade .tabset-pills}
+
+### Dotplot
+
+```{r, MSigDB1, echo=FALSE}
+if (!is.null(msigdbRes$enricher_result) & length(msigdbRes$enricher_result) != 0) {
+  plotly::ggplotly(
+    #enrichplot:::barplot.enrichResult()
+    enrichplot::dotplot(msigdbRes$enricher_result) +
+      theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()
+      )
+    #width = 1000,
+    #scrollX=T
+  ) # %>% layout(yaxis = list(showticklabels = FALSE))
+  
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+```{r, MSigDB2, echo=FALSE}
+if (!is.null(msigdbRes$enricher_result) & length(msigdbRes$enricher_result) != 0) {
+  table <- msigdbRes$enricher_result %>% as.data.frame() %>%
+    dplyr::rename(
+      'Term Description' = Description,
+      'Term ID' = ID,
+      'geneID' = geneID,
+      'Hits' = Count,
+      'p-Value (adj.)' = pvalue,
+      'p-Value' = p.adjust,
+      'Genes in Term' = geneID
+    )
+  
+  table <- makeTermsTable(
+    table = table,
+    genesDelim = '/',
+    datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
+    caption = NULL,
+    includeColumns = c(
+      'Term Description',
+      'Hits',
+      'p-Value (adj.)',
+      'p-Value',
+      'Genes in Term'
+    )
+  )
+  table
+} else {
+  print('No significant enrichment found.')
+}
+```
+
+
+## STRINGdb
+
+### Network
+
+```{r include=FALSE}
+if (!is.null(stringdbRes) & length(stringdbRes) != 0) {
+  link <- stringdbRes[['link']]
+} else {
+  link <- NULL
+  print('No link available.')
+}
+```
+[View mapped genes on string-db website](`r link`)
+
+### GO
+
+```{r, STRINGdb2, echo=FALSE}
+if (!is.null(stringdbRes$GO) & length(stringdbRes$GO) != 0) {
+  table <- stringdbRes$GO %>%
+    dplyr::rename(
+      'Term Description' = term_description,
+      'Term ID' = term_id,
+      'Proteins' = proteins,
+      'Hits' = hits,
+      'p-Value' = pvalue,
+      'p-Value (adj.)' = pvalue_fdr,
+      'Genes in Term' = hit_term_genes
+    )
+  
+  table <- makeTermsTable(
+    table = table,
+    genesDelim = ',',
+    datasetURL = "https://www.ebi.ac.uk/QuickGO/term/",
+    caption = NULL,
+    includeColumns = c(
+      'Term Description',
+      'Proteins',
+      'Hits',
+      'p-Value (adj.)',
+      'p-Value',
+      'Genes in Term'
+    )
+  )
+  table
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+### KEGG
+
+```{r, echo=FALSE}
+if (!is.null(stringdbRes$KEGG) & length(stringdbRes$KEGG) != 0) {
+  table <- stringdbRes$KEGG %>%
+    dplyr::rename(
+      'Term Description' = term_description,
+      'Term ID' = term_id,
+      'Proteins' = proteins,
+      'Hits' = hits,
+      'p-Value' = pvalue,
+      'p-Value (adj.)' = pvalue_fdr,
+      'Genes in Term' = hit_term_genes
+    )
+  
+  table <- makeTermsTable(
+    table = table,
+    genesDelim = ',',
+    datasetURL = "https://www.genome.jp/dbget-bin/www_bget?map",
+    caption = NULL,
+    includeColumns = c(
+      'Term Description',
+      'Proteins',
+      'Hits',
+      'p-Value (adj.)',
+      'p-Value',
+      'Genes in Term'
+    )
+  )
+  table
+} else {
+  print('No significant enrichment found.')
+}
+```
+
+
+## Reactome
+```{r, Reactome1, echo=FALSE}
+if ( !is.null(reactomeRes) & !is.null(nrow(reactomeRes)) ) {
+  plotly::ggplotly(
+    #enrichplot:::barplot.enrichResult()
+    enrichplot::dotplot(reactomeRes) +
+      theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()
+      )
+    #width = 1000,
+    #scrollX=T
+  ) # %>% layout(yaxis = list(showticklabels = FALSE))
+  
+} else {
+  print('No significant enrichment found.')
+}
+```
+
+```{r, Reactome2, echo=FALSE}
+if ( !is.null(reactomeRes) & !is.null(nrow(reactomeRes)) ) {
+  table <- reactomeRes %>% as.data.frame() %>%
+    dplyr::rename(
+      'Term Description' = Description,
+      'Term ID' = ID,
+      'geneID' = geneID,
+      'Hits' = Count,
+      'p-Value (adj.)' = pvalue,
+      'p-Value' = p.adjust,
+      'Genes in Term' = geneID
+    )
+  
+  table <- makeTermsTable(
+    table = table,
+    genesDelim = '/',
+    datasetURL = "https://reactome.org/PathwayBrowser/#/",
+    caption = NULL,
+    includeColumns = c(
+      'Term Description',
+      'Hits',
+      'p-Value (adj.)',
+      'p-Value',
+      'Genes in Term'
+    )
+  )
+  table
+} else {
+  print('No significant enrichment found.')
+}
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
+### DAVID
+enrichplot::dotplot(davidRes) + 
+      scale_y_discrete(labels = function(x) stringr::str_wrap(stringr::str_replace_all(x, "pattern_" , "_"), width = 40))
+    
+```
+
+```{r eval=FALSE, include=FALSE}
+table <- davidRes %>% as.data.frame() %>%
+  dplyr::rename(
+    'Term Description' = Description,
+    'Term ID' = ID,
+    'geneID' = geneID,
+    'Hits' = Count,
+    'p-Value (adj.)' = pvalue,
+    'p-Value' = p.adjust,
+    'Genes in Term' = geneID
+  )
+
+table <- makeTermsTable(
+  table = table,
+  genesDelim = '/',
+  datasetURL = '',
+  caption = NULL,
+  includeColumns = c(
+    'Term Description',
+    'Hits',
+    'p-Value (adj.)',
+    'p-Value',
+    'Genes in Term'
+  )
+)  
+table
+```
+
+
+```{r eval=FALSE, include=FALSE}
+### DOSE
+
+enrichplot::dotplot(doseRes) + 
+      scale_y_discrete(labels = function(x) stringr::str_wrap(stringr::str_replace_all(x, "pattern_" , "_"), width = 40))
+    
+```
+
+```{r eval=FALSE, include=FALSE}
+doseRes
+doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
+rownames(doseRes@result) <- doseRes@result$ID
+
+table <- doseRes %>% as.data.frame() %>%
+  dplyr::rename(
+    'Term Description' = Description,
+    'Term ID' = ID,
+    'geneID' = geneID,
+    'Hits' = Count,
+    'p-Value (adj.)' = pvalue,
+    'p-Value' = p.adjust,
+    'Genes in Term' = geneID
+  )
+
+table <- makeTermsTable(
+  table = table,
+  genesDelim = '/',
+  datasetURL = "https://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http%3A%2F%2Fpurl.obolibrary.org%2Fobo%2FDOID_",
+  caption = NULL,
+  includeColumns = c(
+    'Term Description',
+    'Hits',
+    'p-Value (adj.)',
+    'p-Value',
+    'Genes in Term'
+  )
+) 
+table
+```
+
+
+```{r eval=FALSE, include=FALSE}
+### NCG
+enrichplot::dotplot(ncgRes) + 
+      scale_y_discrete(labels = function(x) stringr::str_wrap(stringr::str_replace_all(x, "pattern_" , "_"), width = 40))
+    
+```
+
+```{r eval=FALSE, include=FALSE}
+table <- ncgRes %>% as.data.frame() %>%
+  dplyr::rename(
+    'Term Description' = Description,
+    'Term ID' = ID,
+    'geneID' = geneID,
+    'Hits' = Count,
+    'p-Value (adj.)' = pvalue,
+    'p-Value' = p.adjust,
+    'Genes in Term' = geneID
+  )
+
+makeTermsTable(
+  table = table,
+  genesDelim = '/',
+  datasetURL = '',
+  caption = NULL,
+  includeColumns = c(
+    'Term Description',
+    'Hits',
+    'p-Value (adj.)',
+    'p-Value',
+    'Genes in Term'
+  )
+) 
+```
+
+
+```{r eval=FALSE, include=FALSE}
+### DGN
+
+enrichplot::dotplot(dgnRes) + 
+      scale_y_discrete(labels = function(x) stringr::str_wrap(stringr::str_replace_all(x, "pattern_" , "_"), width = 40))
+    
+```
+
+```{r eval=FALSE, include=FALSE}
+table <- dgnRes %>% as.data.frame() %>%
+  dplyr::rename(
+    'Term Description' = Description,
+    'Term ID' = ID,
+    'geneID' = geneID,
+    'Hits' = Count,
+    'p-Value (adj.)' = pvalue,
+    'p-Value' = p.adjust,
+    'Genes in Term' = geneID
+  )
+
+makeTermsTable(
+  table = table,
+  genesDelim = '/',
+  datasetURL = "https://www.disgenet.org/browser/0/1/0/",
+  caption = NULL,
+  includeColumns = c(
+    'Term Description',
+    'Hits',
+    'p-Value (adj.)',
+    'p-Value',
+    'Genes in Term'
+  )
+) 
+
+```
+
+
+```{r eval=FALSE, include=FALSE}
+### enrichR
+
+table <- enrichrRes %>% as.data.frame() %>%
+  dplyr::rename(
+    'Term Description' = Description,
+    'Term ID' = ID,
+    'geneID' = geneID,
+    'Hits' = Count,
+    'p-Value (adj.)' = pvalue,
+    'p-Value' = p.adjust,
+    'Genes in Term' = geneID
+  )
+
+makeTermsTable(
+  table = table,
+  genesDelim = '/',
+  datasetURL = "https://www.disgenet.org/browser/0/1/0/",
+  caption = NULL,
+  includeColumns = c(
+    'Term Description',
+    'Hits',
+    'p-Value (adj.)',
+    'p-Value',
+    'Genes in Term'
+  )
+) 
+```
+

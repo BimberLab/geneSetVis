@@ -22,10 +22,10 @@ Imports:
     biomaRt,
     clusterProfiler,
     dplyr,
+    magrittr,
     enrichR,
     enrichplot,
     fgsea,
-    flexdashboard,
     formattable,
     ggplot2,
     ggupset,
@@ -38,7 +38,6 @@ Imports:
     shinydashboard,
     shinytest,
     stringr,
-    testthat,
     tidyr,
     RDAVIDWebService,
     STRINGdb,
@@ -46,7 +45,8 @@ Imports:
 Suggests:
     ggvis,
     devtools,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    digest
 Remotes:
     bioc::release/RDAVIDWebService,
     bioc::release/STRINGdb

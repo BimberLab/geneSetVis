@@ -4,12 +4,11 @@
 #' @keywords gene-set enrichment
 #' @export
 #' @return Shiny application.
-#' @import shiny
+#' @rawNamespace import(shiny, except = c('dataTableOutput', 'renderDataTable'))
 #' @import shinydashboard
 #' @import shinyWidgets
 #' @import shinytest
-#' @import testthat
-#' @importFrom dplyr arrange group_by rename select summarise
+#' @importFrom dplyr %>% arrange group_by rename select summarise
 #' @import ggplot2
 #' @import ggupset
 #' @import tidyr
@@ -17,9 +16,8 @@
 #' @importFrom plotly plotlyOutput renderPlotly
 #' @importFrom DT datatable renderDataTable
 #' @import formattable
-#' @import stats
 #' @import knitr
-#' @importFrom rmdformats html_clean
+#' @import rmdformats
 #' @import org.Hs.eg.db
 #' @import org.Mmu.eg.db
 #' @import org.Mm.eg.db
@@ -30,9 +28,7 @@
 #' @import enrichplot
 #' @import fgsea
 #' @import enrichR
-#' @importFrom utils stack
 #'
-#setwd("/Users/onwuzu/Documents/BimberLab/geneSetVis/")
 launchGeneSetVis <- function(...)
 {
   shiny::runApp(appDir = system.file("app", package = "geneSetVis"),

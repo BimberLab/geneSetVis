@@ -4,18 +4,18 @@ runDGN <- function(DEtable, geneCol, species) {
     DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
     DEtable <- DEtable[match(unique(DEtable[[geneCol]]), DEtable[[geneCol]]), ]
   }
-  
+
   return_list = list()
   tryCatch({
     entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable[[geneCol]]), 'ENTREZID', 'SYMBOL')
-    
+
     dgn <- DOSE::enrichDGN(entrezIDs, OrgDb = human, pvalueCutoff = 1, qvalueCutoff = 1)
-    
+
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
 
 dgnModule <- function(session, input, output, envir, appDiskCache) {
-  
+
   #NOTE: this should reset our tab whenever the input genes change
   observeEvent(list(envir$gene_list), ignoreInit = F, {
     print('resetting dgn')
@@ -23,43 +23,43 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
     errEl <- NULL
     if (!is.null(errEl)) {shinyjs::hide(errEl)}
   })
-  
+
   observeEvent(input$rundgn_button, {
     withBusyIndicatorServer("rundgn_button", {
       Sys.sleep(1)
       #TODO: validate input present?
       validate(need(input$dgn_OrgDB_input != '', "Please select OrgDB..."))
-      
+
       print('making dgn query')
       withProgress(message = 'making DGN query...', {
         cacheKey <- makeDiskCacheKey(list(envir$gene_list[[input$dgn_selectGeneCol]], input$dgn_OrgDB_input), 'dgn')
         cacheVal <- appDiskCache$get(cacheKey)
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
-          
+
           #if (!require(input$dgn_OrgDB_input)) install.packages(input$dgn_OrgDB_input)
           envir$dgnRes <- NULL
           fromType <- ifelse(grepl('id', input$dgn_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-          entrezIDs <- bitr(geneID = envir$gene_list[[input$dgn_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
+          entrezIDs <- clusterProfiler::bitr(geneID = envir$gene_list[[input$dgn_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
           dgnRes <- DOSE::enrichDGN(entrezIDs$ENTREZID, readable = T)
           appDiskCache$set(key = cacheKey, value = dgnRes)
         } else {
           print('loading from cache...')
           dgnRes <- cacheVal
         }
-        
+
         envir$dgnRes <- dgnRes
         if ( is.null(envir$dgnRes) || nrow(envir$dgnRes) == 0 ) {stop('No significant enrichment found.')}
-        
+
         dgnRes@result$ID <- gsub(pattern = 'umls:', replacement = '', dgnRes@result$ID)
         rownames(dgnRes@result) <- dgnRes@result$ID
-        
-        
-        
+
+
+
       })
     })
   })
-  
+
   renderPlotSet(
     output = output,
     key = 'dgn',
@@ -67,16 +67,16 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
     datasetURL = "https://www.disgenet.org/browser/0/1/0/",
     datasetName = 'dgn'
   )
-  
+
   output$dgn_map_stats <- renderText({
     validate(need(!is.null(envir$dgnRes) & length(envir$dgnRes) != 0, "No mapped genes."))
-    num_genes_mapped <- str_split(noquote(envir$dgnRes@result$GeneRatio[1]), '/')[[1]][2]
+    num_genes_mapped <- stringr::str_split(noquote(envir$dgnRes@result$GeneRatio[1]), '/')[[1]][2]
     HTML(
       '<b>Mapped genes</b><br>',
       paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$dgn_selectGeneCol]]), ' genes were mapped.')
     )
   })
-  
+
   observeEvent(input$dgn_resource_info, {
     dgn_resource_info <- list(
       title = "DGN Resource info",
@@ -90,7 +90,7 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
 				'
       )
     )
-    
+
     showModal(modalDialog(
       dgn_resource_info[["text"]],
       title = dgn_resource_info[["title"]],
@@ -98,6 +98,6 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
       footer = NULL
     ))
   })
-  
-  
+
+
 }

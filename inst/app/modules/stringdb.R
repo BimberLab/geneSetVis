@@ -23,10 +23,10 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 			hits <- cluster.map$STRING_id
 			# STRING does not support lists with more than 400 genes
 			if (length(hits) > 400) {
-			  hits <- hits[1:400] 
+			  hits <- hits[1:400]
 			  print('STRING will only map the first 400 of your genes.')
 			}
-			
+
 			if ( sum(!is.na(hits)) == 0 ) {stop('No mapped genes.')}
 
 			max_hits_to_plot <- cluster.map$STRING_id[1:maxHitsToPlot]
@@ -82,7 +82,7 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 			# }
 
 			link <- string_db$get_link(hits[!is.na(hits)])
-			
+
 			graph <- string_db$get_graph()
 
 			addSubset = paste('hits', sep = '')
@@ -99,7 +99,7 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 
 			addSubset = paste('link', sep = '')
 			return_list[[addSubset]] <- link
-			
+
 
 		}
 
@@ -128,14 +128,14 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	    validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
 	    validate(need(input$stringdb_refSpecies_input != '', "Please type in refSpecies..."))
 	    refSpeciesNum = stringdbSpecies$species_id[stringdbSpecies$compact_name == input$stringdb_refSpecies_input]
-	    
+
 	    print('making StringDB query')
 	    withProgress(message = 'making STRING query..', {
 	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdb')
 	      cacheVal <- appDiskCache$get(cacheKey)
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
-	        
+
 	        stringdbRes <- runSTRINGdb(
 	          DEtable = envir$gene_list,
 	          geneCol = input$stringdb_selectGeneCol,
@@ -143,17 +143,17 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	          refSpeciesNum = refSpeciesNum,
 	          scoreThreshold = input$stringdb_scoreThreshold_input
 	        )
-	        
+
 	        appDiskCache$set(key = cacheKey, value = stringdbRes)
-	        
+
 	      } else {
 	        print('loading from cache...')
 	        stringdbRes <- cacheVal
 	      }
-	      
+
 	      envir$stringdbRes <- stringdbRes
 	      if (is.null(envir$stringdbRes) | length(envir$stringdbRes) == 0) {stop('No significant enrichment found.')}
-	      
+
 	    })
 	  })
 	})
@@ -168,7 +168,7 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	    hyperlink_text(href_base = envir$stringdbRes[['link']], link_text = 'View mapped genes on string-db website', href_cont = NULL)
 	  )
 	})
-	
+
 
 	output$stringdb_network <- renderPlot({
 	  validate(need(!is.null(envir$stringdbRes), "Please Run STRINGdb on input..."))
@@ -182,23 +182,24 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	  cacheVal <- appDiskCache$get(cacheKey)
 	  if (class(cacheVal) == 'key_missing') {
 	    print('missing cache key...')
-	    
+
 	    png_file <- paste('network', '.png', sep = '')
 	    plot_png <- list(src = paste('', png_file, sep = ''), height='100%', width='100%')
 	    #plot_png
 	    appDiskCache$set(key = cacheKey, value = plot_png)
-	    
+
 	  } else {
 	    print('loading from cache...')
 	    plot_png <- cacheVal
 	  }
-		
+
 	  plot_png
-		
+
 	})
 
 	# TODO: download entire dataset
-	output$stringdb_GO <- renderDataTable(server = FALSE, {
+	# server = FALSE
+	output$stringdb_GO <- DT::renderDataTable({
 	  validate(need(!is.null(envir$stringdbRes$GO) & length(envir$stringdbRes$GO) != 0, ""))
 	  toSubset <- paste('GO', sep = '')
 	  table <- envir$stringdbRes[[toSubset]] %>%
@@ -223,7 +224,8 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	})
 
 	# TODO: download entire dataset
-	output$stringdb_KEGG <- renderDataTable(server = FALSE, {
+	# server = FALSE
+	output$stringdb_KEGG <- DT::renderDataTable({
 		validate(need(!is.null(envir$stringdbRes$KEGG) & length(envir$stringdbRes$KEGG) != 0, ""))
 	  toSubset <- paste('KEGG', sep = '')
 	  table <- envir$stringdbRes[[toSubset]] %>%

@@ -4,18 +4,18 @@ runDOSE <- function(DEtable, geneCol, species) {
     DEtable <- DEtable[with(DEtable, order(p_val_adj, decreasing = F)),]
     DEtable <- DEtable[match(unique(DEtable$gene), DEtable[[geneCol]]), ]
   }
-  
+
   return_list = list()
   tryCatch({
     entrezIDs <- mapIds(org.Hs.eg.db, as.character(DEtable[[geneCol]]), 'ENTREZID', 'SYMBOL')
-    
+
     do <- enrichDO(entrezIDs, OrgDb = human, pvalueCutoff = 1, qvalueCutoff = 1)
-    
+
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
 
 doseModule <- function(session, input, output, envir, appDiskCache) {
-  
+
   #NOTE: this should reset our tab whenever the input genes change
   observeEvent(list(envir$gene_list), ignoreInit = F, {
     print('resetting dose')
@@ -23,41 +23,41 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
     errEl <- NULL
     if (!is.null(errEl)) {shinyjs::hide(errEl)}
   })
-  
+
   observeEvent(input$rundose_button, {
     withBusyIndicatorServer("rundose_button", {
       Sys.sleep(1)
       #TODO: validate input present?
       validate(need(input$dose_OrgDB_input != '', "Please select OrgDB..."))
-      
+
       print('making dose query')
       withProgress(message = 'making DOSE query...', {
         cacheKey <- makeDiskCacheKey(list(envir$gene_list[[input$dose_selectGeneCol]], input$dose_OrgDB_input), 'dose')
         cacheVal <- appDiskCache$get(cacheKey)
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
-          
+
           #if (!require(input$dose_OrgDB_input)) install.packages(input$dose_OrgDB_input)
           envir$doseRes <- NULL
           fromType <- ifelse(grepl('id', input$dose_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-          entrezIDs <- bitr(geneID = envir$gene_list[[input$dose_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
+          entrezIDs <- clusterProfiler::bitr(geneID = envir$gene_list[[input$dose_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
           doseRes <- DOSE::enrichDO(entrezIDs$ENTREZID, readable = T)
           appDiskCache$set(key = cacheKey, value = doseRes)
         } else {
           print('loading from cache...')
           doseRes <- cacheVal
         }
-        
+
         envir$doseRes <- doseRes
         if ( is.null(envir$doseRes) || nrow(envir$doseRes) == 0 ) {stop('No significant enrichment found.')}
         doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
         rownames(doseRes@result) <- doseRes@result$ID
-        
+
         #envir$doseRes@pvalueCutoff <- input$pvalueCutoff
       })
     })
   })
-  
+
   renderPlotSet(
     output = output,
     key = 'dose',
@@ -65,11 +65,11 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
     datasetURL = "https://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http%3A%2F%2Fpurl.obolibrary.org%2Fobo%2FDOID_",
     datasetName = 'dose'
   )
-  
+
   output$dose_map_stats <- renderText({
     validate(need(!is.null(envir$doseRes) & length(envir$doseRes) != 0, "No mapped genes."))
     if (nrow(envir$doseRes@result) > 0) {
-      num_genes_mapped <- str_split(noquote(envir$doseRes@result$GeneRatio[1]), '/')[[1]][2]
+      num_genes_mapped <- stringr::str_split(noquote(envir$doseRes@result$GeneRatio[1]), '/')[[1]][2]
     } else {
       num_genes_mapped <- 0
     }
@@ -78,7 +78,7 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
       paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$dose_selectGeneCol]]), ' genes were mapped.')
     )
   })
-  
+
   observeEvent(input$dose_resource_info, {
     dose_resource_info <- list(
       title = "DOSE Resource info",
@@ -92,7 +92,7 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
 				'
       )
     )
-    
+
     showModal(modalDialog(
       dose_resource_info[["text"]],
       title = dose_resource_info[["title"]],
@@ -100,6 +100,6 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
       footer = NULL
     ))
   })
-    
-  
+
+
 }
