@@ -51,7 +51,7 @@ Suggests:
     testthat (>= 2.1.0),
     digest
 Remotes:
-    daattali/shinyjs
+    daattali/shinyjs,
     bioc::release/RDAVIDWebService,
     bioc::release/STRINGdb
 
