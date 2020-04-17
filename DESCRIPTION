@@ -42,13 +42,16 @@ Imports:
     tidyr,
     RDAVIDWebService,
     STRINGdb,
-    rmdformats
+    msigdbr,
+    rmdformats,
+    tidyselect (>= 1.0.0)
 Suggests:
     ggvis,
     devtools,
     testthat (>= 2.1.0),
     digest
 Remotes:
+    daattali/shinyjs
     bioc::release/RDAVIDWebService,
     bioc::release/STRINGdb
 

@@ -33,7 +33,7 @@ knitr::opts_knit$set(width=75)
 ### Dotplot
 ```{r msigdb_dotplot, echo=FALSE}
 if (!is.null(msigdbRes$enricher_result) &
-    length(msigdbRes$enricher_result) != 0) {
+    !is.null(nrow(msigdbRes$enricher_result))) {
   plotly::ggplotly(
     enrichplot::dotplot(msigdbRes$enricher_result) +
       ggplot2::theme(
@@ -53,7 +53,7 @@ if (!is.null(msigdbRes$enricher_result) &
 ### Cnetplot
 
 if (!is.null(msigdbRes$enricher_result) &
-    length(msigdbRes$enricher_result) != 0) {
+    !is.null(nrow(msigdbRes$enricher_result))) {
     enrichplot::cnetplot(msigdbRes$enricher_result, categorySize = "p-Value (adj.)", foldChange = namedGeneList, circular = TRUE, colorEdge = TRUE )
 } else {
   print('No significant enrichment found.')
@@ -66,7 +66,7 @@ if (!is.null(msigdbRes$enricher_result) &
 ### Upsetplot
 
 if (!is.null(msigdbRes$enricher_result) &
-    length(msigdbRes$enricher_result) != 0) {
+    !is.null(nrow(msigdbRes$enricher_result))) {
   enrichplot::upsetplot(msigdbRes$enricher_result)
 } else {
   print('No significant enrichment found.')
@@ -79,7 +79,7 @@ if (!is.null(msigdbRes$enricher_result) &
 ### Heatplot
 
 if (!is.null(msigdbRes$enricher_result) &
-    length(msigdbRes$enricher_result) != 0) {
+    !is.null(nrow(msigdbRes$enricher_result))) {
   enrichplot::heatplot(msigdbRes$enricher_result, foldChange = namedGeneList)
 } else {
   print('No significant enrichment found.')
@@ -90,7 +90,8 @@ if (!is.null(msigdbRes$enricher_result) &
 
 ## {-}
 ```{r msigdb_table, echo=FALSE}
-if (!is.null(msigdbRes$enricher_result) & length(msigdbRes$enricher_result) != 0) {
+if (!is.null(msigdbRes$enricher_result) &
+    !is.null(nrow(msigdbRes$enricher_result))) {
   table <- msigdbRes$enricher_result %>% as.data.frame() %>%
     dplyr::rename(
       'Term Description' = Description,
