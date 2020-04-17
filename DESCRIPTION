@@ -44,7 +44,8 @@ Imports:
     STRINGdb,
     msigdbr,
     rmdformats,
-    tidyselect (>= 1.0.0)
+    tidyselect (>= 1.0.0),
+    shinyjs
 Suggests:
     ggvis,
     devtools,
