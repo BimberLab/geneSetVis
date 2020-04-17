@@ -31,7 +31,7 @@ knitr::opts_knit$set(width=75)
 ## MSigDB {.tabset .tabset-fade .tabset-pills}
 
 ### Dotplot
-```{r, MSigDB1, echo=FALSE}
+```{r msigdb_dotplot, echo=FALSE}
 if (!is.null(msigdbRes$enricher_result) &
     length(msigdbRes$enricher_result) != 0) {
   plotly::ggplotly(
@@ -48,35 +48,39 @@ if (!is.null(msigdbRes$enricher_result) &
 
 ```
 
+
+```{r msigdb_cnetplot, echo=FALSE, include=FALSE}
 ### Cnetplot
-```{r, MSigDB1, echo=FALSE}
+
 if (!is.null(msigdbRes$enricher_result) &
     length(msigdbRes$enricher_result) != 0) {
-  plotly::ggplotly(
     enrichplot::cnetplot(msigdbRes$enricher_result, categorySize = "p-Value (adj.)", foldChange = namedGeneList, circular = TRUE, colorEdge = TRUE )
-  )
 } else {
   print('No significant enrichment found.')
 }
 
 ```
 
+
+```{r msigdb_upsetplot, echo=FALSE, include=FALSE}
 ### Upsetplot
-```{r}
+
 if (!is.null(msigdbRes$enricher_result) &
     length(msigdbRes$enricher_result) != 0) {
-  plotly::ggplotly(enrichplot::upsetplot(msigdbRes$enricher_result))
+  enrichplot::upsetplot(msigdbRes$enricher_result)
 } else {
   print('No significant enrichment found.')
 }
 
 ```
 
+
+```{r msigdb_heatplot, echo=FALSE, include=FALSE}
 ### Heatplot
-```{r}
+
 if (!is.null(msigdbRes$enricher_result) &
     length(msigdbRes$enricher_result) != 0) {
-  plotly::ggplotly(enrichplot::heatplot(msigdbRes$enricher_result, foldChange = namedGeneList))
+  enrichplot::heatplot(msigdbRes$enricher_result, foldChange = namedGeneList)
 } else {
   print('No significant enrichment found.')
 }
@@ -84,7 +88,8 @@ if (!is.null(msigdbRes$enricher_result) &
 ```
 
 
-```{r, MSigDB2, echo=FALSE}
+## {-}
+```{r msigdb_table, echo=FALSE}
 if (!is.null(msigdbRes$enricher_result) & length(msigdbRes$enricher_result) != 0) {
   table <- msigdbRes$enricher_result %>% as.data.frame() %>%
     dplyr::rename(
@@ -120,8 +125,7 @@ if (!is.null(msigdbRes$enricher_result) & length(msigdbRes$enricher_result) != 0
 ## STRINGdb
 
 ### Network
-
-```{r include=FALSE}
+```{r stringdb_network, echo=FALSE, include=FALSE}
 if (!is.null(stringdbRes) & length(stringdbRes) != 0) {
   link <- stringdbRes[['link']]
 } else {
@@ -132,8 +136,7 @@ if (!is.null(stringdbRes) & length(stringdbRes) != 0) {
 [View mapped genes on string-db website](`r link`)
 
 ### GO
-
-```{r, STRINGdb2, echo=FALSE}
+```{r stringdb_go, echo=FALSE}
 if (!is.null(stringdbRes$GO) & length(stringdbRes$GO) != 0) {
   table <- stringdbRes$GO %>%
     dplyr::rename(
@@ -168,8 +171,7 @@ if (!is.null(stringdbRes$GO) & length(stringdbRes$GO) != 0) {
 ```
 
 ### KEGG
-
-```{r, echo=FALSE}
+```{r stringdb_kegg, echo=FALSE}
 if (!is.null(stringdbRes$KEGG) & length(stringdbRes$KEGG) != 0) {
   table <- stringdbRes$KEGG %>%
     dplyr::rename(
@@ -203,28 +205,70 @@ if (!is.null(stringdbRes$KEGG) & length(stringdbRes$KEGG) != 0) {
 ```
 
 
-## Reactome
-```{r, Reactome1, echo=FALSE}
-if ( !is.null(reactomeRes) & !is.null(nrow(reactomeRes)) ) {
+## Reactome {.tabset .tabset-fade .tabset-pills}
+
+### Dotplot
+```{r reactome_dotplot, echo=FALSE}
+if (!is.null(reactomeRes) &
+    !is.null(nrow(reactomeRes))) {
   plotly::ggplotly(
-    #enrichplot:::barplot.enrichResult()
     enrichplot::dotplot(reactomeRes) +
       ggplot2::theme(
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()
       )
-    #width = 1000,
-    #scrollX=T
-  ) # %>% layout(yaxis = list(showticklabels = FALSE))
-  
+  )
 } else {
   print('No significant enrichment found.')
 }
+
 ```
 
-```{r, Reactome2, echo=FALSE}
-if ( !is.null(reactomeRes) & !is.null(nrow(reactomeRes)) ) {
+
+```{r reactome_cnetplot, eval=FALSE, include=FALSE}
+### Cnetplot
+
+if (!is.null(reactomeRes) &
+    !is.null(nrow(reactomeRes))) {
+    enrichplot::cnetplot(reactomeRes, categorySize = "p-Value (adj.)", foldChange = namedGeneList, circular = TRUE, colorEdge = TRUE)
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+```{r reactome_upsetplot, eval=FALSE, include=FALSE}
+### Upsetplot
+
+if (!is.null(reactomeRes) &
+    !is.null(nrow(reactomeRes))) {
+  enrichplot::upsetplot(reactomeRes)
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+```{r reactome_heatplot, eval=FALSE, include=FALSE}
+### Heatplot
+
+if (!is.null(reactomeRes) &
+    !is.null(nrow(reactomeRes))) {
+  enrichplot::heatplot(reactomeRes, foldChange = namedGeneList)
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+## {-}
+```{r reactome_table, echo=FALSE}
+if (!is.null(reactomeRes) &
+    !is.null(nrow(reactomeRes))) {
   table <- reactomeRes %>% as.data.frame() %>%
     dplyr::rename(
       'Term Description' = Description,
