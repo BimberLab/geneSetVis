@@ -1,5 +1,5 @@
 runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
-  #DEtable <- gene_list
+  #DEtable <- geneList
   #geneCol <- 'gene'
   string_db <- STRINGdb::STRINGdb$new(
       version = '10',
@@ -113,7 +113,7 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 stringdbModule <- function(session, input, output, envir, appDiskCache) {
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(list(envir$gene_list), ignoreInit = F, {
+	observeEvent(list(envir$geneList), ignoreInit = F, {
 		print('resetting stringdb')
 	  envir$stringdbRes <- NULL
 		errEl <- NULL
@@ -131,13 +131,13 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 
 	    print('making StringDB query')
 	    withProgress(message = 'making STRING query..', {
-	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdb')
+	      cacheKey <- makeDiskCacheKey(list(envir$geneList, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdb')
 	      cacheVal <- appDiskCache$get(cacheKey)
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
 
 	        stringdbRes <- runSTRINGdb(
-	          DEtable = envir$gene_list,
+	          DEtable = envir$geneList,
 	          geneCol = input$stringdb_selectGeneCol,
 	          maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
 	          refSpeciesNum = refSpeciesNum,
@@ -163,7 +163,7 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	  num_genes_mapped <- sum(!is.na(envir$stringdbRes[['hits']]))
 	  HTML(
 	    '<b>Mapped genes</b><br>',
-	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$stringdb_selectGeneCol]]), ' genes were mapped.'),
+	    paste0(num_genes_mapped, ' out of ', length(envir$geneList[[input$stringdb_selectGeneCol]]), ' genes were mapped.'),
 	    '<p>',
 	    hyperlink_text(href_base = envir$stringdbRes[['link']], link_text = 'View mapped genes on string-db website', href_cont = NULL)
 	  )
@@ -178,7 +178,7 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 
 	output$stringdb_network_png <- renderImage(deleteFile = F, {
 		validate(need(!is.null(envir$stringdbRes), "Please Run STRINGdb on input..."))
-	  cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdbpng')
+	  cacheKey <- makeDiskCacheKey(list(envir$geneList, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdbpng')
 	  cacheVal <- appDiskCache$get(cacheKey)
 	  if (class(cacheVal) == 'key_missing') {
 	    print('missing cache key...')

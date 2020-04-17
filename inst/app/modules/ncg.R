@@ -17,7 +17,7 @@ runNCG <- function(DEtable, geneCol, species) {
 ncgModule <- function(session, input, output, envir, appDiskCache) {
 
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), ignoreInit = F, {
+  observeEvent(list(envir$geneList), ignoreInit = F, {
     print('resetting ncg')
     envir$ncgRes <- NULL
     errEl <- NULL
@@ -32,7 +32,7 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
 
       print('making ncg query')
       withProgress(message = 'making NCG query...', {
-        cacheKey <- makeDiskCacheKey(list(envir$gene_list[[input$ncg_selectGeneCol]], input$ncg_OrgDB_input), 'ncg')
+        cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$ncg_selectGeneCol]], input$ncg_OrgDB_input), 'ncg')
         cacheVal <- appDiskCache$get(cacheKey)
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
@@ -40,7 +40,7 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
           #if (!require(input$ncg_OrgDB_input)) install.packages(input$ncg_OrgDB_input)
           envir$ncgRes <- NULL
           fromType <- ifelse(grepl('id', input$ncg_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-          entrezIDs <- clusterProfiler::bitr(geneID = envir$gene_list[[input$ncg_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$ncg_OrgDB_input)
+          entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$ncg_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$ncg_OrgDB_input)
           ncgRes <- DOSE::enrichNCG(entrezIDs$ENTREZID, readable = T)
           appDiskCache$set(key = cacheKey, value = ncgRes)
         } else {
@@ -60,7 +60,8 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
     key = 'ncg',
     enrichTypeResult = reactive(envir$ncgRes),
     datasetURL = "",
-    datasetName = 'ncg'
+    datasetName = 'ncg',
+    namedGeneList = envir$namedGeneList
   )
 
   output$ncg_map_stats <- renderText({
@@ -72,7 +73,7 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
     }
     HTML(
       '<b>Mapped genes</b><br>',
-      paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$ncg_selectGeneCol]]), ' genes were mapped.')
+      paste0(num_genes_mapped, ' out of ', length(envir$geneList[[input$ncg_selectGeneCol]]), ' genes were mapped.')
     )
   })
 

@@ -6,6 +6,7 @@
 #' @return Shiny application.
 #' @rawNamespace import(shiny, except = c('dataTableOutput', 'renderDataTable'))
 #' @import shinydashboard
+#' @importFrom shinyFiles shinyDirChoose
 #' @import shinyWidgets
 #' @import shinytest
 #' @importFrom dplyr %>% arrange group_by rename select summarise

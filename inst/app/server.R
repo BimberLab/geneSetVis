@@ -3,12 +3,18 @@ server = function(input, output, session) {
 
   options(shiny.maxRequestSize=50*1024^2)
 
-  print('cache directory will be created in working directory.')
-  appDiskCache <- diskCache("./geneSetVis/cache/", max_size = 75*1024^2, evict = 'lru', logfile = stdout())
+  if (Sys.getenv("GENESETVIS_CACHE") == "") {
+    cachedir <- paste0(Sys.getenv("TMPDIR"), "geneSetVis-cache")
+  } else {
+    cachedir <-  Sys.getenv("GENESETVIS_CACHE")
+  }
+  print(paste0('cache directory in ', cachedir))
+  appDiskCache <- diskCache(cachedir, max_size = 75*1024^2, evict = 'lru', logfile = stdout())
 
 
   envir <- reactiveValues(
-    gene_list = NULL,
+    geneList = NULL,
+    namedGeneList = NULL,
     stringRes = NULL,
     msigRes = NULL
   )
@@ -30,14 +36,14 @@ server = function(input, output, session) {
   observeEvent(input$submit, {
     if (is.null(input$fileInput)){
       if (input$inputType == "Gene only") {
-        gene_list <- read.table(text = gsub(",", "\n", perl = TRUE, x = input$areaInput),
+        geneList <- read.table(text = gsub(",", "\n", perl = TRUE, x = input$areaInput),
                                 header = FALSE,
                                 col.names = c("gene"),
                                 quote = "",
                                 allowEscapes = T)
-        gene_list <- data.frame(gene = gene_list, avg_logFC = NA)
+        geneList <- data.frame(gene = geneList, avg_logFC = NA)
       } else {
-        gene_list <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
+        geneList <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
                                 header = FALSE,
                                 col.names = c("gene", "avg_logFC"),
                                 quote = "",
@@ -47,56 +53,57 @@ server = function(input, output, session) {
       #TODO: rm excel skip lines
       fileType <- tools::file_ext(input$fileInput)
       if (fileType == 'xlsx') {
-        gene_list <- readxl::read_excel(path = input$fileInput$datapath, sheet = 1, skip = 1, col_names = T)
+        geneList <- readxl::read_excel(path = input$fileInput$datapath, sheet = 1, skip = 1, col_names = T)
       }
       if (fileType == 'csv') {
-        gene_list <- read.csv(file = input$fileInput$datapath, header = T, sep = ',')
+        geneList <- read.csv(file = input$fileInput$datapath, header = T, sep = ',')
       }
 
-      gene_list <- gene_list %>% dplyr::select(gene, avg_logFC, p_val_adj) %>% dplyr::filter(p_val_adj <= 0.5)
+      geneList <- geneList %>% dplyr::select(gene, avg_logFC, p_val_adj) %>% dplyr::filter(p_val_adj <= 0.5)
     }
 
     if (input$checkGeneIdTranslate == T) {
       withProgress(message = 'Translating genes..', {
         print(paste0('gene translate: ', input$checkGeneIdTranslate))
         print(paste0('gene id type: ', input$geneIdType))
-        cacheKey <- makeDiskCacheKey(list(gene_list, input$checkGeneIdTranslate, input$geneIdType), 'genelist')
+        cacheKey <- makeDiskCacheKey(list(geneList, input$checkGeneIdTranslate, input$geneIdType), 'genelist')
         cacheVal <- appDiskCache$get(cacheKey)
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
 
           if (input$geneIdType == 'Symbol') {
             ensemblIds <- NULL
-            geneSymbols <- gene_list$gene
+            geneSymbols <- geneList$gene
           } else {
-            ensemblIds <- gene_list$gene
+            ensemblIds <- geneList$gene
             geneSymbols <- NULL
           }
 
-          # gene_list_tr <- TranslateGeneNames(ensemblIds = ensemblIds, geneSymbols = geneSymbols, davidEmail = 'oosap@ohsu.edu',
+          # geneList_tr <- TranslateGeneNames(ensemblIds = ensemblIds, geneSymbols = geneSymbols, davidEmail = 'oosap@ohsu.edu',
           #                                     useEnsembl = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
           #                                     useSTRINGdb = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
           #                                     useDAVID = F)
 
-          gene_list_tr <- TranslateToEnsembl(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
-          gene_list_tr <- gene_list_tr[, !(colnames(gene_list_tr) %in% c('EnsemblId', 'GeneSymbol'))]
+          geneList_tr <- TranslateToEnsembl(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
+          geneList_tr <- geneList_tr[, !(colnames(geneList_tr) %in% c('EnsemblId', 'GeneSymbol'))]
 
-          gene_list <- dplyr::bind_cols(gene_list[1:nrow(gene_list),], gene_list_tr[1:nrow(gene_list_tr),])
-          appDiskCache$set(key = cacheKey, value = gene_list)
+          geneList <- dplyr::bind_cols(geneList[1:nrow(geneList),], geneList_tr[1:nrow(geneList_tr),])
+          appDiskCache$set(key = cacheKey, value = geneList)
         } else {
-          gene_list <- cacheVal
+          geneList <- cacheVal
         }
       })
     }
 
-    envir$gene_list <- gene_list
+    envir$geneList <- geneList
+    envir$namedGeneList <- setNames(geneList$avg_logFC, geneList$gene)
   })
 
   output$inputTable <- DT::renderDataTable({
-    validate(need(envir$gene_list, "Please enter the gene list and hit submit"))
+    validate(need(envir$geneList, "Please enter the gene list and hit submit"))
 
     req(input$submit)
-    envir$gene_list %>%
+    envir$geneList %>%
     DT::datatable(
       extensions = c('Buttons'),
       options = list(
@@ -114,7 +121,7 @@ server = function(input, output, session) {
   })
 
   observe({
-    geneColnames <- envir$gene_list
+    geneColnames <- envir$geneList
     geneColnames['avg_logFC'] <- NULL
     updateSelectInput(session, "stringdb_selectGeneCol", choices = colnames(geneColnames))
     updateSelectInput(session, "msigdb_selectGeneCol", choices = colnames(geneColnames))
@@ -136,7 +143,7 @@ server = function(input, output, session) {
   enrichrModule(session, input, output, envir, appDiskCache)
 
 
-  observeEvent(input$make_report, {
+  observeEvent(input$export, {
     if (isTruthy(input$fileInput$name)) {
       runname <- tools::file_path_sans_ext(basename(input$fileInput$name))
     } else {
@@ -150,8 +157,16 @@ server = function(input, output, session) {
     dgnRes <- envir$dgnRes
     ncgRes <- envir$ncgRes
     enrichrRes <- envir$enrichrRes
-    print('report directory will be created in working directory.')
-    rmarkdown::render(input = system.file('template_report.Rmd', package = 'geneSetVis'), output_format = 'html_clean', output_file = paste0(runname,'_Report.html'), output_dir = "./geneSetVis/reports/")
+    print('report directory will be created in HOME directory.')
+
+
+    rmarkdown::render(
+      input = system.file('template_report.Rmd', package = 'geneSetVis'),
+      output_format = 'html_clean',
+      output_file = paste0(runname, '_Report.html'),
+      intermediates_dir = paste0(Sys.getenv("HOME"), "/geneSetVis-exports"),
+      output_dir = paste0(Sys.getenv("HOME"), "/geneSetVis-exports")
+    )
   })
 }
 

@@ -17,7 +17,7 @@ runDOSE <- function(DEtable, geneCol, species) {
 doseModule <- function(session, input, output, envir, appDiskCache) {
 
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), ignoreInit = F, {
+  observeEvent(list(envir$geneList), ignoreInit = F, {
     print('resetting dose')
     envir$doseRes <- NULL
     errEl <- NULL
@@ -32,7 +32,7 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
 
       print('making dose query')
       withProgress(message = 'making DOSE query...', {
-        cacheKey <- makeDiskCacheKey(list(envir$gene_list[[input$dose_selectGeneCol]], input$dose_OrgDB_input), 'dose')
+        cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$dose_selectGeneCol]], input$dose_OrgDB_input), 'dose')
         cacheVal <- appDiskCache$get(cacheKey)
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
@@ -40,7 +40,7 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
           #if (!require(input$dose_OrgDB_input)) install.packages(input$dose_OrgDB_input)
           envir$doseRes <- NULL
           fromType <- ifelse(grepl('id', input$dose_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-          entrezIDs <- clusterProfiler::bitr(geneID = envir$gene_list[[input$dose_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
+          entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$dose_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
           doseRes <- DOSE::enrichDO(entrezIDs$ENTREZID, readable = T)
           appDiskCache$set(key = cacheKey, value = doseRes)
         } else {
@@ -63,7 +63,8 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
     key = 'dose',
     enrichTypeResult = reactive(envir$doseRes),
     datasetURL = "https://www.ebi.ac.uk/ols/ontologies/doid/terms?iri=http%3A%2F%2Fpurl.obolibrary.org%2Fobo%2FDOID_",
-    datasetName = 'dose'
+    datasetName = 'dose',
+    namedGeneList = envir$namedGeneList
   )
 
   output$dose_map_stats <- renderText({
@@ -75,7 +76,7 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
     }
     HTML(
       '<b>Mapped genes</b><br>',
-      paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$dose_selectGeneCol]]), ' genes were mapped.')
+      paste0(num_genes_mapped, ' out of ', length(envir$geneList[[input$dose_selectGeneCol]]), ' genes were mapped.')
     )
   })
 

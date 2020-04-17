@@ -51,7 +51,8 @@ ui = shinydashboard::dashboardPage(
         tabName = 'enrichr',
         icon = icon(NULL)
       ),
-      div(style = "display:inline-block;width:32%;text-align: center;", actionButton("make_report", label = NULL, icon = icon("paper-plane")))
+      div(style = "display:inline-block;width:32%;text-align: center;", actionButton("export", label = NULL, icon = icon("paper-plane")))
+
     )
   ),
   shinydashboard::dashboardBody(

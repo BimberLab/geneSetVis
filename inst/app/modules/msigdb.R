@@ -92,7 +92,7 @@ runMSigDB <- function(DEtable, geneCol, species, category = NULL, subcategory = 
 msigdbModule <- function(session, input, output, envir, appDiskCache) {
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(list(envir$gene_list), ignoreInit = F, {
+	observeEvent(list(envir$geneList), ignoreInit = F, {
 		print('resetting msigdb')
 		envir$msigdbRes <- NULL
 		envir$msigdbRes_fgsea <- NULL
@@ -137,7 +137,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	      if (category == '') {category <- NULL}
 	      if (subcategory == '') {subcategory <- NULL}
 
-	      cacheKey <- makeDiskCacheKey(list(envir$gene_list, input$msigdb_selectGeneCol, input$msigdb_species_input, category, subcategory), 'msigdb')
+	      cacheKey <- makeDiskCacheKey(list(envir$geneList, input$msigdb_selectGeneCol, input$msigdb_species_input, category, subcategory), 'msigdb')
 	      cacheVal <- appDiskCache$get(cacheKey)
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
@@ -150,7 +150,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	          }
 
 	        msigdbRes <- runMSigDB(
-	          DEtable = envir$gene_list,
+	          DEtable = envir$geneList,
 	          geneCol = input$msigdb_selectGeneCol,
 	          species = input$msigdb_species_input,
 	          category = category,
@@ -212,7 +212,8 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	  key = 'enricher',
 	  enrichTypeResult = reactive(envir$msigdbRes$enricher_result),
 	  datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
-	  datasetName = 'MSigDB'
+	  datasetName = 'MSigDB',
+	  namedGeneList = envir$namedGeneList
 	)
 
 	renderPlotSet(
@@ -221,7 +222,8 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	  enrichTypeResult = reactive(envir$msigdbRes_fgsea),
 	  datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
 	  datasetName = 'MSigDB',
-	  caption = 'Click on Term Description cell to view enrichment plot.'
+	  caption = 'Click on Term Description cell to view enrichment plot.',
+	  namedGeneList = envir$namedGeneList
 	)
 
 
@@ -230,7 +232,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	  num_genes_mapped <- stringr::str_split(noquote(envir$msigdbRes$enricher_result@result$GeneRatio[1]), '/')[[1]][2]
 	  HTML(
 	    '<b>Mapped genes</b><br>',
-	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list$gene), ' genes were mapped.')
+	    paste0(num_genes_mapped, ' out of ', length(envir$geneList$gene), ' genes were mapped.')
 	  )
 	})
 

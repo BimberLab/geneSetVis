@@ -42,7 +42,7 @@ makeTermsTable <- function(table, genesDelim,
 
 # TODO: download entire dataset:
 # server = FALSE
-renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName = NULL, caption = NULL) {
+renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName = NULL, caption = NULL, namedGeneList = NULL) {
   output[[paste(key, 'table', sep = '_')]] <- DT::renderDataTable({
     er <- enrichTypeResult()
     validate(need(!is.null(er) & nrow(er) != 0, ''))
@@ -71,13 +71,13 @@ renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName
   output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
-    enrichplot::emapplot(er)
+    enrichplot::emapplot(er, )
   })
 
   output[[paste(key, 'cnetplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
-    enrichplot::cnetplot(er)
+    enrichplot::cnetplot(er, categorySize="p-Value (adj.)", foldChange = namedGeneList, circular = TRUE, colorEdge = TRUE)
   })
 
   output[[paste(key, 'upsetplot', sep = '_')]] <- renderPlot({
@@ -89,7 +89,7 @@ renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName
   output[[paste(key, 'heatplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
-    enrichplot::heatplot(er)
+    enrichplot::heatplot(er, foldChange = namedGeneList)
   })
 }
 

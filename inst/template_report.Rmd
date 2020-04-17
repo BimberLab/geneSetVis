@@ -11,8 +11,6 @@ output:
 
 
 ```{r setup, echo=FALSE, cache=FALSE}
-
-
 # Global options
 options(max.print="75")
 knitr::opts_chunk$set(
@@ -33,21 +31,52 @@ knitr::opts_knit$set(width=75)
 ## MSigDB {.tabset .tabset-fade .tabset-pills}
 
 ### Dotplot
-
 ```{r, MSigDB1, echo=FALSE}
-if (!is.null(msigdbRes$enricher_result) & length(msigdbRes$enricher_result) != 0) {
+if (!is.null(msigdbRes$enricher_result) &
+    length(msigdbRes$enricher_result) != 0) {
   plotly::ggplotly(
-    #enrichplot:::barplot.enrichResult()
     enrichplot::dotplot(msigdbRes$enricher_result) +
-      theme(
+      ggplot2::theme(
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()
       )
-    #width = 1000,
-    #scrollX=T
-  ) # %>% layout(yaxis = list(showticklabels = FALSE))
-  
+  )
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+### Cnetplot
+```{r, MSigDB1, echo=FALSE}
+if (!is.null(msigdbRes$enricher_result) &
+    length(msigdbRes$enricher_result) != 0) {
+  plotly::ggplotly(
+    enrichplot::cnetplot(msigdbRes$enricher_result, categorySize = "p-Value (adj.)", foldChange = namedGeneList, circular = TRUE, colorEdge = TRUE )
+  )
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+### Upsetplot
+```{r}
+if (!is.null(msigdbRes$enricher_result) &
+    length(msigdbRes$enricher_result) != 0) {
+  plotly::ggplotly(enrichplot::upsetplot(msigdbRes$enricher_result))
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+### Heatplot
+```{r}
+if (!is.null(msigdbRes$enricher_result) &
+    length(msigdbRes$enricher_result) != 0) {
+  plotly::ggplotly(enrichplot::heatplot(msigdbRes$enricher_result, foldChange = namedGeneList))
 } else {
   print('No significant enrichment found.')
 }
@@ -180,7 +209,7 @@ if ( !is.null(reactomeRes) & !is.null(nrow(reactomeRes)) ) {
   plotly::ggplotly(
     #enrichplot:::barplot.enrichResult()
     enrichplot::dotplot(reactomeRes) +
-      theme(
+      ggplot2::theme(
         axis.title.y = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()

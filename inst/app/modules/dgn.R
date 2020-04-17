@@ -17,7 +17,7 @@ runDGN <- function(DEtable, geneCol, species) {
 dgnModule <- function(session, input, output, envir, appDiskCache) {
 
   #NOTE: this should reset our tab whenever the input genes change
-  observeEvent(list(envir$gene_list), ignoreInit = F, {
+  observeEvent(list(envir$geneList), ignoreInit = F, {
     print('resetting dgn')
     envir$dgnRes <- NULL
     errEl <- NULL
@@ -32,7 +32,7 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
 
       print('making dgn query')
       withProgress(message = 'making DGN query...', {
-        cacheKey <- makeDiskCacheKey(list(envir$gene_list[[input$dgn_selectGeneCol]], input$dgn_OrgDB_input), 'dgn')
+        cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$dgn_selectGeneCol]], input$dgn_OrgDB_input), 'dgn')
         cacheVal <- appDiskCache$get(cacheKey)
         if (class(cacheVal) == 'key_missing') {
           print('missing cache key...')
@@ -40,7 +40,7 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
           #if (!require(input$dgn_OrgDB_input)) install.packages(input$dgn_OrgDB_input)
           envir$dgnRes <- NULL
           fromType <- ifelse(grepl('id', input$dgn_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-          entrezIDs <- clusterProfiler::bitr(geneID = envir$gene_list[[input$dgn_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
+          entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$dgn_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dgn_OrgDB_input)
           dgnRes <- DOSE::enrichDGN(entrezIDs$ENTREZID, readable = T)
           appDiskCache$set(key = cacheKey, value = dgnRes)
         } else {
@@ -65,7 +65,8 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
     key = 'dgn',
     enrichTypeResult = reactive(envir$dgnRes),
     datasetURL = "https://www.disgenet.org/browser/0/1/0/",
-    datasetName = 'dgn'
+    datasetName = 'dgn',
+    namedGeneList = envir$namedGeneList
   )
 
   output$dgn_map_stats <- renderText({
@@ -73,7 +74,7 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
     num_genes_mapped <- stringr::str_split(noquote(envir$dgnRes@result$GeneRatio[1]), '/')[[1]][2]
     HTML(
       '<b>Mapped genes</b><br>',
-      paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$dgn_selectGeneCol]]), ' genes were mapped.')
+      paste0(num_genes_mapped, ' out of ', length(envir$geneList[[input$dgn_selectGeneCol]]), ' genes were mapped.')
     )
   })
 

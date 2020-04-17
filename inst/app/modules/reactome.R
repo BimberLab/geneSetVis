@@ -17,7 +17,7 @@ runReactomePA <- function(DEtable, geneCol, species) {
 reactomeModule <- function(session, input, output, envir, appDiskCache) {
 
 	#NOTE: this should reset our tab whenever the input genes change
-	observeEvent(list(envir$gene_list), ignoreInit = F, {
+	observeEvent(list(envir$geneList), ignoreInit = F, {
 		print('resetting reactome')
 		envir$reactomeRes <- NULL
 		errEl <- NULL
@@ -32,7 +32,7 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 
 	    print('making Reactome query')
 	    withProgress(message = 'making reactomePA query...', {
-	      cacheKey <- makeDiskCacheKey(list(envir$gene_list[[input$reactome_selectGeneCol]], input$reactome_OrgDB_input), 'reactome')
+	      cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$reactome_selectGeneCol]], input$reactome_OrgDB_input), 'reactome')
 	      cacheVal <- appDiskCache$get(cacheKey)
 	      if (class(cacheVal) == 'key_missing') {
 	        print('missing cache key...')
@@ -40,7 +40,7 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	        #if (!require(input$reactome_OrgDB_input)) install.packages(input$reactome_OrgDB_input)
 	        envir$reactomeRes <- NULL
 	        fromType <- ifelse(grepl('id', input$reactome_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-	        entrezIDs <- clusterProfiler::bitr(geneID = envir$gene_list[[input$reactome_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
+	        entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$reactome_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
 	        reactomeRes <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
 	        appDiskCache$set(key = cacheKey, value = reactomeRes)
 	      } else {
@@ -60,7 +60,8 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 		key = 'reactome',
 		enrichTypeResult = reactive(envir$reactomeRes),
 		datasetURL = "https://reactome.org/PathwayBrowser/#/",
-		datasetName = 'Reactome'
+		datasetName = 'Reactome',
+		namedGeneList = envir$namedGeneList
 	)
 
 	output$reactome_map_stats <- renderText({
@@ -72,7 +73,7 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 	  }
 	  HTML(
 	    '<b>Mapped genes</b><br>',
-	    paste0(num_genes_mapped, ' out of ', length(envir$gene_list[[input$reactome_selectGeneCol]]), ' genes were mapped.')
+	    paste0(num_genes_mapped, ' out of ', length(envir$geneList[[input$reactome_selectGeneCol]]), ' genes were mapped.')
 	  )
 	})
 
