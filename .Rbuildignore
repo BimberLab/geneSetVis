@@ -8,10 +8,6 @@
 ^\.RData$
 ^\.Ruserdata$
 ^.*/.*\.rds$
-^report/exports/
-^report/report_cache/
-^network\.png$
-^tests/shinytestrecord\.R$
 ^\.travis\.yml$
 ^\.dockerignore$
 ^tests/
