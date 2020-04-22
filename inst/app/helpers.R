@@ -5,7 +5,7 @@ getEnrichResGeneID <- function(gseResult, idCol, idColName, gseGenes, geneSet) {
 
   genesInGeneSet <- lapply(geneSetsOI, intersect, y=gseGenes)
   genesInGeneSet.stack <- stack(genesInGeneSet) %>%
-    dplyr::rename(ind = idColName) %>% dplyr::group_by(.dots = idColName) %>%
+    dplyr::rename(!!idColName := ind) %>% dplyr::group_by(.dots = idColName) %>%
     dplyr::summarise(geneID = paste(values, collapse = '/'))
 
   gseResult <- merge(gseResult, genesInGeneSet.stack, by = idColName)

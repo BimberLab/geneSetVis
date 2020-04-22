@@ -26,6 +26,18 @@ server = function(input, output, session) {
   source(system.file('app/modules/dgn.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
   source(system.file('app/modules/enrichr.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
 
+  # source('app/GeneAliasing.R', local = TRUE)
+  # source('app/helpers.R', local = TRUE)
+  # source('app/uiElements.R', local = TRUE)
+  # source('app/modules/stringdb.R', local = TRUE)
+  # source('app/modules/msigdb.R', local = TRUE)
+  # source('app/modules/reactome.R', local = TRUE)
+  # source('app/modules/david.R', local = TRUE)
+  # source('app/modules/dose.R', local = TRUE)
+  # source('app/modules/ncg.R', local = TRUE)
+  # source('app/modules/dgn.R', local = TRUE)
+  # source('app/modules/enrichr.R', local = TRUE)
+
 
   envir <- reactiveValues(
     geneList = NULL,
@@ -138,14 +150,14 @@ server = function(input, output, session) {
   observe({
     geneColnames <- envir$geneList
     geneColnames['avg_logFC'] <- NULL
-    updateSelectInput(session, "stringdb_selectGeneCol", choices = colnames(geneColnames))
-    updateSelectInput(session, "msigdb_selectGeneCol", choices = colnames(geneColnames))
-    updateSelectInput(session, "reactome_selectGeneCol", choices = colnames(geneColnames))
-    updateSelectInput(session, "david_selectGeneCol", choices = colnames(geneColnames))
-    updateSelectInput(session, "dose_selectGeneCol", choices = colnames(geneColnames))
-    updateSelectInput(session, "ncg_selectGeneCol", choices = colnames(geneColnames))
-    updateSelectInput(session, "dgn_selectGeneCol", choices = colnames(geneColnames))
-    updateSelectInput(session, "enrichr_selectGeneCol", choices = colnames(geneColnames))
+  #   updateSelectInput(session, "stringdb_selectGeneCol", choices = colnames(geneColnames))
+  #   updateSelectInput(session, "msigdb_selectGeneCol", choices = colnames(geneColnames))
+  #   updateSelectInput(session, "reactome_selectGeneCol", choices = colnames(geneColnames))
+  #   updateSelectInput(session, "david_selectGeneCol", choices = colnames(geneColnames))
+  #   updateSelectInput(session, "dose_selectGeneCol", choices = colnames(geneColnames))
+  #   updateSelectInput(session, "ncg_selectGeneCol", choices = colnames(geneColnames))
+  #   updateSelectInput(session, "dgn_selectGeneCol", choices = colnames(geneColnames))
+  #   updateSelectInput(session, "enrichr_selectGeneCol", choices = colnames(geneColnames))
     })
 
   stringdbModule(session, input, output, envir, appDiskCache)
@@ -176,7 +188,8 @@ server = function(input, output, session) {
 
     print('report directory will be created in HOME directory.')
     rmarkdown::render(
-      input = system.file('template_report.Rmd', package = 'geneSetVis'),
+      # input = system.file('template_report.Rmd', package = 'geneSetVis'),
+      input = 'template_report.Rmd',
       output_format = 'html_clean',
       output_file = paste0(runname, '_Report.html'),
       intermediates_dir = paste0(Sys.getenv("HOME"), "/geneSetVis-exports"),
