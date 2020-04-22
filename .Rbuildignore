@@ -12,3 +12,4 @@
 ^\.dockerignore$
 ^tests/
 ^rsconnect/
+^\.DS_Store$
