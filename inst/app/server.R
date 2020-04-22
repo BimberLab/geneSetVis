@@ -147,18 +147,18 @@ server = function(input, output, session) {
     )
   })
 
-  # observe({
-  #   geneColnames <- envir$geneList
-  #   geneColnames['avg_logFC'] <- NULL
-  #   updateSelectInput(session, "stringdb_selectGeneCol", choices = colnames(geneColnames))
-  #   updateSelectInput(session, "msigdb_selectGeneCol", choices = colnames(geneColnames))
-  #   updateSelectInput(session, "reactome_selectGeneCol", choices = colnames(geneColnames))
-  #   updateSelectInput(session, "david_selectGeneCol", choices = colnames(geneColnames))
-  #   updateSelectInput(session, "dose_selectGeneCol", choices = colnames(geneColnames))
-  #   updateSelectInput(session, "ncg_selectGeneCol", choices = colnames(geneColnames))
-  #   updateSelectInput(session, "dgn_selectGeneCol", choices = colnames(geneColnames))
-  #   updateSelectInput(session, "enrichr_selectGeneCol", choices = colnames(geneColnames))
-  #   })
+  observe({
+    geneColnames <- envir$geneList
+    geneColnames['avg_logFC'] <- NULL
+    updateSelectInput(session, "stringdb_selectGeneCol", choices = colnames(geneColnames)[1])
+    updateSelectInput(session, "msigdb_selectGeneCol", choices = colnames(geneColnames)[1])
+    updateSelectInput(session, "reactome_selectGeneCol", choices = colnames(geneColnames)[1])
+    updateSelectInput(session, "david_selectGeneCol", choices = colnames(geneColnames)[1])
+    updateSelectInput(session, "dose_selectGeneCol", choices = colnames(geneColnames)[1])
+    updateSelectInput(session, "ncg_selectGeneCol", choices = colnames(geneColnames)[1])
+    updateSelectInput(session, "dgn_selectGeneCol", choices = colnames(geneColnames)[1])
+    updateSelectInput(session, "enrichr_selectGeneCol", choices = colnames(geneColnames)[1])
+    })
 
   stringdbModule(session, input, output, envir, appDiskCache)
   msigdbModule(session, input, output, envir, appDiskCache)
