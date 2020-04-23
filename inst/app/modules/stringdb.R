@@ -1,11 +1,11 @@
-runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0) {
+runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9606, scoreThreshold = 0, cachedir = "") {
   #DEtable <- geneList
   #geneCol <- 'gene'
   string_db <- STRINGdb::STRINGdb$new(
       version = '10',
       species = refSpeciesNum,
       score_threshold = scoreThreshold,
-      input_directory = ''
+      input_directory = cachedir
     )
 
 	##dedup table to remove multiple tests
@@ -141,7 +141,8 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	          geneCol = input$stringdb_selectGeneCol,
 	          maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
 	          refSpeciesNum = refSpeciesNum,
-	          scoreThreshold = input$stringdb_scoreThreshold_input
+	          scoreThreshold = input$stringdb_scoreThreshold_input,
+	          cachedir = envir$cachedir
 	        )
 
 	        appDiskCache$set(key = cacheKey, value = stringdbRes)

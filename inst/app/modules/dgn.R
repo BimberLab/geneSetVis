@@ -88,6 +88,11 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
 				<li><a href=https://www.disgenet.org/home/
 				title="DisGeNET Browser website"
 				target="_blank"><b>DisGeNET Browser website</b></a></li>
+				<p>
+				<p>
+				<b>enrichplot</b><br>
+				The plots are produced using <a href=https://bioconductor.org/packages/release/bioc/html/enrichplot.html target="_blank"><b>enrichplot</b></a> by
+				<a href=https://github.com/YuLab-SMU/enrichplot target="_blank"><b>Yu G (2019) </b></a>
 				'
       )
     )

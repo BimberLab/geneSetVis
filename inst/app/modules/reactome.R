@@ -87,6 +87,11 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 				<li><a href=https://reactome.org/PathwayBrowser/
 				title="Reactome Pathway Browser website"
 				target="_blank"><b>Reactome Pathway Browser website</b></a></li>
+				<p>
+				<p>
+				<b>enrichplot</b><br>
+				The plots are produced using <a href=https://bioconductor.org/packages/release/bioc/html/enrichplot.html target="_blank"><b>enrichplot</b></a> by
+				<a href=https://github.com/YuLab-SMU/enrichplot target="_blank"><b>Yu G (2019) </b></a>
 				'
 			)
 		)

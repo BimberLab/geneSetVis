@@ -1,6 +1,8 @@
 
-source(system.file('app/uiElements.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
-source(system.file('app/tabs.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
+# source(system.file('app/uiElements.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
+# source(system.file('app/tabs.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
+source('uiElements.R', local = TRUE)
+source('tabs.R', local = TRUE)
 
 ui = shinydashboard::dashboardPage(
   shinydashboard::dashboardHeader(title = 'geneSetVis'),
@@ -54,7 +56,7 @@ ui = shinydashboard::dashboardPage(
         tabName = 'enrichr',
         icon = icon(NULL)
       ),
-      div(style = "display:inline-block;width:32%;text-align: center;", actionButton("export", label = NULL, icon = icon("paper-plane")))
+      div(style = "display:inline-block;width:32%;text-align: center;", downloadButton("downloadReport", label = NULL, icon = icon("paper-plane")))
 
     )
   ),

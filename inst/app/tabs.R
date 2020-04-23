@@ -57,7 +57,7 @@ tab_stringdb <- shinydashboard::tabItem(
                       label = "info",
                       icon = NULL,
                       class = "btn-xs",
-                      title = "Show additional information for this panel."
+                      title = "Show additional information.."
                     )),
     status = 'primary',
     solidHeader = TRUE,
@@ -117,9 +117,9 @@ tab_stringdb <- shinydashboard::tabItem(
   )
 )
 
-
-#msigdbCategories <- read.table(file = 'msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
-msigdbCategories <- read.table(file = system.file('msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
+print(getwd())
+msigdbCategories <- read.table(file = '../msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+#msigdbCategories <- read.table(file = system.file('msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
 msigdbCategories <- unique(msigdbCategories[c('Category', 'CategoryLabel')])
 msigdbCategories$CategoryLabel <- paste0(msigdbCategories$Category, ': ', msigdbCategories$CategoryLabel)
 msigdb_categories <- msigdbCategories$Category
@@ -135,7 +135,7 @@ tab_msigdb <- shinydashboard::tabItem(
                       label = "info",
                       icon = NULL,
                       class = "btn-xs",
-                      title = "Show additional information for this panel."
+                      title = "Show additional information.."
                     )),
     status = 'primary',
     solidHeader = TRUE,
@@ -192,7 +192,7 @@ tab_reactome <- shinydashboard::tabItem(
                       label = "info",
                       icon = NULL,
                       class = "btn-xs",
-                      title = "Show additional information for this panel."
+                      title = "Show additional information.."
                     )),
     status = 'primary',
     solidHeader = TRUE,
@@ -235,7 +235,7 @@ tab_david <- shinydashboard::tabItem(
                       label = "info",
                       icon = NULL,
                       class = "btn-xs",
-                      title = "Show additional information for this panel."
+                      title = "Show additional information.."
                     )),
     status = 'primary',
     solidHeader = TRUE,
@@ -285,7 +285,7 @@ tab_dose <- shinydashboard::tabItem(
                       label = "info",
                       icon = NULL,
                       class = "btn-xs",
-                      title = "Show additional information for this panel."
+                      title = "Show additional information.."
                     )),
     status = 'primary',
     solidHeader = TRUE,
@@ -330,7 +330,7 @@ tab_ncg <- shinydashboard::tabItem(
                       label = "info",
                       icon = NULL,
                       class = "btn-xs",
-                      title = "Show additional information for this panel."
+                      title = "Show additional information.."
                     )),
     status = 'primary',
     solidHeader = TRUE,
@@ -374,7 +374,7 @@ tab_dgn <- shinydashboard::tabItem(
                       label = "info",
                       icon = NULL,
                       class = "btn-xs",
-                      title = "Show additional information for this panel."
+                      title = "Show additional information.."
                     )),
     status = 'primary',
     solidHeader = TRUE,
@@ -418,7 +418,7 @@ tab_enrichr <- shinydashboard::tabItem(
                       label = "info",
                       icon = NULL,
                       class = "btn-xs",
-                      title = "Show additional information for this panel."
+                      title = "Show additional information.."
                     )),
     status = 'primary',
     solidHeader = TRUE,

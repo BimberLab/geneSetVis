@@ -100,8 +100,9 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		if (!is.null(errEl)) {shinyjs::hide(errEl)}
 	})
 
-	#msigdbSubcategories <- read.table(file = 'msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
-	msigdbSubcategories <- read.table(file = system.file('msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
+	print(getwd())
+  msigdbSubcategories <- read.table(file = '../msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+	#msigdbSubcategories <- read.table(file = system.file('msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
 	msigdbSubcategories <- msigdbSubcategories[!is.na(msigdbSubcategories$Subcategory) & msigdbSubcategories$Subcategory != '',]
 	msigdbSubcategories$SubcategoryLabel <- paste0(msigdbSubcategories$Subcategory, ': ', msigdbSubcategories$SubcategoryLabel)
 
@@ -191,6 +192,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	        padjCol = msigdbRes$fgsea_result$padj,
 	        pvalCol = msigdbRes$fgsea_result$pval,
 	        geneIDCol = fgsea_geneIDCol,
+	        pvalueCutoff = 0.5,
 	        #?size is not Count
 	        #countCol = msigdbRes$fgsea_result$size,
 	        countCol = lapply(stringr::str_split(fgsea_geneIDCol, pattern = '/'), length),
@@ -201,10 +203,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	          sep = ''
 	        )
 	      )
-
 	    }
-
-
 	  })
 	})
 
@@ -272,6 +271,11 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 				<li><a href="https://www.gsea-msigdb.org/gsea/msigdb/index.jsp"
 				title="link to Official MSigDB"
 				target="_blank"><b>Official MSigDB website</b></a></li>
+				<p>
+				<p>
+				<b>enrichplot</b><br>
+				The plots are produced using <a href=https://bioconductor.org/packages/release/bioc/html/enrichplot.html target="_blank"><b>enrichplot</b></a> by
+				<a href=https://github.com/YuLab-SMU/enrichplot target="_blank"><b>Yu G (2019) </b></a>
 				'
 			)
 		)
