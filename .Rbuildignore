@@ -10,6 +10,6 @@
 ^.*/.*\.rds$
 ^\.travis\.yml$
 ^\.dockerignore$
-^tests/shinytestrecord\.R$
+^tests/
 ^rsconnect/
 ^\.DS_Store$

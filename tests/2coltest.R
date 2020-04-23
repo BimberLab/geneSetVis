@@ -1,4 +1,4 @@
-app <- ShinyDriver$new("../", seed = 1234, loadTimeout = 1e+05)
+app <- shinytest::ShinyDriver$new("./inst/app", seed = 1234, loadTimeout = 1e+05)
 app$snapshotInit("2coltest")
 
 app$setInputs(demo1 = "click")
