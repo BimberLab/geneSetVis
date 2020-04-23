@@ -1,0 +1,13 @@
+app <- ShinyDriver$new("../", seed = 1234, loadTimeout = 1e+05)
+app$snapshotInit("2coltest")
+
+app$setInputs(demo1 = "click")
+app$setInputs(submit = "click")
+app$setInputs(sidebar = "stringdb")
+app$setInputs(runstringdb_button = "click")
+app$setInputs(sidebar = "msigdb")
+app$setInputs(runmsigdb_button = "click")
+app$setInputs(sidebar = "reactome")
+app$setInputs(runreactome_button = "click")
+app$snapshotDownload("downloadReport")
+app$snapshot()
