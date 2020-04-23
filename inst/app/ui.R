@@ -1,8 +1,11 @@
 
-source(system.file('app/uiElements.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
-source(system.file('app/tabs.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
-# source('uiElements.R', local = TRUE)
-# source('tabs.R', local = TRUE)
+if (isTRUE(package)) {
+  source(system.file('app/uiElements.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
+  source(system.file('app/tabs.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
+} else {
+  source('uiElements.R', local = TRUE)
+  source('tabs.R', local = TRUE)
+}
 
 ui = shinydashboard::dashboardPage(
   shinydashboard::dashboardHeader(title = 'geneSetVis'),

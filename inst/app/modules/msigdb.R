@@ -100,10 +100,13 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		if (!is.null(errEl)) {shinyjs::hide(errEl)}
 	})
 
-  #msigdbSubcategories <- read.table(file = '../msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
-	msigdbSubcategories <- read.table(file = system.file('msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
-	msigdbSubcategories <- msigdbSubcategories[!is.na(msigdbSubcategories$Subcategory) & msigdbSubcategories$Subcategory != '',]
-	msigdbSubcategories$SubcategoryLabel <- paste0(msigdbSubcategories$Subcategory, ': ', msigdbSubcategories$SubcategoryLabel)
+  if (isTRUE(package)) {
+    msigdbCategories <- read.table(file = system.file('app/intdata/msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
+  } else {
+    msigdbCategories <- read.table(file = 'intdata/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+  }
+  msigdbCategories <- msigdbCategories[!is.na(msigdbCategories$Subcategory) & msigdbCategories$Subcategory != '',]
+	msigdbCategories$SubcategoryLabel <- paste0(msigdbCategories$Subcategory, ': ', msigdbCategories$SubcategoryLabel)
 
 	observeEvent(input$msigdb_category_input, {
 		req(input$msigdb_category_input)
@@ -111,7 +114,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 		#NOTE: these do not appear to be specieis-specific, at least on the website.  This call introduces a lot of lag time
 		#species.msig <- msigdbr::msigdbr(species = input$msigdbr_species_input)
 
-		subcat <- msigdbSubcategories[msigdbSubcategories$Category == input$msigdb_category_input,]
+		subcat <- msigdbCategories[msigdbCategories$Category == input$msigdb_category_input,]
 		subcat <- subcat[c('Subcategory', 'SubcategoryLabel')]
 		subcatValues <- subcat$Subcategory
 		names(subcatValues) <- subcat$SubcategoryLabel

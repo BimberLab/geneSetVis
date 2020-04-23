@@ -117,8 +117,11 @@ tab_stringdb <- shinydashboard::tabItem(
   )
 )
 
-#msigdbCategories <- read.table(file = '../msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
-msigdbCategories <- read.table(file = system.file('msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
+if (isTRUE(package)) {
+  msigdbCategories <- read.table(file = system.file('app/intdata/msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
+} else {
+  msigdbCategories <- read.table(file = 'intdata/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)
+}
 msigdbCategories <- unique(msigdbCategories[c('Category', 'CategoryLabel')])
 msigdbCategories$CategoryLabel <- paste0(msigdbCategories$Category, ': ', msigdbCategories$CategoryLabel)
 msigdb_categories <- msigdbCategories$Category
