@@ -117,7 +117,7 @@ tab_stringdb <- shinydashboard::tabItem(
   )
 )
 
-if (isTRUE(package)) {
+if (exists('gsvis_package')) {
   msigdbCategories <- read.table(file = system.file('app/intdata/msigdb_categories.txt', package = 'geneSetVis'), sep = '\t', header = T, stringsAsFactors = FALSE)
 } else {
   msigdbCategories <- read.table(file = 'intdata/msigdb_categories.txt', sep = '\t', header = T, stringsAsFactors = FALSE)

@@ -31,7 +31,7 @@
 #'
 launchGeneSetVis <- function(...) {
   # for source() if from package of user dir
-  package <<- TRUE
+  gsvis_package <<- TRUE
   shiny::runApp(appDir = system.file("app", package = "geneSetVis"),
                 ...)
   }

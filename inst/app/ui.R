@@ -1,5 +1,5 @@
 
-if (isTRUE(package)) {
+if (exists('gsvis_package')) {
   source(system.file('app/uiElements.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
   source(system.file('app/tabs.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
 } else {
