@@ -206,6 +206,7 @@ server = function(input, output, session) {
       } else {
         file.copy('intdata/template_report.Rmd', paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"))
       }
+      Sys.sleep(5)
       output_path <-rmarkdown::render(
         input = paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"),
         output_format = 'html_clean',
