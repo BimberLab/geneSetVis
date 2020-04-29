@@ -41,7 +41,7 @@ Imports:
     stringr,
     tidyr,
     RDAVIDWebService,
-    STRINGdb,
+    STRINGdb (== 1.26.0),
     msigdbr,
     rmdformats,
     tidyselect (>= 1.0.0),
