@@ -11,10 +11,12 @@ server = function(input, output, session) {
     msigRes = NULL
   )
 
-  if (Sys.getenv("GENESETVIS_CACHE") == "") {
-    cachedir <- paste0(Sys.getenv("TMPDIR"), "geneSetVis-cache")
-  } else {
+  if (Sys.getenv("GENESETVIS_CACHE") != "") {
     cachedir <-  Sys.getenv("GENESETVIS_CACHE")
+  } else if (Sys.getenv("SCRATCH_DIR") != "") {
+    cachedir <- paste0(Sys.getenv("SCRATCH_DIR"), "geneSetVis-cache")
+  } else {
+    cachedir <- paste0(Sys.getenv("TMPDIR"), "geneSetVis-cache")
   }
   print(paste0('cache directory in ', cachedir))
   envir$cachedir <- cachedir
