@@ -53,6 +53,6 @@ Suggests:
     digest
 Remotes:
     daattali/shinyjs,
-    bioc::3.10/RDAVIDWebService,
+    bioc::release/RDAVIDWebService,
     bioc::3.10/STRINGdb
 
