@@ -41,7 +41,7 @@ Imports:
     stringr,
     tidyr,
     RDAVIDWebService,
-    STRINGdb (== 1.26.0),
+    STRINGdb,
     msigdbr,
     rmdformats,
     tidyselect (>= 1.0.0),
@@ -53,6 +53,6 @@ Suggests:
     digest
 Remotes:
     daattali/shinyjs,
-    bioc::release/RDAVIDWebService,
-    bioc::release/STRINGdb
+    bio::3.10/RDAVIDWebService,
+    bio::3.10/STRINGdb
 
