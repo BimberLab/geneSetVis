@@ -14,11 +14,22 @@ server = function(input, output, session) {
   if (Sys.getenv("GENESETVIS_CACHE") != "") {
     cachedir <-  Sys.getenv("GENESETVIS_CACHE")
   } else if (Sys.getenv("SCRATCH_DIR") != "") {
-    cachedir <- paste0(Sys.getenv("SCRATCH_DIR"), "geneSetVis-cache")
+    sd <- Sys.getenv("SCRATCH_DIR")
+    if (substr(sd, nchar(sd), nchar(sd)) != "/") {
+      sd <- paste0(sd, "/")
+    }
+    cachedir <- paste0(sd, "geneSetVis-cache")
   } else {
-    cachedir <- paste0(Sys.getenv("TMPDIR"), "geneSetVis-cache")
+    sd <- Sys.getenv("TMPDIR")
+    if (substr(sd, nchar(sd), nchar(sd)) != "/") {
+      sd <- paste0(sd, "/")
+    }
+    cachedir <- paste0(sd, "geneSetVis-cache")
   }
   print(paste0('cache directory in ', cachedir))
+  if (!dir.exists(cachedir)) {
+    dir.create(cachedir, recursive = T)  
+  }
   envir$cachedir <- cachedir
   appDiskCache <- diskCache(cachedir, max_size = 75*1024^2, evict = 'lru', logfile = stdout())
 
