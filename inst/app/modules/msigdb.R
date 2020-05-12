@@ -70,7 +70,7 @@ runMSigDB <- function(DEtable, geneCol, species, category = NULL, subcategory = 
 				colwidths = c(5, 3, 0.8, 1.2, 1.2)
 			)
 
-			plot(fgsea_gtable)
+			#plot(fgsea_gtable)
 
 			addSubset = paste('fgsea_result', sep = '')
 			return_list[[addSubset]] <- fgsea_results
