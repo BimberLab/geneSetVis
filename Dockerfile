@@ -8,4 +8,4 @@ RUN Rscript -e "devtools::install_github(repo = 'kolabx/geneSetVis@pkg', depende
 EXPOSE 3838
 
 # run app
-#CMD ["R", "-e", "geneSetVis::launchGeneSetVis(port=3838, host='0.0.0.0')"]
+CMD ["R", "-e", "geneSetVis::launchGeneSetVis(port=3838, host='0.0.0.0')"]

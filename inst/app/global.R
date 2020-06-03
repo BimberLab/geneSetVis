@@ -1,7 +1,7 @@
 
 ##comment out when using runApp to call
 options(repos = BiocManager::repositories())
-gsvis_package <- TRUE
+#gsvis_package <- TRUE
 
 library(dplyr)
 library(ggplot2)

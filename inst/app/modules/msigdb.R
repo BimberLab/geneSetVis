@@ -95,7 +95,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	observeEvent(list(envir$geneList), ignoreInit = F, {
 		print('resetting msigdb')
 		envir$msigdbRes <- NULL
-		envir$msigdbRes_fgsea <- NULL
+		#envir$msigdbRes_fgsea <- NULL
 		errEl <- NULL
 		if (!is.null(errEl)) {shinyjs::hide(errEl)}
 	})
@@ -186,7 +186,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	          idColName = 'pathway'
 	        )
 
-	      envir$msigdbRes_fgsea <- as.enrichResult(
+	      envir$msigdbRes$fgsea_result_asenrich <- as.enrichResult(
 	        gseType = 'FGSEA',
 	        gseResult = msigdbRes$fgsea_result,
 	        gseGenes = msigdbRes$enricher_result@gene,
@@ -205,6 +205,8 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	          sep = ''
 	        )
 	      )
+
+
 	    }
 	  })
 	})
@@ -221,7 +223,7 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	renderPlotSet(
 	  output = output,
 	  key = 'fgsea',
-	  enrichTypeResult = reactive(envir$msigdbRes_fgsea),
+	  enrichTypeResult = reactive(envir$msigdbRes$fgsea_result_asenrich),
 	  datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
 	  datasetName = 'MSigDB',
 	  caption = 'Click on Term Description cell to view enrichment plot.',

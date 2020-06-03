@@ -31,17 +31,12 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 
 			max_hits_to_plot <- cluster.map$STRING_id[1:maxHitsToPlot]
 
-			enrichmentGO <- string_db$get_enrichment(hits,
-			                           category = 'Process',
-			                           methodMT = 'fdr',
-			                           iea = TRUE)
+			enrichmentGO <- string_db$get_enrichment(hits, category = 'Process')
 
-			enrichmentKEGG <- string_db$get_enrichment(hits,
-			                           category = 'KEGG',
-			                           methodMT = 'fdr',
-			                           iea = TRUE)
+			enrichmentKEGG <- string_db$get_enrichment(hits, category = 'KEGG')
 
 
+			#deprecated in string version 11
 			hit_term_proteins <- string_db$get_term_proteins(enrichmentGO$term_id, hits)
 			hit_term_genes <- hit_term_proteins %>%
 				dplyr::select(term_id, preferred_name) %>%
@@ -50,7 +45,7 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 
 			enrichmentGO <- merge(hit_term_genes, enrichmentGO)
 
-
+			#deprecated in string version 11
 			hit_term_proteins <- string_db$get_term_proteins(enrichmentKEGG$term_id, hits)
 			hit_term_genes <- hit_term_proteins %>%
 				dplyr::select(term_id, preferred_name) %>%
@@ -120,14 +115,18 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 		if (!is.null(errEl)) {shinyjs::hide(errEl)}
 	})
 
-	stringdbSpecies <- STRINGdb::get_STRING_species(version = '10')
-	observeEvent(input$runstringdb_button, {
+  if (exists('gsvis_package')) {
+    stringdbSpecies <- read.csv(file = system.file('app/intdata/stringdb_species.v10.txt', package = 'geneSetVis'), header = T, stringsAsFactors = F, check.names = F, quote = "", sep = "\t")
+  } else {
+    stringdbSpecies <- read.csv(file = 'intdata/stringdb_species.v10.txt', header = T, stringsAsFactors = F, check.names = F, quote = "", sep = "\t")
+  }
+  observeEvent(input$runstringdb_button, {
 	  withBusyIndicatorServer("runstringdb_button", {
 	    Sys.sleep(1)
 	    validate(need(input$stringdb_maxHitsToPlot_input != '', "Please type in maxHitsToPlot..."))
 	    validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
 	    validate(need(input$stringdb_refSpecies_input != '', "Please type in refSpecies..."))
-	    refSpeciesNum = stringdbSpecies$species_id[stringdbSpecies$compact_name == input$stringdb_refSpecies_input]
+	    refSpeciesNum = stringdbSpecies$`## taxon_id`[stringdbSpecies$official_name_NCBI == input$stringdb_refSpecies_input]
 
 	    print('making StringDB query')
 	    withProgress(message = 'making STRING query..', {
@@ -201,24 +200,36 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	# TODO: download entire dataset
 	# server = FALSE
 	output$stringdb_GO <- DT::renderDataTable({
-	  validate(need(!is.null(envir$stringdbRes$GO) & length(envir$stringdbRes$GO) != 0, ""))
+	  validate(need(!is.null(envir$stringdbRes$GO), ""))
+	  #validate(need(!is.null(envir$stringdbRes$GO) | nrow(envir$stringdbRes$GO) != 0, ""))
 	  toSubset <- paste('GO', sep = '')
 	  table <- envir$stringdbRes[[toSubset]] %>%
 	    dplyr::rename(
 	      'Term Description' = term_description,
 	      'Term ID' = term_id,
-	      'Proteins' = proteins,
 	      'Hits' = hits,
 	      'p-Value' = pvalue,
+	      'Proteins' = proteins,
 	      'p-Value (adj.)' = pvalue_fdr,
 	      'Genes in Term' = hit_term_genes
 	    )
+	    # dplyr::rename(
+	    #   'Term Description' = description,
+	    #   'Term ID' = term,
+	    #   'Hits' = number_of_genes,
+	    #   'Background Genes' = number_of_genes_in_background,
+	    #   'p-Value' = p_value,
+	    #   'p-Value (adj.)' = fdr,
+	    #   'Genes in Term' = preferredNames
+	    # )
+	  table$'Term Description' <- gsub(pattern = 'GO.', replacement = 'GO:', x = table$'Term Description')
 
 	  makeTermsTable(
 	    table = table,
 	    genesDelim = ',',
 	    datasetURL = "https://www.ebi.ac.uk/QuickGO/term/",
 	    caption = NULL,
+	    #includeColumns = c('Term Description', 'Hits', 'Background Genes', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
 	    includeColumns = c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
 	  )
 
@@ -227,24 +238,34 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 	# TODO: download entire dataset
 	# server = FALSE
 	output$stringdb_KEGG <- DT::renderDataTable({
-		validate(need(!is.null(envir$stringdbRes$KEGG) & length(envir$stringdbRes$KEGG) != 0, ""))
+		validate(need(!is.null(envir$stringdbRes$KEGG) | nrow(envir$stringdbRes$KEGG) != 0, ""))
 	  toSubset <- paste('KEGG', sep = '')
 	  table <- envir$stringdbRes[[toSubset]] %>%
 	    dplyr::rename(
 	      'Term Description' = term_description,
 	      'Term ID' = term_id,
-	      'Proteins' = proteins,
 	      'Hits' = hits,
+	      'Proteins' = proteins,
 	      'p-Value' = pvalue,
 	      'p-Value (adj.)' = pvalue_fdr,
 	      'Genes in Term' = hit_term_genes
 	    )
+	    # dplyr::rename(
+	    #   'Term Description' = description,
+	    #   'Term ID' = term,
+	    #   'Hits' = number_of_genes,
+	    #   'Background Genes' = number_of_genes_in_background,
+	    #   'p-Value' = p_value,
+	    #   'p-Value (adj.)' = fdr,
+	    #   'Genes in Term' = preferredNames
+	    # )
 
 	  makeTermsTable(
 	    table = table,
 	    genesDelim = ',',
 	    datasetURL = "https://www.genome.jp/dbget-bin/www_bget?map",
 	    caption = NULL,
+	    #includeColumns = c('Term Description', 'Hits', 'Background Genes', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
 	    includeColumns = c('Term Description', 'Proteins', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')
 	  )
 	})

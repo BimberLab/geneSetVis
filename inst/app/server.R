@@ -28,7 +28,7 @@ server = function(input, output, session) {
   }
   print(paste0('cache directory in ', cachedir))
   if (!dir.exists(cachedir)) {
-    dir.create(cachedir, recursive = T)  
+    dir.create(cachedir, recursive = T)
   }
   envir$cachedir <- cachedir
   appDiskCache <- diskCache(cachedir, max_size = 75*1024^2, evict = 'lru', logfile = stdout())
@@ -98,12 +98,16 @@ server = function(input, output, session) {
       #TODO: rm excel skip lines
       fileType <- tools::file_ext(input$fileInput)
       if (fileType == 'xlsx') {
-        geneList <- readxl::read_excel(path = input$fileInput$datapath, sheet = 1, skip = 1, col_names = T)
+        geneList <- readxl::read_excel(path = input$fileInput$datapath, sheet = 1, skip = 0, col_names = T)
       }
       if (fileType == 'csv') {
         geneList <- read.csv(file = input$fileInput$datapath, header = T, sep = ',')
+        geneList <- read.csv(file = "../../Vineet/D13 16 cluster 8 vs 2 UP.xlsx", header = T, sep = ',')
       }
 
+      names(geneList)[names(geneList) == input$file_geneCol] <- "gene"
+      names(geneList)[names(geneList) == input$file_avgLogFCcol] <- "avg_logFC"
+      names(geneList)[names(geneList) == input$file_pvaladjCol] <- "p_val_adj"
       geneList <- geneList %>% dplyr::select(gene, avg_logFC, p_val_adj) %>% dplyr::filter(p_val_adj <= 0.5)
     }
 
@@ -199,36 +203,49 @@ server = function(input, output, session) {
 
   output$downloadReport <- downloadHandler(
     filename = function() {
-      runname()
+      paste0(runname(), '_geneSetVis_Report.html')
     },
     content = function(file) {
-      runname <- tools::file_path_sans_ext(runname())
-      stringdbRes <- envir$stringdbRes
-      msigdbRes <- envir$msigdbRes
-      reactomeRes <- envir$reactomeRes
-      davidRes <- envir$davidRes
-      doseRes <- envir$doseRes
-      dgnRes <- envir$dgnRes
-      ncgRes <- envir$ncgRes
-      enrichrRes <- envir$enrichrRes
-      namedGeneList <- envir$namedGeneList
+      withProgress(message = 'Downloading...', {
+        runname <- tools::file_path_sans_ext(runname())
+        stringdbRes <- envir$stringdbRes
+        msigdbRes <- envir$msigdbRes
+        reactomeRes <- envir$reactomeRes
+        davidRes <- envir$davidRes
+        doseRes <- envir$doseRes
+        dgnRes <- envir$dgnRes
+        ncgRes <- envir$ncgRes
+        enrichrRes <- envir$enrichrRes
+        namedGeneList <- envir$namedGeneList
 
 
-      if (exists('gsvis_package')) {
-        file.copy(system.file('app/intdata/template_report.Rmd', package = 'geneSetVis'), paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"))
-      } else {
-        file.copy('intdata/template_report.Rmd', paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"))
-      }
-      Sys.sleep(5)
-      output_path <-rmarkdown::render(
-        input = paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"),
-        output_format = 'html_clean',
-        intermediates_dir = paste0(envir$cachedir, "/geneSetVis-exports"),
-        output_dir = paste0(envir$cachedir, "/geneSetVis-exports")
-        #output_file = paste0(runname, '_Report.html')
-      )
-      file.copy(output_path, file)
+        # if (exists('gsvis_package')) {
+        #   file.copy(system.file('app/intdata/template_report.Rmd', package = 'geneSetVis'), paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"))
+        # } else {
+        #   file.copy('intdata/template_report.Rmd', paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"))
+        # }
+        # Sys.sleep(5)
+        if (exists('gsvis_package')) {
+          report_template <- system.file('app/intdata/template_report.Rmd', package = 'geneSetVis')
+          report_cache <- system.file('app/intdata/template_report_cache', package = 'geneSetVis')
+        } else {
+          report_template <- 'intdata/template_report.Rmd'
+          report_cache <- 'intdata/template_report_cache'
+        }
+        output_path <-rmarkdown::render(
+          #input = paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"),
+          input = report_template,
+          output_format = 'html_clean',
+          #intermediates_dir = paste0(envir$cachedir, "/geneSetVis-exports"),
+          #output_dir = paste0(envir$cachedir, "/geneSetVis-exports"),
+          output_dir = paste0(report_cache),
+          output_file = paste0(runname, '_Report.html')
+        )
+        file.copy(output_path, file)
+        unlink(report_cache, recursive = T)
+      })
     }
+
   )
 
 }

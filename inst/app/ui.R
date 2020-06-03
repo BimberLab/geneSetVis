@@ -59,7 +59,12 @@ ui = shinydashboard::dashboardPage(
         tabName = 'enrichr',
         icon = icon(NULL)
       ),
-      div(style = "display:inline-block;width:32%;text-align: center;", downloadButton("downloadReport", label = NULL, icon = icon("paper-plane")))
+      div(style = "display:inline-block;width:32%;text-align: center;",
+          downloadButton(
+            "downloadReport",
+            label = NULL,
+            icon = icon("paper-plane")
+          ))
 
     )
   ),

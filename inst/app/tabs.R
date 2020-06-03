@@ -24,7 +24,18 @@ tab_load_data <- shinydashboard::tabItem(
         placeholder = NULL,
         resize = NULL
       ),
-      fileInput('fileInput', label = 'or Upload Gene-sets:', multiple = F, accept = c('.xlsx', '.xls')),
+      fileInput(
+        'fileInput',
+        label = tagList(
+          'or Upload Gene-sets:',
+          div(style = "font-weight:10px; font-size:10px;", em("Enter column headers in file. If p_val column present, will filter out >0.5")),
+          div(style = "display:inline-block;", textInput("file_geneCol", label = NULL, value = "gene")),
+          div(style = "display:inline-block;", textInput("file_avgLogFCcol", label = NULL, value = "avg_logFC")),
+          div(style = "display:inline-block;", textInput("file_pvaladjCol", label = NULL, value = "p_val_adj")),
+        ),
+        multiple = F,
+        accept = c('.xlsx', '.xls')
+      ),
       radioButtons("inputType",
                   label = "Input Type:",
                   choices = list("Gene only", "Gene & avg. LogFC"),
@@ -47,7 +58,11 @@ tab_load_data <- shinydashboard::tabItem(
   )
 )
 
-
+if (exists('gsvis_package')) {
+  stringdbSpecies <- read.csv(file = system.file('app/intdata/stringdb_species.v10.txt', package = 'geneSetVis'), header = T, stringsAsFactors = F, check.names = F, quote = "", sep = "\t")
+} else {
+  stringdbSpecies <- read.csv(file = 'intdata/stringdb_species.v10.txt', header = T, stringsAsFactors = F, check.names = F, quote = "", sep = "\t")
+}
 tab_stringdb <- shinydashboard::tabItem(
   tabName = 'stringdb',
   shinydashboard::box(
@@ -74,7 +89,7 @@ tab_stringdb <- shinydashboard::tabItem(
         inputId = 'stringdb_refSpecies_input',
         label = 'Reference species:',
         selected = 'Homo sapiens',
-        choices = STRINGdb::get_STRING_species(version = '10')$compact_name
+        choices = stringdbSpecies$official_name_NCBI
       ),
       numericInput(
         inputId = 'stringdb_maxHitsToPlot_input',

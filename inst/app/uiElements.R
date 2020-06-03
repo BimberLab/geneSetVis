@@ -3,41 +3,43 @@ makeTermsTable <- function(table, genesDelim,
                            caption = NULL,
                            includeColumns = c('Term Description', 'Hits', 'p-Value (adj.)', 'p-Value', 'Genes in Term')) {
 
-  table$'Genes in Term' <- gsub(pattern = genesDelim, replacement = ',', x = table$'Genes in Term')
-  table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
+  if (nrow(table) != 0) {
+    table$'Genes in Term' <- gsub(pattern = genesDelim, replacement = ',', x = table$'Genes in Term')
+    table$'Genes in Term' <- multi_hyperlink_text(labels = table$'Genes in Term', links = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=")
 
-  if(!is.null(datasetURL)) {
-    table$'Term Description' <- hyperlink_text(href_base = datasetURL, href_cont = table$'Term ID', link_text = table$'Term Description')
-  }
+    if(!is.null(datasetURL)) {
+      table$'Term Description' <- hyperlink_text(href_base = datasetURL, href_cont = table$'Term ID', link_text = table$'Term Description')
+    }
 
 
-  table <- table %>%
-    dplyr::select(tidyselect::all_of(includeColumns)) %>%
-    dplyr::arrange(`p-Value (adj.)`) %>%
-    DT::datatable(
-      caption = caption,
-      filter = 'bottom',
-      selection = 'single',
-      escape = FALSE,
-      autoHideNavigation = TRUE,
-      rownames = FALSE,
-      extensions = c('Buttons'),
-      class = 'cell-border stripe',
-      options = list(
-        dom = 'lBfrtip',
-        lengthMenu = list(c(15, 30, 50, 100, -1), c('15', '30', '50', '100', 'All')),
-        pageLength = 10,
-        scrollX = TRUE,
-        buttons = list(
-          'colvis',
-          list(
-            extend = 'collection',
-            text = 'Download/Copy',
-            buttons = c('copy', 'csv', 'excel')
+    table <- table %>%
+      dplyr::select(tidyselect::all_of(includeColumns)) %>%
+      dplyr::arrange(`p-Value (adj.)`) %>%
+      DT::datatable(
+        caption = caption,
+        filter = 'bottom',
+        selection = 'single',
+        escape = FALSE,
+        autoHideNavigation = TRUE,
+        rownames = FALSE,
+        extensions = c('Buttons'),
+        class = 'cell-border stripe',
+        options = list(
+          dom = 'lBfrtip',
+          lengthMenu = list(c(15, 30, 50, 100, -1), c('15', '30', '50', '100', 'All')),
+          pageLength = 10,
+          scrollX = TRUE,
+          buttons = list(
+            'colvis',
+            list(
+              extend = 'collection',
+              text = 'Download/Copy',
+              buttons = c('copy', 'csv', 'excel')
+            )
           )
         )
-      )
-    ) # %>% formatStyle( 0, target= 'row',color = 'black', backgroundColor = NULL, fontWeight = NULL, lineHeight='50%')
+      ) # %>% formatStyle( 0, target= 'row',color = 'black', backgroundColor = NULL, fontWeight = NULL, lineHeight='50%')
+  }
 }
 
 # TODO: download entire dataset:

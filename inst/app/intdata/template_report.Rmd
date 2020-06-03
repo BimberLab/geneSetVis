@@ -28,101 +28,6 @@ knitr::opts_knit$set(width=75)
 
 # `r runname`
 
-## MSigDB {.tabset .tabset-fade .tabset-pills}
-
-### Dotplot
-```{r msigdb_dotplot, echo=FALSE}
-if (!is.null(msigdbRes$enricher_result) &
-    !is.null(nrow(msigdbRes$enricher_result))) {
-  plotly::ggplotly(
-    enrichplot::dotplot(msigdbRes$enricher_result) +
-      ggplot2::theme(
-        axis.title.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()
-      )
-  )
-} else {
-  print('No significant enrichment found.')
-}
-
-```
-
-
-```{r msigdb_cnetplot, echo=FALSE, include=FALSE}
-### Cnetplot
-
-if (!is.null(msigdbRes$enricher_result) &
-    !is.null(nrow(msigdbRes$enricher_result))) {
-    enrichplot::cnetplot(msigdbRes$enricher_result, categorySize = "p-Value (adj.)", foldChange = namedGeneList, circular = TRUE, colorEdge = TRUE )
-} else {
-  print('No significant enrichment found.')
-}
-
-```
-
-
-```{r msigdb_upsetplot, echo=FALSE, include=FALSE}
-### Upsetplot
-
-if (!is.null(msigdbRes$enricher_result) &
-    !is.null(nrow(msigdbRes$enricher_result))) {
-  enrichplot::upsetplot(msigdbRes$enricher_result)
-} else {
-  print('No significant enrichment found.')
-}
-
-```
-
-
-```{r msigdb_heatplot, echo=FALSE, include=FALSE}
-### Heatplot
-
-if (!is.null(msigdbRes$enricher_result) &
-    !is.null(nrow(msigdbRes$enricher_result))) {
-  enrichplot::heatplot(msigdbRes$enricher_result, foldChange = namedGeneList)
-} else {
-  print('No significant enrichment found.')
-}
-
-```
-
-
-## {-}
-```{r msigdb_table, echo=FALSE}
-if (!is.null(msigdbRes$enricher_result) &
-    !is.null(nrow(msigdbRes$enricher_result))) {
-  table <- msigdbRes$enricher_result %>% as.data.frame() %>%
-    dplyr::rename(
-      'Term Description' = Description,
-      'Term ID' = ID,
-      'geneID' = geneID,
-      'Hits' = Count,
-      'p-Value (adj.)' = pvalue,
-      'p-Value' = p.adjust,
-      'Genes in Term' = geneID
-    )
-  
-  table <- makeTermsTable(
-    table = table,
-    genesDelim = '/',
-    datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
-    caption = NULL,
-    includeColumns = c(
-      'Term Description',
-      'Hits',
-      'p-Value (adj.)',
-      'p-Value',
-      'Genes in Term'
-    )
-  )
-  table
-} else {
-  print('No significant enrichment found.')
-}
-```
-
-
 ## STRINGdb
 
 ### Network
@@ -193,6 +98,199 @@ if (!is.null(stringdbRes$KEGG) & length(stringdbRes$KEGG) != 0) {
     includeColumns = c(
       'Term Description',
       'Proteins',
+      'Hits',
+      'p-Value (adj.)',
+      'p-Value',
+      'Genes in Term'
+    )
+  )
+  table
+} else {
+  print('No significant enrichment found.')
+}
+```
+
+
+## MSigDB 
+
+### Enricher
+
+#### Dotplot {.tabset .tabset-fade .tabset-pills}
+
+```{r msigdb_dotplot, echo=FALSE}
+if (!is.null(msigdbRes$enricher_result) &
+    !is.null(nrow(msigdbRes$enricher_result))) {
+  plotly::ggplotly(
+    enrichplot::dotplot(msigdbRes$enricher_result) +
+      ggplot2::theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()
+      )
+  )
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+```{r msigdb_cnetplot, echo=FALSE, include=FALSE}
+#### Cnetplot
+
+if (!is.null(msigdbRes$enricher_result) &
+    !is.null(nrow(msigdbRes$enricher_result))) {
+    enrichplot::cnetplot(msigdbRes$enricher_result, categorySize = "p-Value (adj.)", foldChange = namedGeneList, circular = TRUE, colorEdge = TRUE )
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+```{r msigdb_upsetplot, echo=FALSE, include=FALSE}
+#### Upsetplot
+
+if (!is.null(msigdbRes$enricher_result) &
+    !is.null(nrow(msigdbRes$enricher_result))) {
+  enrichplot::upsetplot(msigdbRes$enricher_result)
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+```{r msigdb_heatplot, echo=FALSE, include=FALSE}
+#### Heatplot
+
+if (!is.null(msigdbRes$enricher_result) &
+    !is.null(nrow(msigdbRes$enricher_result))) {
+  enrichplot::heatplot(msigdbRes$enricher_result, foldChange = namedGeneList)
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+### {-}
+```{r msigdb_table, echo=FALSE}
+if (!is.null(msigdbRes$enricher_result) &
+    !is.null(nrow(msigdbRes$enricher_result))) {
+  table <- msigdbRes$enricher_result %>% as.data.frame() %>%
+    dplyr::rename(
+      'Term Description' = Description,
+      'Term ID' = ID,
+      'geneID' = geneID,
+      'Hits' = Count,
+      'p-Value (adj.)' = pvalue,
+      'p-Value' = p.adjust,
+      'Genes in Term' = geneID
+    )
+  
+  table <- makeTermsTable(
+    table = table,
+    genesDelim = '/',
+    datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
+    caption = "Integrating MSigDB gene-sets with clusterProfiler's Enricher Pathway Analysis",
+    includeColumns = c(
+      'Term Description',
+      'Hits',
+      'p-Value (adj.)',
+      'p-Value',
+      'Genes in Term'
+    )
+  )
+  table
+} else {
+  print('No significant enrichment found.')
+}
+```
+
+### FGSEA
+
+#### Dotplot {.tabset .tabset-fade .tabset-pills}
+
+```{r msigdb_dotplot_fgsea, echo=FALSE}
+if (!is.null(msigdbRes$fgsea_result_asenrich) &
+    !is.null(nrow(msigdbRes$fgsea_result_asenrich))) {
+  plotly::ggplotly(
+    enrichplot::dotplot(msigdbRes$fgsea_result_asenrich) +
+      ggplot2::theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()
+      )
+  )
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+```{r msigdb_cnetplot_fgsea, echo=FALSE, include=FALSE}
+#### Cnetplot
+
+if (!is.null(msigdbRes$fgsea_result_asenrich) &
+    !is.null(nrow(msigdbRes$fgsea_result_asenrich))) {
+    enrichplot::cnetplot(msigdbRes$fgsea_result_asenrich, categorySize = "p-Value (adj.)", foldChange = namedGeneList, circular = TRUE, colorEdge = TRUE)
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+```{r msigdb_upsetplot_fgsea, echo=FALSE, include=FALSE}
+#### Upsetplot
+
+if (!is.null(msigdbRes$fgsea_result_asenrich) &
+    !is.null(nrow(msigdbRes$fgsea_result_asenrich))) {
+  enrichplot::upsetplot(msigdbRes$fgsea_result_asenrich)
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+```{r msigdb_heatplot_fgsea, echo=FALSE, include=FALSE}
+#### Heatplot
+
+if (!is.null(msigdbRes$fgsea_result_asenrich) &
+    !is.null(nrow(msigdbRes$fgsea_result_asenrich))) {
+  enrichplot::heatplot(msigdbRes$fgsea_result_asenrich, foldChange = namedGeneList)
+} else {
+  print('No significant enrichment found.')
+}
+
+```
+
+
+### {-}
+```{r msigdb_table_fgsea, echo=FALSE}
+if (!is.null(msigdbRes$fgsea_result_asenrich) &
+    !is.null(nrow(msigdbRes$fgsea_result_asenrich))) {
+  table <- msigdbRes$fgsea_result_asenrich %>% as.data.frame() %>%
+    dplyr::rename(
+      'Term Description' = Description,
+      'Term ID' = ID,
+      'geneID' = geneID,
+      'Hits' = Count,
+      'p-Value (adj.)' = pvalue,
+      'p-Value' = p.adjust,
+      'Genes in Term' = geneID
+    )
+  
+  table <- makeTermsTable(
+    table = table,
+    genesDelim = '/',
+    datasetURL = 'https://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=',
+    caption = "Integrating MSigDB gene-sets with FGSEA",
+    includeColumns = c(
+      'Term Description',
       'Hits',
       'p-Value (adj.)',
       'p-Value',
@@ -478,5 +576,11 @@ makeTermsTable(
     'Genes in Term'
   )
 ) 
+```
+
+## R sessionInfo
+```{r sessionInfo, echo=FALSE}
+options('max.print' = 500)
+sessionInfo()
 ```
 
