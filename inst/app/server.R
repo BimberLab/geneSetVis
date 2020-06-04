@@ -79,73 +79,76 @@ server = function(input, output, session) {
   })
 
   observeEvent(input$submit, {
-    if (is.null(input$fileInput)){
-      if (input$inputType == "Gene only") {
-        geneList <- read.table(text = gsub(",", "\n", perl = TRUE, x = input$areaInput),
-                                header = FALSE,
-                                col.names = c("gene"),
-                                quote = "",
-                                allowEscapes = T)
-        geneList <- data.frame(gene = geneList, avg_logFC = NA)
-      } else {
-        geneList <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
-                                header = FALSE,
-                                col.names = c("gene", "avg_logFC"),
-                                quote = "",
-                                allowEscapes = T)
-      }
-    } else {
-      #TODO: rm excel skip lines
-      fileType <- tools::file_ext(input$fileInput)
-      if (fileType == 'xlsx') {
-        geneList <- readxl::read_excel(path = input$fileInput$datapath, sheet = 1, skip = 0, col_names = T)
-      }
-      if (fileType == 'csv') {
-        geneList <- read.csv(file = input$fileInput$datapath, header = T, sep = ',')
-        geneList <- read.csv(file = "../../Vineet/D13 16 cluster 8 vs 2 UP.xlsx", header = T, sep = ',')
-      }
-
-      names(geneList)[names(geneList) == input$file_geneCol] <- "gene"
-      names(geneList)[names(geneList) == input$file_avgLogFCcol] <- "avg_logFC"
-      names(geneList)[names(geneList) == input$file_pvaladjCol] <- "p_val_adj"
-      geneList <- geneList %>% dplyr::select(gene, avg_logFC, p_val_adj) %>% dplyr::filter(p_val_adj <= 0.5)
-    }
-
-    if (input$checkGeneIdTranslate == T) {
-      withProgress(message = 'Translating genes..', {
-        print(paste0('gene translate: ', input$checkGeneIdTranslate))
-        print(paste0('gene id type: ', input$geneIdType))
-        cacheKey <- makeDiskCacheKey(list(geneList, input$checkGeneIdTranslate, input$geneIdType), 'genelist')
-        cacheVal <- appDiskCache$get(cacheKey)
-        if (class(cacheVal) == 'key_missing') {
-          print('missing cache key...')
-
-          if (input$geneIdType == 'Symbol') {
-            ensemblIds <- NULL
-            geneSymbols <- geneList$gene
-          } else {
-            ensemblIds <- geneList$gene
-            geneSymbols <- NULL
-          }
-
-          # geneList_tr <- TranslateGeneNames(ensemblIds = ensemblIds, geneSymbols = geneSymbols, davidEmail = 'oosap@ohsu.edu',
-          #                                     useEnsembl = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
-          #                                     useSTRINGdb = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
-          #                                     useDAVID = F)
-
-          geneList_tr <- TranslateToEnsembl(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
-          geneList_tr <- geneList_tr[, !(colnames(geneList_tr) %in% c('EnsemblId', 'GeneSymbol'))]
-
-          geneList <- dplyr::bind_cols(geneList[1:nrow(geneList),], geneList_tr[1:nrow(geneList_tr),])
-          appDiskCache$set(key = cacheKey, value = geneList)
+    withBusyIndicatorServer("submit", {
+      if (is.null(input$fileInput)){
+        if (input$inputType == "Gene only") {
+          geneList <- read.table(text = gsub(",", "\n", perl = TRUE, x = input$areaInput),
+                                  header = FALSE,
+                                  quote = "",
+                                  allowEscapes = T)
+          if (ncol(geneList) > 1) {stop("More than 1 column found. Please correct Input Type options.")}
+          geneList <- data.frame(gene = geneList[,1], avg_logFC = NA)
         } else {
-          geneList <- cacheVal
+          geneList <- read.table(text = gsub("(?<=[a-z])\\s+", "\n", perl = TRUE, x = input$areaInput),
+                                  header = FALSE,
+                                  quote = "",
+                                  allowEscapes = T)
+          if (ncol(geneList) == 1) {stop("Only one column found. Please correct Input Type options.")}
+          if (nrow(geneList) == 1) {stop("Only 1 row found. Please correct Input.")}
+          geneList <- data.frame(gene = geneList[,1], avg_logFC = geneList[,2])
         }
+      } else {
+        #TODO: rm excel skip lines
+        fileType <- tools::file_ext(input$fileInput)
+        if (fileType == 'xlsx') {
+          geneList <- readxl::read_excel(path = input$fileInput$datapath, sheet = 1, skip = 0, col_names = T)
+        }
+        if (fileType == 'csv') {
+          geneList <- read.csv(file = input$fileInput$datapath, header = T, sep = ',')
+        }
+
+        names(geneList)[names(geneList) == input$file_geneCol] <- "gene"
+        names(geneList)[names(geneList) == input$file_avgLogFCcol] <- "avg_logFC"
+        names(geneList)[names(geneList) == input$file_pvaladjCol] <- "p_val_adj"
+        geneList <- geneList %>% dplyr::select(gene, avg_logFC, p_val_adj) %>% dplyr::filter(p_val_adj <= 0.5)
+      }
+
+      if (input$checkGeneIdTranslate == T) {
+        withProgress(message = 'Translating genes..', {
+          print(paste0('gene translate: ', input$checkGeneIdTranslate))
+          print(paste0('gene id type: ', input$geneIdType))
+          cacheKey <- makeDiskCacheKey(list(geneList, input$checkGeneIdTranslate, input$geneIdType), 'genelist')
+          cacheVal <- appDiskCache$get(cacheKey)
+          if (class(cacheVal) == 'key_missing') {
+            print('missing cache key...')
+
+            if (input$geneIdType == 'Symbol') {
+              ensemblIds <- NULL
+              geneSymbols <- geneList$gene
+            } else {
+              ensemblIds <- geneList$gene
+              geneSymbols <- NULL
+            }
+
+            # geneList_tr <- TranslateGeneNames(ensemblIds = ensemblIds, geneSymbols = geneSymbols, davidEmail = 'oosap@ohsu.edu',
+            #                                     useEnsembl = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
+            #                                     useSTRINGdb = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
+            #                                     useDAVID = F)
+
+            geneList_tr <- TranslateToEnsembl(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
+            geneList_tr <- geneList_tr[, !(colnames(geneList_tr) %in% c('EnsemblId', 'GeneSymbol'))]
+
+            geneList <- dplyr::bind_cols(geneList[1:nrow(geneList),], geneList_tr[1:nrow(geneList_tr),])
+            appDiskCache$set(key = cacheKey, value = geneList)
+          } else {
+            geneList <- cacheVal
+          }
       })
     }
 
     envir$geneList <- geneList
     envir$namedGeneList <- setNames(geneList$avg_logFC, geneList$gene)
+    })
   })
 
   output$inputTable <- DT::renderDataTable({

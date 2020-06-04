@@ -48,11 +48,13 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
           dgnRes <- cacheVal
         }
 
-        envir$dgnRes <- dgnRes
-        if ( is.null(envir$dgnRes) || nrow(envir$dgnRes) == 0 ) {stop('No significant enrichment found.')}
+
+        if ( is.null(dgnRes) || nrow(dgnRes) == 0 ) {stop('No significant enrichment found.')}
 
         dgnRes@result$ID <- gsub(pattern = 'umls:', replacement = '', dgnRes@result$ID)
         rownames(dgnRes@result) <- dgnRes@result$ID
+
+        envir$dgnRes <- dgnRes
 
 
 

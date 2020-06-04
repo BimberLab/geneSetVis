@@ -28,13 +28,13 @@ tab_load_data <- shinydashboard::tabItem(
         'fileInput',
         label = tagList(
           'or Upload Gene-sets:',
-          div(style = "font-weight:10px; font-size:10px;", em("Enter column headers in file. If p_val column present, will filter out >0.5")),
-          div(style = "display:inline-block;", textInput("file_geneCol", label = NULL, value = "gene")),
-          div(style = "display:inline-block;", textInput("file_avgLogFCcol", label = NULL, value = "avg_logFC")),
-          div(style = "display:inline-block;", textInput("file_pvaladjCol", label = NULL, value = "p_val_adj")),
+          div(style = "font-weight:10px; font-size:12px;", em("Enter column headers in file. If p_val column present, will filter out >0.5")),
+          div(style = "display:inline-block; font-weight:normal; font-size:12px;", textInput("file_geneCol", label = NULL, value = "gene")),
+          div(style = "display:inline-block; font-weight:normal; font-size:12px;", textInput("file_avgLogFCcol", label = NULL, value = "avg_logFC")),
+          div(style = "display:inline-block; font-weight:normal; font-size:12px;", textInput("file_pvaladjCol", label = NULL, value = "p_val_adj")),
         ),
         multiple = F,
-        accept = c('.xlsx', '.xls')
+        accept = c(".xlsx", ".xls", "csv")
       ),
       radioButtons("inputType",
                   label = "Input Type:",
@@ -46,7 +46,7 @@ tab_load_data <- shinydashboard::tabItem(
                                   "Symbol" = "Symbol"),
                    selected = 'Symbol'),
       checkboxInput('checkGeneIdTranslate',label = strong('Gene ID Translation'), value = FALSE),
-      actionButton('submit', 'Submit'),
+      withBusyIndicatorUI(actionButton('submit', 'Submit')),
     ),
     shinydashboard::box(
       title = 'Parsed Genes',
@@ -275,7 +275,7 @@ tab_david <- shinydashboard::tabItem(
       textInput(
         inputId = 'davidUserEmail',
         label = 'DAVID user email:',
-        value = 'oosap@ohsu.edu',
+        value = NULL,
         placeholder = 'enter DAVID account email',
       )
     ),

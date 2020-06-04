@@ -48,10 +48,11 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
           doseRes <- cacheVal
         }
 
-        envir$doseRes <- doseRes
         if ( is.null(envir$doseRes) || nrow(envir$doseRes) == 0 ) {stop('No significant enrichment found.')}
         doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
         rownames(doseRes@result) <- doseRes@result$ID
+
+        envir$doseRes <- doseRes
 
         #envir$doseRes@pvalueCutoff <- input$pvalueCutoff
       })
