@@ -2,7 +2,7 @@
 # geneSetVis
 geneSetVis is a shiny app for the vizualization of enrichment analysis of sets of genes.
 
-**Available here:**
+**Available:**
   ```
   devtools::install_github("kolabx/geneSetVis@pkg", dependencies = T, upgrade = "always")
   
