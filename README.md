@@ -10,5 +10,6 @@ geneSetVis is a shiny app for the vizualization of enrichment analysis of sets o
   geneSetVis::launchGeneSetVis()
   ```
 [Shiny](https://kolabx.shinyapps.io/genesetvis/)
+
 [Docker](https://hub.docker.com/r/bimberlabinternal/shiny) `docker pull bimberlabinternal/shiny`
 
