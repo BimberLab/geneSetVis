@@ -82,7 +82,6 @@
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
-#' @export
 TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = "uswest", biomart = "ensembl"){
   .CheckGeneInputs(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
   if (is.null(ensemblIds)) {
@@ -200,8 +199,6 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
-#' @export
-
 TranslateToStringDb <- function(ensemblIds = NULL, geneSymbols = NULL, speciesId = 9606){
 	.CheckGeneInputs(ensemblIds, geneSymbols)
   if (is.null(ensemblIds)) {
@@ -254,8 +251,6 @@ TranslateToStringDb <- function(ensemblIds = NULL, geneSymbols = NULL, speciesId
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
-#' @export
-
 TranslateToDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email){
 	.CheckGeneInputs(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
   if (is.null(ensemblIds)) {
@@ -309,8 +304,6 @@ TranslateToDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email){
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
-#' @export
-
 TranslateGeneNames <- function(ensemblIds = NULL, geneSymbols = NULL, davidEmail,
                        ensemblDataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = "uswest", biomart = 'ensembl', 
                        stringSpeciesId = 9606,

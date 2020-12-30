@@ -18,7 +18,6 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
 
   #NOTE: this should reset our tab whenever the input genes change
   observeEvent(list(envir$geneList), ignoreInit = F, {
-    print('resetting dose')
     envir$doseRes <- NULL
     errEl <- NULL
     if (!is.null(errEl)) {shinyjs::hide(errEl)}
@@ -26,36 +25,38 @@ doseModule <- function(session, input, output, envir, appDiskCache) {
 
   observeEvent(input$rundose_button, {
     withBusyIndicatorServer("rundose_button", {
-      Sys.sleep(1)
-      #TODO: validate input present?
-      validate(need(input$dose_OrgDB_input != '', "Please select OrgDB..."))
+      validate(need(!is.null(envir$geneList) && nrow(envir$geneList) > 0, "Please enter genes into Load Data tab"))
+      validate(need(input$dose_selectGeneCol != '', "Please select gene column to use"))
+      validate(need(input$dose_OrgDB_input != '', "Please select OrgDB"))
 
-      print('making dose query')
-      withProgress(message = 'making DOSE query...', {
-        cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$dose_selectGeneCol]], input$dose_OrgDB_input), 'dose')
-        cacheVal <- appDiskCache$get(cacheKey)
-        if (class(cacheVal) == 'key_missing') {
-          print('missing cache key...')
+      shinybusy::show_modal_spinner(text = 'Querying DOSE. This might take some time.')
 
-          #if (!require(input$dose_OrgDB_input)) install.packages(input$dose_OrgDB_input)
-          envir$doseRes <- NULL
-          fromType <- ifelse(grepl('id', input$dose_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-          entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$dose_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
-          doseRes <- DOSE::enrichDO(entrezIDs$ENTREZID, readable = T)
-          appDiskCache$set(key = cacheKey, value = doseRes)
-        } else {
-          print('loading from cache...')
-          doseRes <- cacheVal
-        }
+      cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$dose_selectGeneCol]], input$dose_OrgDB_input), 'dose')
+      cacheVal <- appDiskCache$get(cacheKey)
+      if (class(cacheVal) == 'key_missing') {
+        print('missing cache key...')
 
-        if ( is.null(envir$doseRes) || nrow(envir$doseRes) == 0 ) {stop('No significant enrichment found.')}
-        doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
-        rownames(doseRes@result) <- doseRes@result$ID
+        #if (!require(input$dose_OrgDB_input)) install.packages(input$dose_OrgDB_input)
+        envir$doseRes <- NULL
+        fromType <- ifelse(grepl('id', input$dose_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+        entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$dose_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$dose_OrgDB_input)
+        doseRes <- DOSE::enrichDO(entrezIDs$ENTREZID, readable = T)
+        appDiskCache$set(key = cacheKey, value = doseRes)
+      } else {
+        print('loading from cache...')
+        doseRes <- cacheVal
+      }
 
-        envir$doseRes <- doseRes
+      remove_modal_progress()
 
-        #envir$doseRes@pvalueCutoff <- input$pvalueCutoff
-      })
+      if ( is.null(envir$doseRes) || nrow(envir$doseRes) == 0 ) {
+        stop('No significant enrichment found.')
+      }
+
+      doseRes@result$ID <- gsub(pattern = 'DOID:', replacement = '', doseRes@result$ID)
+      rownames(doseRes@result) <- doseRes@result$ID
+
+      envir$doseRes <- doseRes
     })
   })
 

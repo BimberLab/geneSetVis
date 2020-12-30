@@ -18,7 +18,6 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
 
   #NOTE: this should reset our tab whenever the input genes change
   observeEvent(list(envir$geneList), ignoreInit = F, {
-    print('resetting david')
     envir$davidRes <- NULL
     errEl <- NULL
     if (!is.null(errEl)) {shinyjs::hide(errEl)}
@@ -26,45 +25,39 @@ davidModule <- function(session, input, output, envir, appDiskCache) {
 
   observeEvent(input$rundavid_button, {
     withBusyIndicatorServer("rundavid_button", {
-      Sys.sleep(1)
-      #TODO: validate input present?
-      validate(need(input$david_OrgDB_input != '', "Please select OrgDB..."))
+      validate(need(!is.null(envir$geneList) && nrow(envir$geneList) > 0, "Please enter genes into Load Data tab"))
+      validate(need(input$david_selectGeneCol != '', "Please select gene column to use"))
+      validate(need(input$david_OrgDB_input != '', "Please select OrgDB"))
+      validate(need(input$davidUserEmail != '', "Please enter email"))
 
-      print('making david query')
-      withProgress(message = 'making DAVID query...', {
-        cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$david_selectGeneCol]], input$david_OrgDB_input), 'david')
-        cacheVal <- appDiskCache$get(cacheKey)
-        if (class(cacheVal) == 'key_missing') {
-          print('missing cache key...')
+      shinybusy::show_modal_spinner(text = 'Querying DAVID. This might take some time.')
 
-          #if (!require(input$david_OrgDB_input)) install.packages(input$david_OrgDB_input)
-          envir$davidRes <- NULL
-          fromType <- ifelse(grepl('id', input$david_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-          entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$david_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$david_OrgDB_input)
-          davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = input$davidUserEmail)
+      cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$david_selectGeneCol]], input$david_OrgDB_input), 'david')
+      cacheVal <- appDiskCache$get(cacheKey)
+      if (class(cacheVal) == 'key_missing') {
+        print('missing cache key...')
 
-          appDiskCache$set(key = cacheKey, value = davidRes)
-        } else {
-          print('loading from cache...')
-          davidRes <- cacheVal
-        }
+        #if (!require(input$david_OrgDB_input)) install.packages(input$david_OrgDB_input)
+        envir$davidRes <- NULL
+        fromType <- ifelse(grepl('id', input$david_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+        entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$david_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$david_OrgDB_input)
+        davidRes <- clusterProfiler::enrichDAVID(entrezIDs$ENTREZID, david.user = input$davidUserEmail)
 
-        ##change result replace entrezIDs with SYMBOLS; replace with & to replace
-        davidRes <- clusterProfiler::setReadable(davidRes, input$david_OrgDB_input, 'ENTREZID')
+        appDiskCache$set(key = cacheKey, value = davidRes)
+      } else {
+        print('loading from cache...')
+        davidRes <- cacheVal
+      }
 
-        envir$davidRes <- davidRes
-        if ( is.null(envir$davidRes)|| nrow(envir$davidRes) == 0 ) {stop('No significant enrichment found.')}
+      ##change result replace entrezIDs with SYMBOLS; replace with & to replace
+      davidRes <- clusterProfiler::setReadable(davidRes, input$david_OrgDB_input, 'ENTREZID')
 
-        ##change result replace entrezIDs with SYMBOLS; replace with & to replace
-        # davidRes@result$geneID <-
-        #   lapply(davidRes@result$geneID, function(x)
-        #     sapply(strsplit(as.character(x), "/"),
-        #            function(y)
-        #              paste(entrezIDs$SYMBOL[match(y, entrezIDs$ENTREZID)], collapse = '/')))
-        #
-        # davidRes@gene <- entrezIDs$ENTREZID
+      envir$davidRes <- davidRes
+      remove_modal_progress()
 
-      })
+      if ( is.null(envir$davidRes)|| nrow(envir$davidRes) == 0 ) {
+        stop('No significant enrichment found.')
+      }
     })
   })
 

@@ -18,7 +18,6 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 
 	#NOTE: this should reset our tab whenever the input genes change
 	observeEvent(list(envir$geneList), ignoreInit = F, {
-		print('resetting reactome')
 		envir$reactomeRes <- NULL
 		errEl <- NULL
 		if (!is.null(errEl)) {shinyjs::hide(errEl)}
@@ -26,32 +25,34 @@ reactomeModule <- function(session, input, output, envir, appDiskCache) {
 
 	observeEvent(input$runreactome_button, {
 	  withBusyIndicatorServer("runreactome_button", {
-	    Sys.sleep(1)
-	    #TODO: validate input present?
+			validate(need(!is.null(envir$geneList) && nrow(envir$geneList) > 0, "Please enter genes into Load Data tab"))
+			validate(need(input$reactome_selectGeneCol != '', "Please select gene column to use"))
 	    validate(need(input$reactome_OrgDB_input != '', "Please select OrgDB..."))
 
-	    print('making Reactome query')
-	    withProgress(message = 'making reactomePA query...', {
-	      cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$reactome_selectGeneCol]], input$reactome_OrgDB_input), 'reactome')
-	      cacheVal <- appDiskCache$get(cacheKey)
-	      if (class(cacheVal) == 'key_missing') {
-	        print('missing cache key...')
+			shinybusy::show_modal_spinner(text = 'Querying Reactome. This might take some time.')
 
-	        #if (!require(input$reactome_OrgDB_input)) install.packages(input$reactome_OrgDB_input)
-	        envir$reactomeRes <- NULL
-	        fromType <- ifelse(grepl('id', input$reactome_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-	        entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$reactome_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
-	        reactomeRes <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
-	        appDiskCache$set(key = cacheKey, value = reactomeRes)
-	      } else {
-	        print('loading from cache...')
-	        reactomeRes <- cacheVal
-	      }
+			cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$reactome_selectGeneCol]], input$reactome_OrgDB_input), 'reactome')
+			cacheVal <- appDiskCache$get(cacheKey)
+			if (class(cacheVal) == 'key_missing') {
+				print('missing cache key...')
 
-	      envir$reactomeRes <- reactomeRes
-	      if ( is.null(envir$reactomeRes) || nrow(envir$reactomeRes) == 0 ) {stop('No significant enrichment found.')}
+				#if (!require(input$reactome_OrgDB_input)) install.packages(input$reactome_OrgDB_input)
+				envir$reactomeRes <- NULL
+				fromType <- ifelse(grepl('id', input$reactome_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+				entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$reactome_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$reactome_OrgDB_input)
+				reactomeRes <- ReactomePA::enrichPathway(entrezIDs$ENTREZID, readable = T)
+				appDiskCache$set(key = cacheKey, value = reactomeRes)
+			} else {
+				print('loading from cache...')
+				reactomeRes <- cacheVal
+			}
 
-	    })
+			envir$reactomeRes <- reactomeRes
+			remove_modal_progress()
+
+			if ( is.null(envir$reactomeRes) || nrow(envir$reactomeRes) == 0 ) {
+				stop('No significant enrichment found.')
+			}
 	  })
 	})
 

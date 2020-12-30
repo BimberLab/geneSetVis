@@ -3,7 +3,6 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
 
   #NOTE: this should reset our tab whenever the input genes change
   observeEvent(list(envir$geneList), ignoreInit = F, {
-    print('resetting enrichr')
     envir$enrichrRes <- NULL
     envir$enrichRes_selected <- NULL
     errEl <- NULL
@@ -12,42 +11,40 @@ enrichrModule <- function(session, input, output, envir, appDiskCache) {
 
   observeEvent(input$runenrichr_button, {
     withBusyIndicatorServer("runenrichr_button", {
-      Sys.sleep(1)
-      #TODO: validate input present?
+      validate(need(!is.null(envir$geneList) && nrow(envir$geneList) > 0, "Please enter genes into Load Data tab"))
+      validate(need(input$enrichr_selectGeneCol != '', "Please select gene column to use"))
       validate(need(input$enrichr_db != '', "Please select database(s)..."))
 
-      print('making enrichr query')
-      withProgress(message = 'making enrichr query...', {
-        cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$enrichr_selectGeneCol]], input$enrichr_db), 'enrichr')
-        cacheVal <- appDiskCache$get(cacheKey)
-        if (class(cacheVal) == 'key_missing') {
-          print('missing cache key...')
+      shinybusy::show_modal_spinner(text = 'Querying enrichR. This might take some time.')
 
-          #envir$enrichrRes <- NULL
-          fromType <- ifelse(grepl('id', input$enrichr_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-          if (fromType != 'SYMBOL') {
-            envir$enrichrRes <- NULL
-            stop('MsigDB only accepts gene columns of type SYMBOL')
-          }
-          enrichrRes <- enrichr(genes = as.vector(envir$geneList[[input$enrichr_selectGeneCol]]), databases = input$enrichr_db)
-          #enrichrRes <- enrichr(genes = as.vector(y$ensembl_gene_id), databases = input$enrichr_db)
+      cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$enrichr_selectGeneCol]], input$enrichr_db), 'enrichr')
+      cacheVal <- appDiskCache$get(cacheKey)
+      if (class(cacheVal) == 'key_missing') {
+        print('missing cache key...')
 
-          appDiskCache$set(key = cacheKey, value = enrichrRes)
-        } else {
-          print('loading from cache...')
-          enrichrRes <- cacheVal
+        #envir$enrichrRes <- NULL
+        fromType <- ifelse(grepl('id', input$enrichr_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+        if (fromType != 'SYMBOL') {
+          envir$enrichrRes <- NULL
+          stop('MsigDB only accepts gene columns of type SYMBOL')
         }
+        enrichrRes <- enrichr(genes = as.vector(envir$geneList[[input$enrichr_selectGeneCol]]), databases = input$enrichr_db)
+        #enrichrRes <- enrichr(genes = as.vector(y$ensembl_gene_id), databases = input$enrichr_db)
 
-        envir$enrichrRes <- enrichrRes
-        if ( is.null(envir$enrichrRes) || length(envir$enrichrRes) == 0 ) {stop('No significant enrichment found.')}
+        appDiskCache$set(key = cacheKey, value = enrichrRes)
+      } else {
+        print('loading from cache...')
+        enrichrRes <- cacheVal
+      }
 
-        #enrichrRes@result$ID <- gsub(pattern = 'umls:', replacement = '', enrichrRes@result$ID)
-        #rownames(enrichrRes@result) <- enrichrRes@result$ID
+      envir$enrichrRes <- enrichrRes
+      remove_modal_progress()
 
-        })
-
-      })
+      if ( is.null(envir$enrichrRes) || length(envir$enrichrRes) == 0 ) {
+        stop('No significant enrichment found.')
+      }
     })
+  })
 
   observe({
     updateSelectInput(session, "enrichr_selectQuery", choices = names(envir$enrichrRes), selected = tail(names(envir$enrichrRes), 1))

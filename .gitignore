@@ -1,10 +1,14 @@
+# Intellij files
 .idea/*
 .Rproj.user
 .Rhistory
-.RData
-.Ruserdata
+..Rcheck*
+geneSetVis.Rcheck*
+geneSetVis**.tar.gz
+geneSetVis**.zip
+geneSetVis.Rproj
+.shelf/*
+install.bat
 **/*.rds
-packrat/lib*/
-packrat/src/*
-rsconnect/
-.DS_Store
+.Rhistory
+cache/*
