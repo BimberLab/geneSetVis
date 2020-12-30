@@ -1,5 +1,6 @@
 on:
   push:
+    branches: [ master, dev ]
   pull_request:
 
 name: run-tests
@@ -14,9 +15,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: windows-latest, r: 'release'}
-          - {os: macOS-latest, r: 'release'}
-          - {os: ubuntu-16.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/xenial/latest"}
+          - {os: ubuntu-20.04, r: 'devel', bioc: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", cont: "bioconductor/bioconductor_docker:devel"}
+          - {os: ubuntu-20.04, r: 'release', bioc: '3.12', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", cont: "bioconductor/bioconductor_docker:RELEASE_3_12", pkgdown: "true"}
+          - {os: windows-latest, r: 'release', bioc: '3.12'}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
