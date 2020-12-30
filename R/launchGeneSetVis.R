@@ -1,6 +1,6 @@
 #' Launch geneSetVis.
 #' @title Launch geneSetVis.
-#' @description Launch geneSetVis.
+#' @description This will launch the geneSetVis app.
 #' @keywords gene-set enrichment
 #' @export
 #' @return Shiny application.
@@ -28,16 +28,16 @@
 #' @import enrichplot
 #' @import fgsea
 #' @import enrichR
+#' @import shinybusy
 #'
 launchGeneSetVis <- function(...) {
-  # for source() if from package of user dir
   gsvis_package <<- TRUE
-  ## run app does not work w shiny-server
-  # runApp(appDir = system.file("app", package = "geneSetVis"),
-  #               ...)
+
+  #Load libraries via global, to ensure we stay in sync:
+  globalFile <- system.file("app/global.R", package = "geneSetVis")
+  source(globalFile)
 
   shinyAppDir(appDir = system.file("app", package = "geneSetVis"))
-
-  }
+}
 
 

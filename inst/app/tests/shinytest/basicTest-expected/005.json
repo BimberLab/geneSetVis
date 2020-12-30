@@ -1,0 +1,704 @@
+{
+  "input": {
+    "areaInput": "HMOX1\t1.0596510 \nRNF167\t0.9790608 \nHSPA5\t0.7293491 \nCDKN1A\t0.7265868 \nFCGR2B\t0.6369659 \nPFN1\t0.5453499 \nLAPTM5\t0.5164539 \nAHNAK\t0.5045917 \nFN1\t0.4090008 \nS100A10\t0.3566574 \nVIM\t0.3409602 \nYWHAZ\t0.2911121 \nFTH1.1\t0.2733286 \nPDIA3\t0.2555106 \nATP5MPL\t-0.2565952 \nLAMTOR4\t-0.2574608 \nSMDT1\t-0.2589715 \nCOX5A\t-0.2610802 \nMTDH\t-0.2619066 \nNDUFA2\t-0.2638782 \nCOX6C\t-0.2679750 \nCOX8A\t-0.2756591 \nNDUFA1\t-0.2781574 \nH2AFJ\t-0.2827520 \nTOMM7\t-0.2955068 \nRPL23\t-0.3009606 \nCOX7C\t-0.3324625 \nCASP1\t-0.3531754 \nRPS21\t-0.3921719 \nRPL38\t-0.3928734 \nFOS\t-0.8496947 \nIGFBP1\t-2.2179911 \nPPT1\t0.2956121 \nHEXB\t0.2665466 \nNINJ1\t0.3056079 \nFGL2\t0.2589270 \nLDHA\t0.2736736 \nCD59\t-0.3042252 \nGSN\t0.2728750 \nANXA2\t0.2990603 \nLGALS3\t0.2911058 \nSLC2A3\t0.4835044 \nMT-CO2\t-0.3797473 \nPLIN2\t0.2974303 \nPLAUR\t0.2979632 \nPPP1R15A\t0.3040476",
+    "checkGeneIdTranslate": false,
+    "david_OrgDB_input": "org.Hs.eg.db",
+    "david_resource_info": 0,
+    "david_selectGeneCol": "gene",
+    "davidUserEmail": "",
+    "demo1": 1,
+    "demo2": 0,
+    "dgn_OrgDB_input": "org.Hs.eg.db",
+    "dgn_resource_info": 0,
+    "dgn_selectGeneCol": "gene",
+    "dose_OrgDB_input": "org.Hs.eg.db",
+    "dose_resource_info": 0,
+    "dose_selectGeneCol": "gene",
+    "enricher_table_cell_clicked": {
+
+    },
+    "enricher_table_cells_selected": [
+
+    ],
+    "enricher_table_columns_selected": null,
+    "enricher_table_rows_all": null,
+    "enricher_table_rows_current": null,
+    "enricher_table_rows_selected": null,
+    "enricher_table_search": "",
+    "enricher_table_search_columns": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "enricher_table_state": null,
+    "enrichr_db": null,
+    "enrichr_resource_info": 0,
+    "enrichr_selectGeneCol": "gene",
+    "enrichr_selectQuery": "",
+    "fgsea_table_cell_clicked": {
+
+    },
+    "fgsea_table_cells_selected": [
+
+    ],
+    "fgsea_table_columns_selected": null,
+    "fgsea_table_rows_all": null,
+    "fgsea_table_rows_current": null,
+    "fgsea_table_rows_selected": null,
+    "fgsea_table_search": "",
+    "fgsea_table_search_columns": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "fgsea_table_state": null,
+    "file_avgLogFCcol": "avg_logFC",
+    "file_geneCol": "gene",
+    "file_pvaladjCol": "p_val_adj",
+    "fileInput": null,
+    "geneIdType": "Symbol",
+    "inputTable_cell_clicked": {
+
+    },
+    "inputTable_cells_selected": [
+
+    ],
+    "inputTable_columns_selected": null,
+    "inputTable_rows_all": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "inputTable_rows_current": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "inputTable_rows_selected": null,
+    "inputTable_search": "",
+    "inputTable_state": null,
+    "inputType": "Gene & avg. LogFC",
+    "msigdb_category_input": "C7",
+    "msigdb_resource_info": 0,
+    "msigdb_selectGeneCol": "gene",
+    "msigdb_species_input": "Homo sapiens",
+    "msigdb_subcategory_input": "",
+    "ncg_OrgDB_input": "org.Hs.eg.db",
+    "ncg_resource_info": 0,
+    "ncg_selectGeneCol": "gene",
+    "reactome_OrgDB_input": "org.Hs.eg.db",
+    "reactome_resource_info": 0,
+    "reactome_selectGeneCol": "gene",
+    "rundavid_button": 0,
+    "rundgn_button": 0,
+    "rundose_button": 0,
+    "runenrichr_button": 0,
+    "runmsigdb_button": 1,
+    "runncg_button": 0,
+    "runreactome_button": 0,
+    "runstringdb_button": 1,
+    "shinyjs-delay-22d698b7cc2c73b2966da4b4b1adbdaf": 2000,
+    "sidebar": "msigdb",
+    "sidebarCollapsed": false,
+    "sidebarItemExpanded": null,
+    "stringdb_maxHitsToPlot_input": 200,
+    "stringdb_refSpecies_input": "Homo sapiens",
+    "stringdb_resource_info": 0,
+    "stringdb_scoreThreshold_input": 0,
+    "stringdb_selectGeneCol": "gene",
+    "submit": 1
+  },
+  "output": {
+    "enricher_table": {
+      "x": {
+        "filter": "bottom",
+        "filterHTML": "<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"3\" data-max=\"9\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"2.70825e-10\" data-max=\"0.008595232835529\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"4.06429665e-07\" data-max=\"0.045636197550341\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>",
+        "extensions": [
+          "Buttons"
+        ],
+        "autoHideNavigation": true,
+        "container": "<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th>Term Description<\/th>\n      <th>Hits<\/th>\n      <th>p-Value (adj.)<\/th>\n      <th>p-Value<\/th>\n      <th>Genes in Term<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>",
+        "options": {
+          "dom": "lBfrtip",
+          "lengthMenu": [
+            [
+              15,
+              30,
+              50,
+              100,
+              -1
+            ],
+            [
+              "15",
+              "30",
+              "50",
+              "100",
+              "All"
+            ]
+          ],
+          "pageLength": 10,
+          "scrollX": true,
+          "buttons": [
+            "colvis",
+            {
+              "extend": "collection",
+              "text": "Download/Copy",
+              "buttons": [
+                "copy",
+                "csv",
+                "excel"
+              ]
+            }
+          ],
+          "columnDefs": [
+            {
+              "className": "dt-right",
+              "targets": [
+                1,
+                2,
+                3
+              ]
+            }
+          ],
+          "order": [
+
+          ],
+          "autoWidth": false,
+          "orderClasses": false,
+          "ajax": {
+            "type": "POST",
+            "data": "function(d) {\nd.search.caseInsensitive = true;\nd.search.smart = true;\nd.escape = false;\nvar encodeAmp = function(x) { x.value = x.value.replace(/&/g, \"%26\"); }\nencodeAmp(d.search);\n$.each(d.columns, function(i, v) {encodeAmp(v.search);});\n}"
+          },
+          "serverSide": true,
+          "processing": true
+        },
+        "selection": {
+          "mode": "single",
+          "selected": null,
+          "target": "row",
+          "selectable": null
+        }
+      },
+      "evals": [
+        "options.ajax.data"
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+        {
+          "name": "dt-core",
+          "version": "1.10.20",
+          "src": {
+            "href": "dt-core-1.10.20"
+          },
+          "meta": null,
+          "script": "js/jquery.dataTables.min.js",
+          "stylesheet": [
+            "css/jquery.dataTables.min.css",
+            "css/jquery.dataTables.extra.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "jszip",
+          "version": "1.10.20",
+          "src": {
+            "href": "jszip-1.10.20"
+          },
+          "meta": null,
+          "script": "jszip.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "dt-ext-buttons",
+          "version": "1.10.20",
+          "src": {
+            "href": "dt-ext-buttons-1.10.20"
+          },
+          "meta": null,
+          "script": [
+            "js/dataTables.buttons.min.js",
+            "js/buttons.flash.min.js",
+            "js/buttons.html5.min.js",
+            "js/buttons.colVis.min.js",
+            "js/buttons.print.min.js"
+          ],
+          "stylesheet": "css/buttons.dataTables.min.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "nouislider",
+          "version": "7.0.10",
+          "src": {
+            "href": "nouislider-7.0.10"
+          },
+          "meta": null,
+          "script": "jquery.nouislider.min.js",
+          "stylesheet": "jquery.nouislider.min.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        },
+        {
+          "name": "selectize",
+          "version": "0.12.0",
+          "src": {
+            "href": "selectize-0.12.0"
+          },
+          "meta": null,
+          "script": "selectize.min.js",
+          "stylesheet": "selectize.bootstrap3.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        },
+        {
+          "name": "jquery",
+          "version": "1.11.3",
+          "src": {
+            "href": "jquery-1.11.3"
+          },
+          "meta": null,
+          "script": "jquery.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "crosstalk",
+          "version": "1.1.0.1",
+          "src": {
+            "href": "crosstalk-1.1.0.1"
+          },
+          "meta": null,
+          "script": "js/crosstalk.min.js",
+          "stylesheet": "css/crosstalk.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "fgsea_table": {
+      "x": {
+        "filter": "bottom",
+        "filterHTML": "<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"5\" data-max=\"8\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"0.010680534765248\" data-max=\"0.029858054148673\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"0.364125428674874\" data-max=\"0.406815987775668\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>",
+        "extensions": [
+          "Buttons"
+        ],
+        "caption": "<caption>Click on Term Description cell to view enrichment plot.<\/caption>",
+        "autoHideNavigation": true,
+        "container": "<table class=\"cell-border stripe\">\n  <thead>\n    <tr>\n      <th>Term Description<\/th>\n      <th>Hits<\/th>\n      <th>p-Value (adj.)<\/th>\n      <th>p-Value<\/th>\n      <th>Genes in Term<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>",
+        "options": {
+          "dom": "lBfrtip",
+          "lengthMenu": [
+            [
+              15,
+              30,
+              50,
+              100,
+              -1
+            ],
+            [
+              "15",
+              "30",
+              "50",
+              "100",
+              "All"
+            ]
+          ],
+          "pageLength": 10,
+          "scrollX": true,
+          "buttons": [
+            "colvis",
+            {
+              "extend": "collection",
+              "text": "Download/Copy",
+              "buttons": [
+                "copy",
+                "csv",
+                "excel"
+              ]
+            }
+          ],
+          "columnDefs": [
+            {
+              "className": "dt-right",
+              "targets": [
+                1,
+                2,
+                3
+              ]
+            }
+          ],
+          "order": [
+
+          ],
+          "autoWidth": false,
+          "orderClasses": false,
+          "ajax": {
+            "type": "POST",
+            "data": "function(d) {\nd.search.caseInsensitive = true;\nd.search.smart = true;\nd.escape = false;\nvar encodeAmp = function(x) { x.value = x.value.replace(/&/g, \"%26\"); }\nencodeAmp(d.search);\n$.each(d.columns, function(i, v) {encodeAmp(v.search);});\n}"
+          },
+          "serverSide": true,
+          "processing": true
+        },
+        "selection": {
+          "mode": "single",
+          "selected": null,
+          "target": "row",
+          "selectable": null
+        }
+      },
+      "evals": [
+        "options.ajax.data"
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+        {
+          "name": "dt-core",
+          "version": "1.10.20",
+          "src": {
+            "href": "dt-core-1.10.20"
+          },
+          "meta": null,
+          "script": "js/jquery.dataTables.min.js",
+          "stylesheet": [
+            "css/jquery.dataTables.min.css",
+            "css/jquery.dataTables.extra.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "jszip",
+          "version": "1.10.20",
+          "src": {
+            "href": "jszip-1.10.20"
+          },
+          "meta": null,
+          "script": "jszip.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "dt-ext-buttons",
+          "version": "1.10.20",
+          "src": {
+            "href": "dt-ext-buttons-1.10.20"
+          },
+          "meta": null,
+          "script": [
+            "js/dataTables.buttons.min.js",
+            "js/buttons.flash.min.js",
+            "js/buttons.html5.min.js",
+            "js/buttons.colVis.min.js",
+            "js/buttons.print.min.js"
+          ],
+          "stylesheet": "css/buttons.dataTables.min.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "nouislider",
+          "version": "7.0.10",
+          "src": {
+            "href": "nouislider-7.0.10"
+          },
+          "meta": null,
+          "script": "jquery.nouislider.min.js",
+          "stylesheet": "jquery.nouislider.min.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        },
+        {
+          "name": "selectize",
+          "version": "0.12.0",
+          "src": {
+            "href": "selectize-0.12.0"
+          },
+          "meta": null,
+          "script": "selectize.min.js",
+          "stylesheet": "selectize.bootstrap3.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        },
+        {
+          "name": "jquery",
+          "version": "1.11.3",
+          "src": {
+            "href": "jquery-1.11.3"
+          },
+          "meta": null,
+          "script": "jquery.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "crosstalk",
+          "version": "1.1.0.1",
+          "src": {
+            "href": "crosstalk-1.1.0.1"
+          },
+          "meta": null,
+          "script": "js/crosstalk.min.js",
+          "stylesheet": "css/crosstalk.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "inputTable": {
+      "x": {
+        "filter": "none",
+        "extensions": [
+          "Buttons"
+        ],
+        "container": "<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>gene<\/th>\n      <th>avg_logFC<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>",
+        "options": {
+          "dom": "lBfrtip",
+          "lengthMenu": [
+            [
+              15,
+              30,
+              50,
+              -1
+            ],
+            [
+              "15",
+              "30",
+              "50",
+              "All"
+            ]
+          ],
+          "pageLength": 10,
+          "scrollX": true,
+          "buttons": [
+            {
+              "extend": "collection",
+              "text": "Download/Copy",
+              "buttons": [
+                "copy",
+                "csv",
+                "excel"
+              ]
+            }
+          ],
+          "columnDefs": [
+            {
+              "className": "dt-right",
+              "targets": 2
+            },
+            {
+              "orderable": false,
+              "targets": 0
+            }
+          ],
+          "order": [
+
+          ],
+          "autoWidth": false,
+          "orderClasses": false,
+          "ajax": {
+            "type": "POST",
+            "data": "function(d) {\nd.search.caseInsensitive = true;\nd.search.smart = true;\nd.escape = true;\nvar encodeAmp = function(x) { x.value = x.value.replace(/&/g, \"%26\"); }\nencodeAmp(d.search);\n$.each(d.columns, function(i, v) {encodeAmp(v.search);});\n}"
+          },
+          "serverSide": true,
+          "processing": true
+        },
+        "selection": {
+          "mode": "multiple",
+          "selected": null,
+          "target": "row",
+          "selectable": null
+        }
+      },
+      "evals": [
+        "options.ajax.data"
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+        {
+          "name": "dt-core",
+          "version": "1.10.20",
+          "src": {
+            "href": "dt-core-1.10.20"
+          },
+          "meta": null,
+          "script": "js/jquery.dataTables.min.js",
+          "stylesheet": [
+            "css/jquery.dataTables.min.css",
+            "css/jquery.dataTables.extra.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "jszip",
+          "version": "1.10.20",
+          "src": {
+            "href": "jszip-1.10.20"
+          },
+          "meta": null,
+          "script": "jszip.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "dt-ext-buttons",
+          "version": "1.10.20",
+          "src": {
+            "href": "dt-ext-buttons-1.10.20"
+          },
+          "meta": null,
+          "script": [
+            "js/dataTables.buttons.min.js",
+            "js/buttons.flash.min.js",
+            "js/buttons.html5.min.js",
+            "js/buttons.colVis.min.js",
+            "js/buttons.print.min.js"
+          ],
+          "stylesheet": "css/buttons.dataTables.min.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "jquery",
+          "version": "1.11.3",
+          "src": {
+            "href": "jquery-1.11.3"
+          },
+          "meta": null,
+          "script": "jquery.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "crosstalk",
+          "version": "1.1.0.1",
+          "src": {
+            "href": "crosstalk-1.1.0.1"
+          },
+          "meta": null,
+          "script": "js/crosstalk.min.js",
+          "stylesheet": "css/crosstalk.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "msigdb_map_stats": "<b>Mapped genes<\/b><br> 43 out of 46 genes were mapped.",
+    "stringdb_GO": [
+      "",
+      "NULL",
+      "c(\"shiny.silent.error\", \"validation\")"
+    ],
+    "stringdb_map_stats": {
+      "message": "No mapped genes.",
+      "call": "NULL",
+      "type": [
+        "shiny.silent.error",
+        "validation"
+      ]
+    }
+  },
+  "export": {
+
+  }
+}

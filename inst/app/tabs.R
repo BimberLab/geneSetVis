@@ -170,7 +170,7 @@ tab_msigdb <- shinydashboard::tabItem(
         inputId = 'msigdb_species_input',
         label = 'Reference species',
         selected = 'Homo sapiens',
-        choices = sort(msigdbr::msigdbr_show_species())
+        choices = sort(msigdbr::msigdbr_species()$species_name)
       ),
       selectInput(
         inputId = 'msigdb_category_input',

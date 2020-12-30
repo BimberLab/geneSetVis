@@ -2,7 +2,7 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
   #DEtable <- geneList
   #geneCol <- 'gene'
   string_db <- STRINGdb::STRINGdb$new(
-      version = '10',
+      version = '11',
       species = refSpeciesNum,
       score_threshold = scoreThreshold,
       input_directory = cachedir
@@ -37,7 +37,7 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 
 
 			#deprecated in string version 11
-			hit_term_proteins <- string_db$get_term_proteins(enrichmentGO$term_id, hits)
+			hit_term_proteins <- string_db$get_annotations(enrichmentGO$term_id, hits)
 			hit_term_genes <- hit_term_proteins %>%
 				dplyr::select(term_id, preferred_name) %>%
 				dplyr::group_by(term_id) %>%
@@ -46,7 +46,7 @@ runSTRINGdb <- function(DEtable, geneCol, maxHitsToPlot = 200, refSpeciesNum = 9
 			enrichmentGO <- merge(hit_term_genes, enrichmentGO)
 
 			#deprecated in string version 11
-			hit_term_proteins <- string_db$get_term_proteins(enrichmentKEGG$term_id, hits)
+			hit_term_proteins <- string_db$get_annotations(enrichmentKEGG$term_id, hits)
 			hit_term_genes <- hit_term_proteins %>%
 				dplyr::select(term_id, preferred_name) %>%
 				dplyr::group_by(term_id) %>%
@@ -109,7 +109,6 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
 
 	#NOTE: this should reset our tab whenever the input genes change
 	observeEvent(list(envir$geneList), ignoreInit = F, {
-		print('resetting stringdb')
 	  envir$stringdbRes <- NULL
 		errEl <- NULL
 		if (!is.null(errEl)) {shinyjs::hide(errEl)}
@@ -122,39 +121,41 @@ stringdbModule <- function(session, input, output, envir, appDiskCache) {
   }
   observeEvent(input$runstringdb_button, {
 	  withBusyIndicatorServer("runstringdb_button", {
-	    Sys.sleep(1)
+			validate(need(!is.null(envir$geneList) && nrow(envir$geneList) > 0, "Please enter genes into Load Data tab"))
 	    validate(need(input$stringdb_maxHitsToPlot_input != '', "Please type in maxHitsToPlot..."))
 	    validate(need(input$stringdb_scoreThreshold_input != '', "Please type in scoreThreshold..."))
 	    validate(need(input$stringdb_refSpecies_input != '', "Please type in refSpecies..."))
 	    refSpeciesNum = stringdbSpecies$`## taxon_id`[stringdbSpecies$official_name_NCBI == input$stringdb_refSpecies_input]
 
-	    print('making StringDB query')
-	    withProgress(message = 'making STRING query..', {
-	      cacheKey <- makeDiskCacheKey(list(envir$geneList, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdb')
-	      cacheVal <- appDiskCache$get(cacheKey)
-	      if (class(cacheVal) == 'key_missing') {
-	        print('missing cache key...')
+			shinybusy::show_modal_spinner(text = 'Querying StringDB. This might take some time.')
 
-	        stringdbRes <- runSTRINGdb(
-	          DEtable = envir$geneList,
-	          geneCol = input$stringdb_selectGeneCol,
-	          maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
-	          refSpeciesNum = refSpeciesNum,
-	          scoreThreshold = input$stringdb_scoreThreshold_input,
-	          cachedir = envir$cachedir
-	        )
+			cacheKey <- makeDiskCacheKey(list(envir$geneList, input$stringdb_selectGeneCol, input$stringdb_maxHitsToPlot_input, input$stringdb_refSpecies_input, input$stringdb_scoreThreshold_input), 'stringdb')
+			cacheVal <- appDiskCache$get(cacheKey)
+			if (class(cacheVal) == 'key_missing') {
+				print('missing cache key...')
 
-	        appDiskCache$set(key = cacheKey, value = stringdbRes)
+				stringdbRes <- runSTRINGdb(
+					DEtable = envir$geneList,
+					geneCol = input$stringdb_selectGeneCol,
+					maxHitsToPlot = input$stringdb_maxHitsToPlot_input,
+					refSpeciesNum = refSpeciesNum,
+					scoreThreshold = input$stringdb_scoreThreshold_input,
+					cachedir = envir$cachedir
+				)
 
-	      } else {
-	        print('loading from cache...')
-	        stringdbRes <- cacheVal
-	      }
+				appDiskCache$set(key = cacheKey, value = stringdbRes)
 
-	      envir$stringdbRes <- stringdbRes
-	      if (is.null(envir$stringdbRes) | length(envir$stringdbRes) == 0) {stop('No significant enrichment found.')}
+			} else {
+				print('loading from cache...')
+				stringdbRes <- cacheVal
+			}
 
-	    })
+			envir$stringdbRes <- stringdbRes
+			remove_modal_progress()
+
+			if (is.null(envir$stringdbRes) | length(envir$stringdbRes) == 0) {
+				stop('No significant enrichment found.')
+			}
 	  })
 	})
 

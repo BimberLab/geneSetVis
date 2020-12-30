@@ -73,7 +73,8 @@ renderPlotSet <- function(output, key, enrichTypeResult, datasetURL, datasetName
   output[[paste(key, 'emapplot', sep = '_')]] <- renderPlot({
     er <- enrichTypeResult()
     validate(need(!is.null(er) & nrow(er) != 0, 'No enriched terms.'))
-    enrichplot::emapplot(er, )
+    toPlot <- enrichplot::pairwise_termsim(er)
+    enrichplot::emapplot(toPlot)
   })
 
   output[[paste(key, 'cnetplot', sep = '_')]] <- renderPlot({

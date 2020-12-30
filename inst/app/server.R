@@ -153,8 +153,8 @@ server = function(input, output, session) {
 
   output$inputTable <- DT::renderDataTable({
     validate(need(envir$geneList, "Please enter the gene list and hit submit"))
-
     req(input$submit)
+
     envir$geneList %>%
     DT::datatable(
       extensions = c('Buttons'),
@@ -183,7 +183,7 @@ server = function(input, output, session) {
     updateSelectInput(session, "ncg_selectGeneCol", choices = colnames(geneColnames)[1])
     updateSelectInput(session, "dgn_selectGeneCol", choices = colnames(geneColnames)[1])
     updateSelectInput(session, "enrichr_selectGeneCol", choices = colnames(geneColnames)[1])
-    })
+  })
 
   stringdbModule(session, input, output, envir, appDiskCache)
   msigdbModule(session, input, output, envir, appDiskCache)
@@ -193,7 +193,6 @@ server = function(input, output, session) {
   ncgModule(session, input, output, envir, appDiskCache)
   dgnModule(session, input, output, envir, appDiskCache)
   enrichrModule(session, input, output, envir, appDiskCache)
-
 
   runname <- reactive({
     if (isTruthy(input$fileInput$name)) {
@@ -209,46 +208,40 @@ server = function(input, output, session) {
       paste0(runname(), '_geneSetVis_Report.html')
     },
     content = function(file) {
-      withProgress(message = 'Downloading...', {
-        runname <- tools::file_path_sans_ext(runname())
-        stringdbRes <- envir$stringdbRes
-        msigdbRes <- envir$msigdbRes
-        reactomeRes <- envir$reactomeRes
-        davidRes <- envir$davidRes
-        doseRes <- envir$doseRes
-        dgnRes <- envir$dgnRes
-        ncgRes <- envir$ncgRes
-        enrichrRes <- envir$enrichrRes
-        namedGeneList <- envir$namedGeneList
+      shinybusy::show_modal_spinner(text = 'Preparing download.')
+
+      runname <- tools::file_path_sans_ext(runname())
+      stringdbRes <- envir$stringdbRes
+      msigdbRes <- envir$msigdbRes
+      reactomeRes <- envir$reactomeRes
+      davidRes <- envir$davidRes
+      doseRes <- envir$doseRes
+      dgnRes <- envir$dgnRes
+      ncgRes <- envir$ncgRes
+      enrichrRes <- envir$enrichrRes
+      namedGeneList <- envir$namedGeneList
 
 
-        # if (exists('gsvis_package')) {
-        #   file.copy(system.file('app/intdata/template_report.Rmd', package = 'geneSetVis'), paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"))
-        # } else {
-        #   file.copy('intdata/template_report.Rmd', paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"))
-        # }
-        # Sys.sleep(5)
-        if (exists('gsvis_package')) {
-          report_template <- system.file('app/intdata/template_report.Rmd', package = 'geneSetVis')
-          report_cache <- system.file('app/intdata/template_report_cache', package = 'geneSetVis')
-        } else {
-          report_template <- 'intdata/template_report.Rmd'
-          report_cache <- 'intdata/template_report_cache'
-        }
-        output_path <-rmarkdown::render(
-          #input = paste0(envir$cachedir, "/geneSetVis-exports", "/template_report.Rmd"),
-          input = report_template,
-          output_format = 'html_clean',
-          #intermediates_dir = paste0(envir$cachedir, "/geneSetVis-exports"),
-          #output_dir = paste0(envir$cachedir, "/geneSetVis-exports"),
-          output_dir = paste0(report_cache),
-          output_file = paste0(runname, '_Report.html')
-        )
-        file.copy(output_path, file)
-        unlink(report_cache, recursive = T)
-      })
+      if (exists('gsvis_package')) {
+        report_template <- system.file('app/intdata/template_report.Rmd', package = 'geneSetVis')
+        report_cache <- system.file('app/intdata/template_report_cache', package = 'geneSetVis')
+      } else {
+        report_template <- 'intdata/template_report.Rmd'
+        report_cache <- 'intdata/template_report_cache'
+      }
+
+      output_path <-rmarkdown::render(
+        input = report_template,
+        output_format = 'html_clean',
+        output_dir = paste0(report_cache),
+        output_file = paste0(runname, '_Report.html')
+      )
+
+      remove_modal_progress()
+
+      file.copy(output_path, file)
+      unlink(report_cache, recursive = T)
     }
-
   )
 
 }

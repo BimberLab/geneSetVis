@@ -50,8 +50,7 @@ runMSigDB <- function(DEtable, geneCol, species, category = NULL, subcategory = 
 			  pathways = msig_geneSet,
 			  stats = ranks,
 			  minSize = 5,
-			  maxSize = 600,
-			  nperm = 10000
+			  maxSize = 600
 			)
 
 			threshold <- 0.001
@@ -93,7 +92,6 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 
 	#NOTE: this should reset our tab whenever the input genes change
 	observeEvent(list(envir$geneList), ignoreInit = F, {
-		print('resetting msigdb')
 		envir$msigdbRes <- NULL
 		#envir$msigdbRes_fgsea <- NULL
 		errEl <- NULL
@@ -128,55 +126,53 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 
 	observeEvent(input$runmsigdb_button, {
 	  withBusyIndicatorServer("runmsigdb_button", {
-	    Sys.sleep(1)
+			validate(need(!is.null(envir$geneList) && nrow(envir$geneList) > 0, "Please enter genes into Load Data tab"))
+			validate(need(input$msigdb_selectGeneCol != '', "Please select gene column to use"))
+			validate(need(input$msigdb_species_input != '', "Please enter species"))
 
-	    print('making MSigDB query')
+			shinybusy::show_modal_spinner(text = 'Querying MSigDB. This might take some time.')
 
-	    req(input$msigdb_species_input)
+			category <- input$msigdb_category_input
+			subcategory <- input$msigdb_subcategory_input
 
-	    withProgress(message = 'making MSigDB query..', {
-	      category <- input$msigdb_category_input
-	      subcategory <- input$msigdb_subcategory_input
+			if (category == '') {category <- NULL}
+			if (subcategory == '') {subcategory <- NULL}
 
-	      if (category == '') {category <- NULL}
-	      if (subcategory == '') {subcategory <- NULL}
+			cacheKey <- makeDiskCacheKey(list(envir$geneList, input$msigdb_selectGeneCol, input$msigdb_species_input, category, subcategory), 'msigdb')
+			cacheVal <- appDiskCache$get(cacheKey)
+			if (class(cacheVal) == 'key_missing') {
+				print('missing cache key...')
 
-	      cacheKey <- makeDiskCacheKey(list(envir$geneList, input$msigdb_selectGeneCol, input$msigdb_species_input, category, subcategory), 'msigdb')
-	      cacheVal <- appDiskCache$get(cacheKey)
-	      if (class(cacheVal) == 'key_missing') {
-	        print('missing cache key...')
+				type <- ifelse(grepl('id', input$msigdb_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+				if (type != 'SYMBOL') {
+					envir$msigdbRes$enricher_result <- NULL
+					envir$msigdbRes$fgsea_result <- NULL
+					stop('MsigDB only accepts gene columns of type SYMBOL')
+				}
 
-	        type <- ifelse(grepl('id', input$msigdb_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-	        if (type != 'SYMBOL') {
-	          envir$msigdbRes$enricher_result <- NULL
-	          envir$msigdbRes$fgsea_result <- NULL
-	          stop('MsigDB only accepts gene columns of type SYMBOL')
-	          }
-
-	        msigdbRes <- runMSigDB(
-	          DEtable = envir$geneList,
-	          geneCol = input$msigdb_selectGeneCol,
-	          species = input$msigdb_species_input,
-	          category = category,
-	          subcategory = subcategory
-	        )
-	        appDiskCache$set(key = cacheKey, value = msigdbRes)
-	      } else {
-	        print('loading from cache...')
-	        msigdbRes <- cacheVal
-	      }
-	    })
+				msigdbRes <- runMSigDB(
+					DEtable = envir$geneList,
+					geneCol = input$msigdb_selectGeneCol,
+					species = input$msigdb_species_input,
+					category = category,
+					subcategory = subcategory
+				)
+				appDiskCache$set(key = cacheKey, value = msigdbRes)
+			} else {
+				print('loading from cache...')
+				msigdbRes <- cacheVal
+			}
 
 	    envir$msigdbRes <- msigdbRes
+			remove_modal_progress()
 
-	    if (is.null(envir$msigdbRes$enricher_result) | nrow(envir$msigdbRes$enricher_result) == 0) {
+			if (is.null(envir$msigdbRes$enricher_result) | nrow(envir$msigdbRes$enricher_result) == 0) {
 	      envir$msigdbRes$enricher_result <- NULL
 	      envir$msigdbRes$fgsea_result <- NULL
 	      stop('No significant enrichment found.')
-	      }
+			}
 
 	    if ( !is.null(envir$msigdbRes$fgsea_result) & nrow(envir$msigdbRes$fgsea_result) != 0 ) {
-
 	      fgsea_geneIDCol <-
 	        getEnrichResGeneID(
 	          gseResult = msigdbRes$fgsea_result,
@@ -205,8 +201,6 @@ msigdbModule <- function(session, input, output, envir, appDiskCache) {
 	          sep = ''
 	        )
 	      )
-
-
 	    }
 	  })
 	})

@@ -39,8 +39,6 @@ as.enrichResult <- function( gseType = 'GSE', gseResult, gseGenes, idCol, descCo
     result <- data.frame(NULL)
   }
 
-
-
   new(
     Class = 'enrichResult',
     result         = result,

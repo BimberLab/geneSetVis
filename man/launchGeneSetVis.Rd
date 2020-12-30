@@ -10,7 +10,7 @@ launchGeneSetVis(...)
 Shiny application.
 }
 \description{
-Launch geneSetVis.
+This will launch the geneSetVis app.
 }
 \details{
 Launch geneSetVis.

@@ -18,7 +18,6 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
 
   #NOTE: this should reset our tab whenever the input genes change
   observeEvent(list(envir$geneList), ignoreInit = F, {
-    print('resetting ncg')
     envir$ncgRes <- NULL
     errEl <- NULL
     if (!is.null(errEl)) {shinyjs::hide(errEl)}
@@ -26,32 +25,34 @@ ncgModule <- function(session, input, output, envir, appDiskCache) {
 
   observeEvent(input$runncg_button, {
     withBusyIndicatorServer("runncg_button", {
-      Sys.sleep(1)
-      #TODO: validate input present?
-      validate(need(input$ncg_OrgDB_input != '', "Please select OrgDB..."))
+      validate(need(!is.null(envir$geneList) && nrow(envir$geneList) > 0, "Please enter genes into Load Data tab"))
+      validate(need(input$ncg_selectGeneCol != '', "Please select gene column to use"))
+      validate(need(input$ncg_OrgDB_input != '', "Please select OrgDB"))
 
-      print('making ncg query')
-      withProgress(message = 'making NCG query...', {
-        cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$ncg_selectGeneCol]], input$ncg_OrgDB_input), 'ncg')
-        cacheVal <- appDiskCache$get(cacheKey)
-        if (class(cacheVal) == 'key_missing') {
-          print('missing cache key...')
+      shinybusy::show_modal_spinner(text = 'Querying NCG. This might take some time.')
 
-          #if (!require(input$ncg_OrgDB_input)) install.packages(input$ncg_OrgDB_input)
-          envir$ncgRes <- NULL
-          fromType <- ifelse(grepl('id', input$ncg_selectGeneCol), 'ENSEMBL', 'SYMBOL')
-          entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$ncg_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$ncg_OrgDB_input)
-          ncgRes <- DOSE::enrichNCG(entrezIDs$ENTREZID, readable = T)
-          appDiskCache$set(key = cacheKey, value = ncgRes)
-        } else {
-          print('loading from cache...')
-          ncgRes <- cacheVal
-        }
+      cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$ncg_selectGeneCol]], input$ncg_OrgDB_input), 'ncg')
+      cacheVal <- appDiskCache$get(cacheKey)
+      if (class(cacheVal) == 'key_missing') {
+        print('missing cache key...')
 
-        envir$ncgRes <- ncgRes
-        if ( is.null(envir$ncgRes) || nrow(envir$ncgRes) == 0 ) {stop('No significant enrichment found.')}
+        #if (!require(input$ncg_OrgDB_input)) install.packages(input$ncg_OrgDB_input)
+        envir$ncgRes <- NULL
+        fromType <- ifelse(grepl('id', input$ncg_selectGeneCol), 'ENSEMBL', 'SYMBOL')
+        entrezIDs <- clusterProfiler::bitr(geneID = envir$geneList[[input$ncg_selectGeneCol]], fromType=fromType, toType="ENTREZID", OrgDb=input$ncg_OrgDB_input)
+        ncgRes <- DOSE::enrichNCG(entrezIDs$ENTREZID, readable = T)
+        appDiskCache$set(key = cacheKey, value = ncgRes)
+      } else {
+        print('loading from cache...')
+        ncgRes <- cacheVal
+      }
 
-      })
+      envir$ncgRes <- ncgRes
+      remove_modal_progress()
+
+      if ( is.null(envir$ncgRes) || nrow(envir$ncgRes) == 0 ) {
+        stop('No significant enrichment found.')
+      }
     })
   })
 

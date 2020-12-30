@@ -1,11 +1,1 @@
-.idea/*
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-**/*.rds
-packrat/lib*/
-packrat/src/*
-rsconnect/
-.DS_Store
-
+.git

@@ -9,7 +9,7 @@ Description: Visualization of gene-sets using established packages and databases
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Depends:
     R (>= 3.5.0)
 biocViews:
@@ -45,14 +45,13 @@ Imports:
     msigdbr,
     rmdformats,
     tidyselect (>= 1.0.0),
-    shinyjs
+    shinyjs,
+    shinybusy
 Suggests:
     ggvis,
     devtools,
     testthat (>= 2.1.0),
     digest
 Remotes:
-    daattali/shinyjs,
-    bioc::3.10/RDAVIDWebService,
-    bioc::3.10/STRINGdb
-
+    bioc::release/RDAVIDWebService,
+    bioc::release/STRINGdb
