@@ -29,7 +29,7 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
       validate(need(input$dgn_selectGeneCol != '', "Please select gene column to use"))
       validate(need(input$dgn_OrgDB_input != '', "Please select OrgDB..."))
 
-      shinybusy::show_modal_spinner(text = 'Querying DGN. This might take some time.')
+      shinybusy::show_modal_spinner(text = 'Querying DisGeNET. This might take some time.')
 
       cacheKey <- makeDiskCacheKey(list(envir$geneList[[input$dgn_selectGeneCol]], input$dgn_OrgDB_input), 'dgn')
       cacheVal <- appDiskCache$get(cacheKey)
@@ -64,8 +64,8 @@ dgnModule <- function(session, input, output, envir, appDiskCache) {
     output = output,
     key = 'dgn',
     enrichTypeResult = reactive(envir$dgnRes),
-    datasetURL = "https://www.disgenet.org/browser/0/1/0/",
-    datasetName = 'dgn',
+    datasetURL = "https://www.disgenet.org",
+    datasetName = 'DisGeNET',
     namedGeneList = envir$namedGeneList
   )
 

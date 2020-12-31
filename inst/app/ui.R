@@ -50,13 +50,18 @@ ui = shinydashboard::dashboardPage(
         icon = icon(NULL)
       ),
       shinydashboard::menuItem(
-        text = 'DGN',
+        text = 'DisGeNET',
         tabName = 'dgn',
         icon = icon(NULL)
       ),
       shinydashboard::menuItem(
         text = 'enrichR',
         tabName = 'enrichr',
+        icon = icon(NULL)
+      ),
+      shinydashboard::menuItem(
+        text = 'App Info',
+        tabName = 'appInfo',
         icon = icon(NULL)
       ),
       div(style = "display:inline-block;width:32%;text-align: center;",
@@ -77,6 +82,7 @@ ui = shinydashboard::dashboardPage(
                              tab_dose,
                              tab_ncg,
                              tab_dgn,
-                             tab_enrichr)
+                             tab_enrichr,
+                             tab_info)
   )
 )
