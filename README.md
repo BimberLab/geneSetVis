@@ -2,8 +2,6 @@
 
 geneSetVis is a shiny app for the visualization of enrichment analysis of sets of genes.
 
-### Overview
-
 ## Table of Contents
 * [Overview](#overview)
 * [Usage](#usage)
