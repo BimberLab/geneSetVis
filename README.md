@@ -1,8 +1,8 @@
-
 # geneSetVis
+
 geneSetVis is a shiny app for the visualization of enrichment analysis of sets of genes.
 
-**Available:**
+### Overview
 
 ```
 

@@ -33,12 +33,17 @@ server = function(input, output, session) {
   envir$cachedir <- cachedir
   appDiskCache <- diskCache(cachedir, max_size = 75*1024^2, evict = 'lru', logfile = stdout())
 
+  output$app_info <- renderText({
+    HTML(
+      '<b>Cache Directory</b>: ', cachedir, '<br>',
+      '<b>Running as R Package</b>: ', exists('gsvis_package'), '<br>'
+    )
+  })
 
   demo1 <- "HMOX1	1.0596510 \nRNF167	0.9790608 \nHSPA5	0.7293491 \nCDKN1A	0.7265868 \nFCGR2B	0.6369659 \nPFN1	0.5453499 \nLAPTM5	0.5164539 \nAHNAK	0.5045917 \nFN1	0.4090008 \nS100A10	0.3566574 \nVIM	0.3409602 \nYWHAZ	0.2911121 \nFTH1.1	0.2733286 \nPDIA3	0.2555106 \nATP5MPL	-0.2565952 \nLAMTOR4	-0.2574608 \nSMDT1	-0.2589715 \nCOX5A	-0.2610802 \nMTDH	-0.2619066 \nNDUFA2	-0.2638782 \nCOX6C	-0.2679750 \nCOX8A	-0.2756591 \nNDUFA1	-0.2781574 \nH2AFJ	-0.2827520 \nTOMM7	-0.2955068 \nRPL23	-0.3009606 \nCOX7C	-0.3324625 \nCASP1	-0.3531754 \nRPS21	-0.3921719 \nRPL38	-0.3928734 \nFOS	-0.8496947 \nIGFBP1	-2.2179911 \nPPT1	0.2956121 \nHEXB	0.2665466 \nNINJ1	0.3056079 \nFGL2	0.2589270 \nLDHA	0.2736736 \nCD59	-0.3042252 \nGSN	0.2728750 \nANXA2	0.2990603 \nLGALS3	0.2911058 \nSLC2A3	0.4835044 \nMT-CO2	-0.3797473 \nPLIN2	0.2974303 \nPLAUR	0.2979632 \nPPP1R15A	0.3040476"
   demo2 <- "HMOX1, RNF167, HSPA5, CDKN1A, FCGR2B, PFN1, LAPTM5, AHNAK, FN1, S100A10, VIM, YWHAZ, FTH1.1, PDIA3, ATP5MPL, LAMTOR4, SMDT1, COX5A, MTDH, NDUFA2, COX6C, COX8A, NDUFA1, H2AFJ, TOMM7, RPL23, COX7C, CASP1, RPS21, RPL38, FOS, IGFBP1, PPT1, HEXB, NINJ1, FGL2, LDHA, CD59, GSN, ANXA2, LGALS3	, SLC2A3, MT-CO2, PLIN2, PLAUR, PPP1R15A"
 
   if (exists('gsvis_package')) {
-    source(system.file('app/GeneAliasing.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
     source(system.file('app/helpers.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
     source(system.file('app/uiElements.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
     source(system.file('app/modules/stringdb.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
@@ -50,7 +55,6 @@ server = function(input, output, session) {
     source(system.file('app/modules/dgn.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
     source(system.file('app/modules/enrichr.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
   } else {
-    source('GeneAliasing.R', local = TRUE)
     source('helpers.R', local = TRUE)
     source('uiElements.R', local = TRUE)
     source('modules/stringdb.R', local = TRUE)
@@ -113,41 +117,8 @@ server = function(input, output, session) {
         geneList <- geneList %>% dplyr::select(gene, avg_logFC, p_val_adj) %>% dplyr::filter(p_val_adj <= 0.5)
       }
 
-      if (input$checkGeneIdTranslate == T) {
-        withProgress(message = 'Translating genes..', {
-          print(paste0('gene translate: ', input$checkGeneIdTranslate))
-          print(paste0('gene id type: ', input$geneIdType))
-          cacheKey <- makeDiskCacheKey(list(geneList, input$checkGeneIdTranslate, input$geneIdType), 'genelist')
-          cacheVal <- appDiskCache$get(cacheKey)
-          if (class(cacheVal) == 'key_missing') {
-            print('missing cache key...')
-
-            if (input$geneIdType == 'Symbol') {
-              ensemblIds <- NULL
-              geneSymbols <- geneList$gene
-            } else {
-              ensemblIds <- geneList$gene
-              geneSymbols <- NULL
-            }
-
-            # geneList_tr <- TranslateGeneNames(ensemblIds = ensemblIds, geneSymbols = geneSymbols, davidEmail = 'oosap@ohsu.edu',
-            #                                     useEnsembl = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
-            #                                     useSTRINGdb = ifelse('useSTRINGdb' %in% input$select_gene_conversion, T, F),
-            #                                     useDAVID = F)
-
-            geneList_tr <- TranslateToEnsembl(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
-            geneList_tr <- geneList_tr[, !(colnames(geneList_tr) %in% c('EnsemblId', 'GeneSymbol'))]
-
-            geneList <- dplyr::bind_cols(geneList[1:nrow(geneList),], geneList_tr[1:nrow(geneList_tr),])
-            appDiskCache$set(key = cacheKey, value = geneList)
-          } else {
-            geneList <- cacheVal
-          }
-      })
-    }
-
-    envir$geneList <- geneList
-    envir$namedGeneList <- setNames(geneList$avg_logFC, geneList$gene)
+			envir$geneList <- geneList
+			envir$namedGeneList <- setNames(geneList$avg_logFC, geneList$gene)
     })
   })
 

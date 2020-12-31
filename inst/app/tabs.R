@@ -1,4 +1,19 @@
 
+tab_info <- shinydashboard::tabItem(
+  tabName = 'appInfo',
+  fluidRow(
+    shinydashboard::box(
+      title = tagList(p('App Information', style = "padding-right: 5px; display: inline")),
+      side = 'right',
+      status = 'primary',
+      solidHeader = TRUE,
+      height = NULL,
+      width = 16,
+      uiOutput('app_info')
+    )
+  )
+)
+
 tab_load_data <- shinydashboard::tabItem(
   tabName = 'loadData',
   fluidRow(
@@ -45,7 +60,6 @@ tab_load_data <- shinydashboard::tabItem(
                    choices = list("Ensembl" = "Ensembl",
                                   "Symbol" = "Symbol"),
                    selected = 'Symbol'),
-      checkboxInput('checkGeneIdTranslate',label = strong('Gene ID Translation'), value = FALSE),
       withBusyIndicatorUI(actionButton('submit', 'Submit')),
     ),
     shinydashboard::box(
