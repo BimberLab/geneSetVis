@@ -50,7 +50,7 @@ ui = shinydashboard::dashboardPage(
         icon = icon(NULL)
       ),
       shinydashboard::menuItem(
-        text = 'DGN',
+        text = 'DisGeNET',
         tabName = 'dgn',
         icon = icon(NULL)
       ),

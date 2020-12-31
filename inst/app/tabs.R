@@ -399,7 +399,7 @@ tab_ncg <- shinydashboard::tabItem(
 tab_dgn <- shinydashboard::tabItem(
   tabName = 'dgn',
   shinydashboard::box(
-    title = tagList(p('Run DGN', style = "padding-right: 5px; display: inline"),
+    title = tagList(p('Run DisGeNET', style = "padding-right: 5px; display: inline"),
                     actionButton(
                       inputId = "dgn_resource_info",
                       label = "info",
@@ -436,7 +436,7 @@ tab_dgn <- shinydashboard::tabItem(
     width = 16,
     tabPanel('Mapped', uiOutput('dgn_map_stats'))
   ),
-  makeTabBox(title = 'DGN', key = 'dgn')
+  makeTabBox(title = 'DisGeNET', key = 'dgn')
 )
 
 
