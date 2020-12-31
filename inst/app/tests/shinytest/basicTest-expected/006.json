@@ -689,6 +689,25 @@
     "reactome_OrgDB_input": "org.Hs.eg.db",
     "reactome_resource_info": 0,
     "reactome_selectGeneCol": "gene",
+    "reactome_table_cell_clicked": {
+
+    },
+    "reactome_table_cells_selected": [
+
+    ],
+    "reactome_table_columns_selected": null,
+    "reactome_table_rows_all": null,
+    "reactome_table_rows_current": null,
+    "reactome_table_rows_selected": null,
+    "reactome_table_search": "",
+    "reactome_table_search_columns": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "reactome_table_state": null,
     "rundavid_button": 0,
     "rundgn_button": 0,
     "rundose_button": 0,
@@ -697,8 +716,8 @@
     "runncg_button": 0,
     "runreactome_button": 1,
     "runstringdb_button": 1,
-    "shinyjs-delay-20cdf8bb96073ea54d348b8be43fbc03": 2000,
-    "shinyjs-delay-22d698b7cc2c73b2966da4b4b1adbdaf": 2000,
+    "shinyjs-delay-153e05a8e4c56c704938bb7fc5b10498": 2000,
+    "shinyjs-delay-8bb2230c513dc24c9017e504df9118ed": 2000,
     "sidebar": "reactome",
     "sidebarCollapsed": false,
     "sidebarItemExpanded": null,

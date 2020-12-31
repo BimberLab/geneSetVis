@@ -1108,6 +1108,25 @@
     "enrichr_resource_info": 0,
     "enrichr_selectGeneCol": "gene",
     "enrichr_selectQuery": "Genome_Browser_PWMs",
+    "enrichr_table_cell_clicked": {
+
+    },
+    "enrichr_table_cells_selected": [
+
+    ],
+    "enrichr_table_columns_selected": null,
+    "enrichr_table_rows_all": null,
+    "enrichr_table_rows_current": null,
+    "enrichr_table_rows_selected": null,
+    "enrichr_table_search": "",
+    "enrichr_table_search_columns": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "enrichr_table_state": null,
     "fgsea_table_cell_clicked": {
 
     },
@@ -1286,9 +1305,9 @@
     "runncg_button": 1,
     "runreactome_button": 1,
     "runstringdb_button": 1,
-    "shinyjs-delay-20cdf8bb96073ea54d348b8be43fbc03": 2000,
-    "shinyjs-delay-22d698b7cc2c73b2966da4b4b1adbdaf": 2000,
-    "shinyjs-delay-d925e141e54c74df61d5b7afe80d30b8": 2000,
+    "shinyjs-delay-153e05a8e4c56c704938bb7fc5b10498": 2000,
+    "shinyjs-delay-8bb2230c513dc24c9017e504df9118ed": 2000,
+    "shinyjs-delay-8db7aa596e77c93a364112e6c9f795b0": 2000,
     "sidebar": "enrichr",
     "sidebarCollapsed": false,
     "sidebarItemExpanded": null,
