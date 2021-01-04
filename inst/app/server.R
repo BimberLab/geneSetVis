@@ -36,7 +36,8 @@ server = function(input, output, session) {
   output$app_info <- renderText({
     HTML(
       '<b>Cache Directory</b>: ', cachedir, '<br>',
-      '<b>Running as R Package</b>: ', exists('gsvis_package'), '<br>'
+      '<b>Running as R Package</b>: ', exists('gsvis_package'), '<br>',
+      '<b>Working Directory</b>: ', getwd(), '<br>'
     )
   })
 

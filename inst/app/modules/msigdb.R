@@ -20,20 +20,7 @@ runMSigDB <- function(DEtable, geneCol, species, category = NULL, subcategory = 
 
 			##Use the gene sets data frame for clusterProfiler (for genes as gene symbols)
 			msig_enricher <- clusterProfiler::enricher(gene = clusterTable[[geneCol]], TERM2GENE = msigTerm)
-			#msig_enricher_plot <- dotplot(msig_enricher)
 
-			#clusterProfiler::geneInCategory()
-			#geneInCategory(msig_enricher)[as.data.frame(msig_enricher)$ID == 'WINTER_HYPOXIA_METAGENE'][1]
-
-			# enricher_KEGG <- enrichKEGG(
-			#   clusterTable$gene,
-			#   organism = 'hsa',
-			#   keyType = 'kegg',
-			#   pAdjustMethod = 'BH'
-			# )
-
-			#msig_enricher <- as.data.frame(msig_enricher)
-			#msig_enricher$geneID <- gsub(x = msig_enricher$geneID, pattern = '/', replacement = ',')
 			addSubset = paste('enricher_result', sep = '')
 			return_list[[addSubset]] <- msig_enricher
 
@@ -53,37 +40,25 @@ runMSigDB <- function(DEtable, geneCol, species, category = NULL, subcategory = 
 			  maxSize = 600
 			)
 
-			threshold <- 0.001
-			sigPathways.sum <- sum(fgsea_results[, padj < threshold])
-
 			topPathwaysUp <- fgsea_results[ES > 0][head(order(pval), n = 10), pathway]
 			topPathwaysDown <- fgsea_results[ES < 0][head(order(pval), n = 10), pathway]
 			topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
 
-			fgsea_gtable <- fgsea::plotGseaTable(
+			fgsea_gtable <- R.devices::suppressGraphics({fgsea::plotGseaTable(
 				pathways = msig_geneSet[topPathways],
 				stats = ranks,
 				fgseaRes = fgsea_results,
 				gseaParam = 0.5,
-				render = F,
+				render = FALSE,
 				colwidths = c(5, 3, 0.8, 1.2, 1.2)
-			)
+			)})
 
-			#plot(fgsea_gtable)
-
-			addSubset = paste('fgsea_result', sep = '')
-			return_list[[addSubset]] <- fgsea_results
-
-			addSubset = paste('fgsea_gtable', sep = '')
-			return_list[[addSubset]] <- fgsea_gtable
-
-			addSubset = paste('fgsea_ranks', sep = '')
-			return_list[[addSubset]] <- ranks
-
-			addSubset = 'msig_geneSet'
-			return_list[[addSubset]] <- msig_geneSet
+			return_list[['fgsea_result']] <- fgsea_results
+			return_list[['fgsea_gtable']] <- fgsea_gtable
+			return_list[['fgsea_ranks']] <- ranks
+			return_list[['msig_geneSet']] <- msig_geneSet
 		}
-	})
+	}, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 
 	return(return_list)
 }
