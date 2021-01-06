@@ -2,12 +2,13 @@
 
 geneSetVis is a shiny app for the visualization of enrichment analysis of sets of genes.
 
+###### **[Now available ShinyApps](https://bimberlab.shinyapps.io/geneSetVis/)
+
 ## Table of Contents
 * [Overview](#overview)
 * [Usage](#usage)
 * [Installation](#installation)
 * [Data Sources](#dataSources)
-
 
 ### <a name="overview">Overview</a>
 

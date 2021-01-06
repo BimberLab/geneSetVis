@@ -12,3 +12,4 @@ install.bat
 **/*.rds
 .Rhistory
 cache/*
+**/rsconnect/**
