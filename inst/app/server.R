@@ -20,18 +20,19 @@ server = function(input, output, session) {
     }
     cachedir <- paste0(sd, "geneSetVis-cache")
   } else {
-    sd <- Sys.getenv("TMPDIR")
+    sd <- tempdir()
     if (substr(sd, nchar(sd), nchar(sd)) != "/") {
       sd <- paste0(sd, "/")
     }
     cachedir <- paste0(sd, "geneSetVis-cache")
   }
-  print(paste0('cache directory in ', cachedir))
+
   if (!dir.exists(cachedir)) {
     dir.create(cachedir, recursive = T)
   }
+
   envir$cachedir <- cachedir
-  appDiskCache <- diskCache(cachedir, max_size = 75*1024^2, evict = 'lru', logfile = stdout())
+  appDiskCache <- shiny::diskCache(cachedir, max_size = 75*1024^2, evict = 'lru', logfile = stdout())
 
   output$app_info <- renderText({
     HTML(

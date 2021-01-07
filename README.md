@@ -8,7 +8,6 @@ geneSetVis is a shiny app for the visualization of enrichment analysis of sets o
 * [Installation](#installation)
 * [Data Sources](#dataSources)
 
-
 ### <a name="overview">Overview</a>
 
 Interpreting the results of transcriptomic analysis generally requires interrogating the function of lists of genes. There are many databases designed to provide gene functional or pathway annotation, and many provide APIs to query their data. geneSetVis takes advantage of these, providing a single interactive Shiny app where the user can enter a set of genes once, and query a variety of these sources. We take advantage of the [enrichplot package](https://bioconductor.org/packages/release/bioc/html/enrichplot.html) to provide a set of consistent visualizations from most data sources. This is designed as an exploratory tool, not to produce publication-level analysis.  
