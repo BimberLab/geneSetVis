@@ -17,5 +17,5 @@ jobs:
         shell: Rscript {0}
       - name: Push to shiny.io
         run: |
-          Rscript -e "rsconnect::setAccountInfo(name='bimberlab', token=${{secrets.SHINYAPPS_TOKEN}}, secret=${{secrets.SHINYAPPS_SECRET}})"
+          Rscript -e "rsconnect::setAccountInfo(name='bimberlab', token='${{secrets.SHINYAPPS_TOKEN}}', secret='${{secrets.SHINYAPPS_SECRET}}')"
           Rscript -e "rsconnect::deployApp('inst/app', appName = 'geneSetVis', forceUpdate = TRUE)"
