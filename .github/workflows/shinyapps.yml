@@ -14,7 +14,7 @@ jobs:
 
       - name: Install packages
         run: |          
-          sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev openjdk-11-jdk
+          sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev adoptopenjdk-11-hotspot
 
       - name: Debug
         run: |
