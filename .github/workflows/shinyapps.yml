@@ -16,6 +16,11 @@ jobs:
         run: |          
           sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev openjdk-11-jdk
 
+      - name: Debug
+        run: |
+          which java
+          echo $JAVA_HOME
+
       - name: Install shiny
         run: |
           install.packages(c("shiny", "rsconnect", "remotes"))
