@@ -54,5 +54,5 @@ Suggests:
     testthat (>= 2.1.0),
     digest
 Remotes:
-    bioc::release/RDAVIDWebService,
-    bioc::release/STRINGdb
+    bioc::RDAVIDWebService,
+    bioc::STRINGdb

@@ -1,4 +1,4 @@
-FROM bimberlab/oosap
+FROM ghcr.io/bimberlabinternal/cellmembrane:latest
 
 # install geneSetVis pkg
 RUN Rscript -e "devtools::install_github(repo = 'kolabx/geneSetVis@pkg', dependencies = T, upgrade = 'always')" \
