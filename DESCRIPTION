@@ -47,7 +47,8 @@ Imports:
     tidyselect (>= 1.0.0),
     shinyjs,
     shinybusy,
-    R.devices
+    R.devices,
+    readxl
 Suggests:
     ggvis,
     devtools,
