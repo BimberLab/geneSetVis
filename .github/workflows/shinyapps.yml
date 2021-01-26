@@ -19,13 +19,14 @@ jobs:
       - name: Setup Java
         uses: joschi/setup-jdk@v2
         with:
-          java-version: '11'
+          java-version: '8'
 
       - name: Debug
         run: |
           which java
           echo $JAVA_HOME
           sudo R CMD javareconf
+          ls /usr/lib/jvm/
 
       - name: Install shiny
         run: |
