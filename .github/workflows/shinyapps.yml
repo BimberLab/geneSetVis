@@ -14,7 +14,7 @@ jobs:
 
       - name: Install packages
         run: |          
-          sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev
+          sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev openjdk-11-jdk
 
       - name: Install shiny
         run: |
@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies, Linux
         if: runner.os != 'Windows'
         run: |
-          remotes::install_deps(dependencies = TRUE)
+          remotes::install_deps(dependencies = TRUE, upgrade = "always")
         shell: Rscript {0}
 
       - name: Push to shiny.io
