@@ -25,6 +25,7 @@ jobs:
         run: |
           which java
           echo $JAVA_HOME
+          R CMD javareconf
 
       - name: Install shiny
         run: |
