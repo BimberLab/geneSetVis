@@ -65,14 +65,14 @@ jobs:
       - name: Install dependencies, Linux
         if: runner.os != 'Windows'
         run: |
-          remotes::install_deps(dependencies = TRUE, )
+          remotes::install_deps(dependencies = TRUE, upgrade = "always")
         shell: Rscript {0}
 
       # NOTE: --no-multiarch is added to allow rJava to install, which is part of RDAVIDWebService. The other args are defaults.
       - name: Install dependencies, Windows
         if: runner.os == 'Windows'
         run: |
-          remotes::install_deps(dependencies = TRUE, build_opts = c("--no-resave-data", "--no-manual", "--no-build-vignettes", "--no-multiarch"))
+          remotes::install_deps(dependencies = TRUE, upgrade = "always", build_opts = c("--no-resave-data", "--no-manual", "--no-build-vignettes", "--no-multiarch"))
         shell: Rscript {0}
 
       - name: Find PhantomJS path
