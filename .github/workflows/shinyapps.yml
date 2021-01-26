@@ -14,7 +14,12 @@ jobs:
 
       - name: Install packages
         run: |          
-          sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev adoptopenjdk-11-hotspot
+          sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev
+
+      - name: Setup Java
+        uses: joschi/setup-jdk@v2
+        with:
+          java-version: '11'
 
       - name: Debug
         run: |
