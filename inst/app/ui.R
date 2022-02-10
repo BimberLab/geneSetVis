@@ -35,11 +35,6 @@ ui = shinydashboard::dashboardPage(
         icon = icon(NULL)
       ),
       shinydashboard::menuItem(
-        text = 'DAVID',
-        tabName = 'david',
-        icon = icon(NULL)
-      ),
-      shinydashboard::menuItem(
         text = 'DOSE',
         tabName = 'dose',
         icon = icon(NULL)
@@ -78,7 +73,6 @@ ui = shinydashboard::dashboardPage(
                              tab_stringdb,
                              tab_msigdb,
                              tab_reactome,
-                             tab_david,
                              tab_dose,
                              tab_ncg,
                              tab_dgn,

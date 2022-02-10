@@ -51,7 +51,6 @@ server = function(input, output, session) {
     source(system.file('app/modules/stringdb.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
     source(system.file('app/modules/msigdb.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
     source(system.file('app/modules/reactome.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
-    source(system.file('app/modules/david.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
     source(system.file('app/modules/dose.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
     source(system.file('app/modules/ncg.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
     source(system.file('app/modules/dgn.R', package = 'geneSetVis', mustWork = TRUE), local = TRUE)
@@ -62,7 +61,6 @@ server = function(input, output, session) {
     source('modules/stringdb.R', local = TRUE)
     source('modules/msigdb.R', local = TRUE)
     source('modules/reactome.R', local = TRUE)
-    source('modules/david.R', local = TRUE)
     source('modules/dose.R', local = TRUE)
     source('modules/ncg.R', local = TRUE)
     source('modules/dgn.R', local = TRUE)
@@ -151,7 +149,6 @@ server = function(input, output, session) {
     updateSelectInput(session, "stringdb_selectGeneCol", choices = colnames(geneColnames)[1])
     updateSelectInput(session, "msigdb_selectGeneCol", choices = colnames(geneColnames)[1])
     updateSelectInput(session, "reactome_selectGeneCol", choices = colnames(geneColnames)[1])
-    updateSelectInput(session, "david_selectGeneCol", choices = colnames(geneColnames)[1])
     updateSelectInput(session, "dose_selectGeneCol", choices = colnames(geneColnames)[1])
     updateSelectInput(session, "ncg_selectGeneCol", choices = colnames(geneColnames)[1])
     updateSelectInput(session, "dgn_selectGeneCol", choices = colnames(geneColnames)[1])
@@ -161,7 +158,6 @@ server = function(input, output, session) {
   stringdbModule(session, input, output, envir, appDiskCache)
   msigdbModule(session, input, output, envir, appDiskCache)
   reactomeModule(session, input, output, envir, appDiskCache)
-  davidModule(session, input, output, envir, appDiskCache)
   doseModule(session, input, output, envir, appDiskCache)
   ncgModule(session, input, output, envir, appDiskCache)
   dgnModule(session, input, output, envir, appDiskCache)
@@ -187,7 +183,6 @@ server = function(input, output, session) {
       stringdbRes <- envir$stringdbRes
       msigdbRes <- envir$msigdbRes
       reactomeRes <- envir$reactomeRes
-      davidRes <- envir$davidRes
       doseRes <- envir$doseRes
       dgnRes <- envir$dgnRes
       ncgRes <- envir$ncgRes

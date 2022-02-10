@@ -40,7 +40,6 @@ Imports:
     shinytest,
     stringr,
     tidyr,
-    RDAVIDWebService,
     STRINGdb,
     msigdbr,
     rmdformats,
@@ -55,5 +54,4 @@ Suggests:
     testthat (>= 2.1.0),
     digest
 Remotes:
-    bioc::RDAVIDWebService,
     bioc::STRINGdb

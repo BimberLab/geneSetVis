@@ -257,56 +257,6 @@ tab_reactome <- shinydashboard::tabItem(
 )
 
 
-tab_david <- shinydashboard::tabItem(
-  tabName = 'david',
-  shinydashboard::box(
-    title = tagList(p('Run DAVID', style = "padding-right: 5px; display: inline"),
-                    actionButton(
-                      inputId = "david_resource_info",
-                      label = "info",
-                      icon = NULL,
-                      class = "btn-xs",
-                      title = "Show additional information.."
-                    )),
-    status = 'primary',
-    solidHeader = TRUE,
-    width = 16,
-    collapsible = TRUE,
-    flowLayout(
-      selectInput(
-        inputId = 'david_selectGeneCol',
-        label = 'Select gene column to use:',
-        selected = 'gene',
-        choices = ''
-      ),
-      selectInput(
-        inputId = 'david_OrgDB_input',
-        label = 'OrgDB:',
-        selected = 'org.Hs.eg.db',
-        #choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Rn.eg.db', 'org.Mm.eg.db')
-        choices = c('org.Hs.eg.db', 'org.Mmu.eg.db', 'org.Mm.eg.db')
-      ),
-      textInput(
-        inputId = 'davidUserEmail',
-        label = 'DAVID user email:',
-        value = NULL,
-        placeholder = 'enter DAVID account email',
-      )
-    ),
-    withBusyIndicatorUI(actionButton('rundavid_button', 'Run')),
-  ),
-  shinydashboard::tabBox(
-    title = NULL,
-    side = 'right',
-    height = NULL,
-    selected = 'Mapped',
-    width = 16,
-    tabPanel('Mapped', uiOutput('david_map_stats'))
-  ),
-  makeTabBox(title = 'DAVID', key = 'david'),
-)
-
-
 tab_dose <- shinydashboard::tabItem(
   tabName = 'dose',
   shinydashboard::box(

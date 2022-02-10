@@ -3,19 +3,19 @@
 .QuerySTRINGdb <- function(inputIds, speciesId, score_threshold = 0, stringDBVersion = "10"){
 	print('Querying STRINGdb')
   string_db <- STRINGdb::STRINGdb$new(version = stringDBVersion,
-                            species = speciesId, 
-                            score_threshold = score_threshold, 
+                            species = speciesId,
+                            score_threshold = score_threshold,
                             input_directory = "")
-  
+
   ## map inputIds to stringID mapIds
   inputIds.map <- string_db$map(my_data_frame = data.frame(InputTerm = as.character(inputIds)),
                                 my_data_frame_id_col_names = "InputTerm",
-                                takeFirst = T, 
+                                takeFirst = T,
                                 removeUnmappedRows = FALSE)
 	## get all species aliases
   stringdb.alias <- string_db$get_aliases()
   stringdb.alias <- stringdb.alias %>%
-    group_by(STRING_id) %>% 
+    group_by(STRING_id) %>%
     summarize(STRING.aliases = toString(sort(unique(alias))))
 
   stringdb.alias <- merge(inputIds.map, stringdb.alias, by = c("STRING_id"), all.x = F)
@@ -25,30 +25,6 @@
   return(stringdb.alias)
 }
 
-
-# Perform the actual query against DAVID
-.QueryDAVID <- function(inputIds, email, idType){
-	print(paste0('Querying DAVID by: ', idType))
-  david <- RDAVIDWebService::DAVIDWebService$new(email = email, url="https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap12Endpoint/")
-  
-  david.addList <- RDAVIDWebService::addList(object = david,
-                           inputIds = inputIds, 
-                           listName = 'MyListName',
-                           idType = idType, 
-                           listType = 'Gene')
-	print(paste0('Found ', (100*david.addList$inDavid), '% of ', length(inputIds)))
-
-  davidReport <- david$getGeneListReport()
-  davidResult.df <- data.frame(InputIds = as.character(davidReport$ID), DAVID.GeneName = as.character(davidReport$Name), DAVID.Id = as.character(davidReport$ID), stringsAsFactors = FALSE)
-
-	# Extract gene symbol from name string (i.e. "microRNA 214(MIR214)")
-  davidResult.df$DAVID.Symbol <- stringr::str_match(davidResult.df$DAVID.GeneName, '\\(.*?\\)$')
-  davidResult.df$DAVID.Symbol <- sapply(davidResult.df$DAVID.Symbol, function(x){
-		return(unlist(strsplit(x, '[()]'))[2])
-	})
-
-  return(davidResult.df)
-}
 
 
 # Basic argument checking
@@ -66,7 +42,7 @@
 
 # Utility function to test if the input is NA or NULL
 .IsEmpty <- function(x) {
-	return(all(is.na(x)) || all(is.null(x)))  
+	return(all(is.na(x)) || all(is.null(x)))
 }
 
 
@@ -91,7 +67,7 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
   if (is.null(geneSymbols)) {
     geneSymbols <- NA
   }
-  
+
 	combinedEnsembl <- data.frame(EnsemblId = ensemblIds, GeneSymbol = geneSymbols, stringsAsFactors = FALSE)
 	combinedEnsembl$Order <- 1:nrow(combinedEnsembl)
 
@@ -99,7 +75,7 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
 	if (!.IsEmpty(ensemblIds)) {
 		ensemblById <- .QueryEnsembl(inputIds = ensemblIds,
                              queryField = "ensembl_gene_id",
-                             dataset = dataset, 
+                             dataset = dataset,
                              ensemblVersion = ensemblVersion,
 														 ensemblMirror = ensemblMirror,
                              biomart = biomart)
@@ -114,7 +90,7 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
   if (!.IsEmpty(geneSymbols)) {
 		ensemblBySymbol1 <- .QueryEnsembl(inputIds = geneSymbols,
                              queryField = "external_gene_name",
-                             dataset = dataset, 
+                             dataset = dataset,
                              ensemblVersion = ensemblVersion,
 														 ensemblMirror = ensemblMirror,
                              biomart = biomart)
@@ -184,17 +160,17 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
 	ensemblResults <- ensemblResults[names(ensemblResults) != 'total']
 
 	print(paste0('Found ', sum(!is.na(ensemblResults$ensembl_gene_id)), ' of ', length(inputIds)))
-	
+
 	return(ensemblResults)
 }
 
-  
+
 #' @title TranslateToStringDb
 #' @param ensemblIds A vector of ensembl IDs
 #' @param geneSymbols A vector of gene symbols
 #' @param speciesId Species ID. see Stringdb reference for list of avialable species
 #' @param replaceUnmatched Logical. If TRUE, removes NA's and replaces with inputs
-#' @import STRINGdb 
+#' @import STRINGdb
 #' @importFrom dplyr %>% group_by summarize mutate_all coalesce
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
@@ -204,11 +180,11 @@ TranslateToStringDb <- function(ensemblIds = NULL, geneSymbols = NULL, speciesId
   if (is.null(ensemblIds)) {
     ensemblIds <- NA
   }
-  
+
   if (is.null(geneSymbols)) {
     geneSymbols <- NA
   }
-  
+
   queryIds <- character()
 	if (!.IsEmpty(ensemblIds)) {
     queryIds <- c(queryIds, ensemblIds)
@@ -217,7 +193,7 @@ TranslateToStringDb <- function(ensemblIds = NULL, geneSymbols = NULL, speciesId
 	if (!.IsEmpty(geneSymbols)) {
     queryIds <- c(queryIds, geneSymbols)
   }
-  
+
   queryIds <- unique(queryIds)
   stringRes <- .QuerySTRINGdb(inputIds = queryIds, speciesId = speciesId)
 
@@ -235,55 +211,12 @@ TranslateToStringDb <- function(ensemblIds = NULL, geneSymbols = NULL, speciesId
 	results <- rbind(results, resultsBase[!(resultsBase$Order %in% results$Order),])
 	results <- dplyr::arrange(results, Order)
 	results <- results[names(results) != 'Order']
-	
+
 	colnames(results)[colnames(results) == 'STRING_id'] <- 'STRING.id'
 
 	return(results)
 }
 
-
-#' @title TranslateToDAVID
-#' @param ensemblIds A vector of ensembl IDs
-#' @param geneSymbols A vector of gene symbols
-#' @param email email account registered with DAVIDWebService 
-#' @rawNamespace import(RDAVIDWebService, except = c('counts', 'cluster'))
-#' @importFrom dplyr %>% group_by summarize mutate_all coalesce
-#' @importFrom BiocGenerics order
-#' @importFrom stringr str_match
-#' @importFrom stats setNames
-TranslateToDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email){
-	.CheckGeneInputs(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
-  if (is.null(ensemblIds)) {
-    ensemblIds <- NA
-  }
-  
-  if (is.null(geneSymbols)) {
-    geneSymbols <- NA
-  }
-
-	results <- data.frame(EnsemblId = ensemblIds, GeneSymbol = geneSymbols, stringsAsFactors = FALSE)
-	results$Order <- 1:nrow(results)
-
-	davidResById <- NA
-	if (!.IsEmpty(ensemblIds)) {
-    davidResById <- .QueryDAVID(inputIds = ensemblIds, email = email, idType = 'ENSEMBL_GENE_ID')
-		davidResById <- merge(results, davidResById, by.x = 'EnsemblId', all.x = F, by.y = 'InputIds')
-  }
-
-	davidResBySymbol <- NA
-	if (!.IsEmpty(geneSymbols)) {
-		# OFFICIAL_GENE_SYMBOL is not available in RDAVIDWebService for now
-    #davidResBySymbol <- .QueryDAVID(inputIds = geneSymbols, email = email, idType = 'OFFICIAL_GENE_SYMBOL')
-		#davidResBySymbol <- merge(results, davidResById, by.x = 'GeneSymbol', all.x = F, by.y = 'InputIds')
-  }
-
-	ret <- data.frame(EnsemblId = ensemblIds, GeneSymbol = geneSymbols, DAVID.Id = NA, DAVID.GeneName = NA, DAVID.Symbol = NA, stringsAsFactors=FALSE)
-	ret$Order <- 1:nrow(ret)
-	ret <- .ConcatPreferentially(fieldToTest = 'DAVID.Id', datasets = list(davidResById, davidResBySymbol), baseDf = ret)
-	ret <- ret[names(ret) != 'Order']
-
-  return(ret)
-}
 
 
 #' @title aliasTable
@@ -294,20 +227,17 @@ TranslateToDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email){
 #' @param ensemblVersion Passed directly to biomaRt::useEnsembl
 #' @param ensemblMirror Passed directly to biomaRt::useEnsembl
 #' @param biomart Passed directly to biomaRt::useEnsembl
-#' @param davidEmail email account registered with DAVIDWebService 
 #' @param stringSpeciesId species ID. see Stringdb for list of available species
-#' @param aliasPriorityOrder vector containig priority order of alias database. Must be UPPERCASE. Current databases: ENSEMBL, STRING, DAVID
+#' @param aliasPriorityOrder vector containig priority order of alias database. Must be UPPERCASE. Current databases: ENSEMBL, STRING
 #' @importFrom biomaRt useEnsembl getBM
 #' @import STRINGdb
-#' @rawNamespace import(RDAVIDWebService, except = c('counts', 'cluster'))
 #' @importFrom dplyr %>% group_by summarize mutate_all coalesce
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
-TranslateGeneNames <- function(ensemblIds = NULL, geneSymbols = NULL, davidEmail,
-                       ensemblDataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = "uswest", biomart = 'ensembl', 
+TranslateGeneNames <- function(ensemblIds = NULL, geneSymbols = NULL, ensemblDataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = "uswest", biomart = 'ensembl',
                        stringSpeciesId = 9606,
-											 useEnsembl = TRUE, useSTRINGdb = TRUE, useDAVID = TRUE){
+											 useEnsembl = TRUE, useSTRINGdb = TRUE){
 
 	.CheckGeneInputs(ensemblIds, geneSymbols)
 	if (is.null(ensemblIds)) {
@@ -323,7 +253,7 @@ TranslateGeneNames <- function(ensemblIds = NULL, geneSymbols = NULL, davidEmail
 
 	if (useEnsembl) {
 	  ret.ensembl <- TranslateToEnsembl(ensemblIds = ensemblIds,
-                              geneSymbols = geneSymbols, 
+                              geneSymbols = geneSymbols,
                               dataset = ensemblDataset,
                               ensemblVersion = ensemblVersion,
 															ensemblMirror = ensemblMirror,
@@ -350,17 +280,6 @@ TranslateGeneNames <- function(ensemblIds = NULL, geneSymbols = NULL, davidEmail
 		ret.string$Order <- 1:nrow(ret.string)
 		ret.string <- ret.string[!(names(ret.string) %in% c('EnsemblId', 'GeneSymbol'))]
 		inputDf <- merge(inputDf, ret.string, by = 'Order', all.x = TRUE)
-	}
-
-	if (useDAVID) {
-  	ret.david <- TranslateToDAVID(ensemblIds = ensemblIds, geneSymbols = geneSymbols, email = davidEmail)
-		if (nrow(inputDf) != nrow(ret.david)) {
-			stop('Rows not equal for DAVID result')
-		}
-
-		ret.david$Order <- 1:nrow(ret.david)
-		ret.david <- ret.david[!(names(ret.david) %in% c('EnsemblId', 'GeneSymbol'))]
-		inputDf <- merge(inputDf, ret.david, by = 'Order', all.x = TRUE)
 	}
 
 	inputDf <- dplyr::arrange(inputDf, Order)
